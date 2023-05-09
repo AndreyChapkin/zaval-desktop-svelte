@@ -1,0 +1,25 @@
+$base-dark-color: #334155;
+$attractive-color: #5e5871;
+$attractive-border-color: #e7cc9d;
+$base-light-color: #ffffff;
+$icon-size: 20px;
+
+@mixin dark-component {
+    background-color: $base-dark-color;
+    color: $base-light-color;
+}
+
+@mixin attractive-component {
+    background-color: $attractive-color;
+    border-color: $attractive-border-color;
+    border-bottom-width: 3px;
+}
+
+@mixin row {
+    @apply flex flex-row items-center space-x-2 p-1;
+}
+
+@mixin icon-sized {
+    height: $icon-size;
+    width: $icon-size;
+}

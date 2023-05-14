@@ -1,25 +1,117 @@
+// base colors
 $base-dark-color: #334155;
-$attractive-color: #5e5871;
-$attractive-border-color: #e7cc9d;
+$base-color: #4f5e70;
+$base-pale-color: #9aa7b7;
 $base-light-color: #ffffff;
-$icon-size: 20px;
+// attractive colors
+$attention-color: rgb(228, 45, 45);
+$attractive-color: #484054;
+$attractive-light-color: #55395a;
+$attractive-border-color: rgb(39, 200, 225);
+// size
+$normal-icon-size: 20px;
+$large-icon-size: 24px;
+$extrawide-border-size: 12px;
+$wide-border-size: 6px;
+$normal-border-size: 3px;
+$narrow-border-size: 2px;
+$normal-size: 10px;
+$narrow-size: 3px;
 
 @mixin dark-component {
-    background-color: $base-dark-color;
-    color: $base-light-color;
+	background-color: $base-dark-color;
+	color: $base-light-color;
 }
 
 @mixin attractive-component {
-    background-color: $attractive-color;
-    border-color: $attractive-border-color;
-    border-bottom-width: 3px;
+	background: linear-gradient(215deg, $attractive-light-color 0%, $attractive-color 100%);
+	border-color: $attractive-border-color;
+	border-bottom-width: $normal-border-size;
+}
+
+@mixin bordered($side: all, $color: $attractive-border-color, $size: $normal-border-size) {
+	border-color: $color;
+	@if $side == all {
+		border-width: $size;
+	} @else if $side == bottom {
+		border-bottom-width: $size;
+	} @else if $side == top {
+		border-top-width: $size;
+	} @else if $side == left {
+		border-left-width: $size;
+	} @else if $side == right {
+		border-right-width: $size;
+	}
 }
 
 @mixin row {
-    @apply flex flex-row items-center space-x-2 p-1;
+	@apply flex flex-row items-center;
 }
 
-@mixin icon-sized {
-    height: $icon-size;
-    width: $icon-size;
+@mixin column {
+	@apply flex flex-col items-center items-stretch;
+}
+
+@mixin move-animation($name, $duration: 300ms, $distance: 100px) {
+	animation: $name $duration;
+
+	@keyframes #{$name} {
+		0% {
+			translate: -$distance / 2;
+			opacity: 0;
+		}
+
+		50% {
+			opacity: 1;
+		}
+
+		100% {
+			translate: $distance / 2;
+			opacity: 0;
+		}
+	}
+}
+
+@mixin responsive-grid($min-cell-width: 200px) {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax($min-cell-width, 1fr));
+	gap: $normal-size $normal-size;
+}
+
+@mixin icon-normal-sized {
+	height: $normal-icon-size;
+	min-width: $normal-icon-size;
+}
+
+@mixin icon-large-sized {
+	height: $large-icon-size;
+	min-width: $large-icon-size;
+}
+
+@mixin full-screen-height {
+	min-height: 100vh;
+	max-height: 100vh;
+}
+
+@mixin full-screen {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+@mixin styled-scrollbar {
+	&::-webkit-scrollbar {
+		width: 10px;
+	}
+
+	&::-webkit-scrollbar-track {
+		border-radius: 10px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: $base-dark-color;
+		border-radius: 10px;
+	}
 }

@@ -66,9 +66,11 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style lang="scss">
+	@import '/static/style/variables-mixins.scss';
+
 	.todo-status-menu img {
-		height: 25px;
+		@include icon-sized;
 	}
 	.options-pane {
 		position: absolute;

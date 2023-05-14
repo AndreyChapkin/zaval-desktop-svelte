@@ -1,12 +1,12 @@
 <script lang="ts">
 	// data
-    let clazz: string = "";
-    export { clazz as class };
+	let clazz: string = '';
+	export { clazz as class };
 
 	let areNotSelectable = false;
 	let separatorMouseDownX = 0;
-	let initialLeftWidth = 200;
-	let resultLeftWidth = 200;
+	export let initialLeftWidth = 600;
+	let resultLeftWidth = initialLeftWidth;
 
 	// handlers
 	const separatorMouseDownHandler = (e: MouseEvent) => {
@@ -30,7 +30,8 @@
 
 <div class={`split-pane ${clazz}`}>
 	<div
-		class="split-left {areNotSelectable ? 'not-selectable' : ''}"
+		class="split-left"
+		class:not-selectable={areNotSelectable}
 		style="width: {resultLeftWidth}px"
 	>
 		<slot name="left" />
@@ -44,26 +45,26 @@
 	</div>
 </div>
 
-<style lang="postcss">
-    .split-pane {
-        @apply flex justify-start;
-    }
-	.split-left {
-        @apply border-green-800 border-2;
-	}
-	.split-separator {
-		width: 5px;
-		cursor: col-resize;
-		@apply border-pink-100 border-2;
-	}
-    .split-separator:hover {
-		width: 15px;
-	}
-	.split-right {
-		@apply flex-1 border-red-800 border-2;
-	}
-	.not-selectable {
-		user-select: none;
-		pointer-events: none;
+<style lang="scss">
+	@import '/static/style/variables-mixins.scss';
+
+	.split-pane {
+		@apply flex items-stretch;
+		/* @include full-screen-height; */
+		.split-left {
+			height: 100%;
+		}
+		.split-separator {
+			background-color: $base-dark-color;
+			width: $extrawide-border-size;
+			cursor: col-resize;
+		}
+		.split-right {
+			@apply flex-1;
+		}
+		.not-selectable {
+			user-select: none;
+			pointer-events: none;
+		}
 	}
 </style>

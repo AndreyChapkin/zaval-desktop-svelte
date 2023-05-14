@@ -1,28 +1,62 @@
 <script lang="ts">
 	import { TODO_ITEM_PARAM, TODO_PRESENTATION_PARAM } from '$lib/api/param/todo-params';
-	import { TodoPageMode, type Todo, type TodoHierachy, TodoStatus } from '$lib/types/todo';
-	import { callGet } from '$lib/utils/call-helpers';
+	import {
+		TodoPageMode,
+		type Todo,
+		type TodoHierachy,
+		TodoStatus,
+		TODO_PRESENTATIONS,
+		STAB_TODO,
+		type UpdateTodoAction,
+		type CustomSvelteEvent
+	} from '$lib/types/todo';
+	import { callDelete, callGet, callPatch, callPost } from '$lib/utils/call-helpers';
 	import SplitPane from '../components/SplitPane.svelte';
 	import TodoInfo from './components/TodoInfo.svelte';
 	import TodoList from './components/TodoList.svelte';
+	import type { SaveInfoEventPayload } from './components/types';
 
 	// data
 	export let data: { todos: TodoHierachy[] };
-	const STAB_TODO: Todo = {
-		id: -100,
-		name: 'nothing',
-		info: '-',
-		status: TodoStatus.ON_HOLD,
-		parent: null
-	};
 	let selectedTodo: Todo = STAB_TODO;
 	let mode: TodoPageMode = TodoPageMode.ALL_TASKS;
-	// $: visibleTasks =
-	// 	mode === TodoPageMode.ALL_TASKS
-	// 		? data.todos
-	// 		: data.todos.filter((i) => i.status === TodoStatus.IN_PROGRESS);
 
 	// handlers
+	const updateTodoHandler = async (saveTodoEvent: any) => {
+		const editedTodo = saveTodoEvent.detail;
+		const updateTodoAction: UpdateTodoAction = {
+			type: 'general',
+			todo: editedTodo
+		};
+		await callPatch<Todo>('/api/todo', updateTodoAction);
+		// refetch all hierachies
+		await refetchTodos();
+	};
+	const updateTodoInfoHandler = async (
+		saveTodoInfoEvent: CustomSvelteEvent<SaveInfoEventPayload>
+	) => {
+		const saveInfoPayload = saveTodoInfoEvent.detail;
+		saveInfoPayload.saveCallbackStarter(async (saveInfo) => {
+			const updateTodoInfoAction: UpdateTodoAction = {
+				type: 'info',
+				todo: saveInfo
+			};
+			const response = await callPatch<Todo>('/api/todo', updateTodoInfoAction);
+			return response.data.data;
+		});
+	};
+	const createTodoHandler = async (createEvent: any) => {
+		const todo = createEvent.detail;
+		await callPost('/api/todo', todo);
+		// refetch all hierachies
+		await refetchTodos();
+	};
+	const deleteTodoHandler = async (deleteEvent: any) => {
+		const todo = deleteEvent.detail;
+		await callDelete('/api/todo', todo);
+		// refetch all hierachies
+		await refetchTodos();
+	};
 	const selectHandler = (selectEvent: CustomEvent<number>) => {
 		let selectedTodoId = selectEvent.detail;
 		callGet<Todo>('/api/todo', {
@@ -36,51 +70,44 @@
 		mode =
 			mode === TodoPageMode.ALL_TASKS ? TodoPageMode.IN_PROGRESS_TASKS : TodoPageMode.ALL_TASKS;
 	};
-	const saveChangesHandler = async (saveChangesEvent: CustomEvent<Todo>) => {
-		// callPatch<Todo>('/api/todo', saveChangesEvent.detail).then((res) => {
-		// callGet<TodoHierachy[]>('/api/todo', {
-		// 	[TODO_PRESENTATION_PARAM]: 'HIERARCHY'
-		// }); //.then(res => data.todos = res.data);
-		// const patchedTodo = res.data;
-		// const patchedIndex = data.todos.findIndex((i) => i.id === patchedTodo.id);
-		// data.todos[patchedIndex] = patchedTodo;
-		// });
+
+	// other
+	const refetchTodos = async () => {
+		const res = await callGet<TodoHierachy[]>('/api/todo', {
+			[TODO_PRESENTATION_PARAM]: 'HIERARCHY'
+		});
+		const changedHierarchy = res.data.data;
+		data = {
+			todos: changedHierarchy
+		};
 	};
 </script>
 
 <div class="todos-page">
-	<button on:click={swithModeHandler}>Switch mode</button>
+	<!-- <button on:click={swithModeHandler}>Switch mode</button> -->
 	<SplitPane class="todos-workbench">
-		<div
-			slot="left"
-			class="workbanch-left"
-		>
+		<svelte:fragment slot="left">
 			<TodoList
 				todos={data.todos}
+				{selectedTodo}
+				on:save={updateTodoHandler}
+				on:create={createTodoHandler}
+				on:delete={deleteTodoHandler}
 				on:select={selectHandler}
 			/>
-		</div>
-		<div
-			slot="right"
-			class="workbanch-right"
-		>
+		</svelte:fragment>
+		<svelte:fragment slot="right">
 			{#key selectedTodo.id}
 				<TodoInfo
+					on:save={updateTodoInfoHandler}
 					todo={selectedTodo}
-					on:save={saveChangesHandler}
 				/>
 			{/key}
-		</div>
+		</svelte:fragment>
 	</SplitPane>
 </div>
 
-<style lang="postcss">
+<style lang="scss">
 	.todos-page {
-		height: 100vh;
-		@apply border-red-500 border-2;
-	}
-	:global(.todos-workbench) {
-		/* width: calc(100vw - (100vw - 100%)); */
-		@apply border-green-500 border-2;
 	}
 </style>

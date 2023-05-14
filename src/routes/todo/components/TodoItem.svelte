@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { TodoStatus, type Todo, type TodoHierachy } from '$lib/types/todo';
-	import { slide } from 'svelte/transition';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
 	export let todo: TodoHierachy;
+	export let selectedTodo: Todo | null = null;
+	export let selectedClass: string = '';
 	let isOpen: boolean = false;
+	$: isSelected = selectedTodo && todo.id === selectedTodo.id;
 
 	// events
 	type EventType = {
@@ -16,21 +18,25 @@
 
 	// handlers
 	const issueSelectEvent = () => dispatch('select', todo.id);
-	const issueRightCLickEvent = (e: any) => {
-		const detail = {
-			todo: todo,
-			x: e.clientX,
-			y: e.clientY
-		};
-		dispatch('rightClick', detail);
+	const issueRightClickEvent = (e: MouseEvent) => {
+		if (e.ctrlKey) {
+			const detail = {
+				todo: todo,
+				x: e.clientX,
+				y: e.clientY
+			};
+			dispatch('rightClick', detail);
+			e.preventDefault();
+			e.stopPropagation();
+		}
 	};
 	const handleClick = () => {
 		isOpen = !isOpen;
 	};
 
 	// helpers
-	function statusImageUrl(): string {
-		switch (todo.status) {
+	function statusImageUrl(status: TodoStatus): string {
+		switch (status) {
 			case TodoStatus.IN_PROGRESS:
 				return '/todo-status/in_progress.svg';
 			case TodoStatus.NEED_ATTENTION:
@@ -41,26 +47,31 @@
 	}
 </script>
 
-<div class="todo-item mb-2">
+<div class="todo-item-container">
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
-		class="todo-self flex flex-row space-x-2 align-middle bg-slate-500 text-slate-100 pl-2 p-1 mb-1 cursor-pointer"
+		class={`todo-item ${isSelected ? 'todo-item-selected' : ''} ${
+			isOpen ? 'todo-item-opened' : ''
+		}`}
 		on:click={issueSelectEvent}
-		on:contextmenu|preventDefault={issueRightCLickEvent}
+		on:contextmenu={issueRightClickEvent}
 	>
 		{#if todo.childs?.length > 0}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<div
-				class="pl-1 pr-1 rounded-md bg-slate-600"
+				class="expander"
 				on:click|stopPropagation={handleClick}
 			>
-				{isOpen ? '--' : '+'}
+				<img
+					src="expander/expander-arrow.svg"
+					alt="arrow"
+				/>
 			</div>
 		{/if}
 
 		<div class="todo-status-image">
 			<img
-				src={statusImageUrl()}
+				src={statusImageUrl(todo.status)}
 				alt="status"
 			/>
 		</div>
@@ -70,24 +81,58 @@
 		</div>
 	</div>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	{#if isOpen}
-		<div
-			transition:slide={{ duration: 200 }}
-			class="todo-children pl-4"
-		>
-			{#each todo.childs as child (child.id)}
-				<svelte:self
-					on:rightClick
-					on:select
-					todo={child}
-				/>
-			{/each}
-		</div>
-	{/if}
+	<div class={`todo-children ${isOpen ? '' : 'todo-hidden-children'}`}>
+		{#each todo.childs as child (child.id)}
+			<svelte:self
+				{selectedTodo}
+				{selectedClass}
+				on:rightClick
+				on:select
+				todo={child}
+			/>
+		{/each}
+	</div>
 </div>
 
 <style lang="scss">
+	@import '/static/style/variables-mixins.scss';
+
+	.todo-item {
+		@include dark-component;
+		@include row;
+		@apply mb-1 space-x-2 p-1 cursor-pointer;
+
+		.expander {
+			@apply pr-1 border-r-2 border-white;
+
+			img {
+				@include icon-normal-sized;
+				transition: rotate 300ms;
+			}
+		}
+	}
+
+	.todo-item-opened {
+		.expander {
+			img {
+				rotate: 180deg;
+			}
+		}
+	}
+
+	.todo-item-selected {
+		@include attractive-component;
+	}
+
 	.todo-status-image img {
-		height: 25px;
+		@include icon-normal-sized;
+	}
+
+	.todo-children {
+		@apply pl-4;
+	}
+
+	.todo-hidden-children {
+		display: none;
 	}
 </style>

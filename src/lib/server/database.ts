@@ -4,31 +4,52 @@ export const db: { todos: Todo[] } = {
 	todos: [
 		{
             id: 1,
-            name: "First",
+            name: "Todo A",
             info: "First info",
             status: TodoStatus.IN_PROGRESS,
             parent: null,
         },
         {
             id: 2,
-            name: "Second",
+            name: "Todo B",
             info: "Second info",
+            status: TodoStatus.ON_HOLD,
+            parent: null,
+        },
+        {
+            id: 3,
+            name: "Todo A-A",
+            info: "Third info",
             status: TodoStatus.ON_HOLD,
             parent: 1,
         },
         {
-            id: 3,
-            name: "Third",
-            info: "Third info",
-            status: TodoStatus.ON_HOLD,
-            parent: 2,
-        },
-        {
             id: 4,
-            name: "Forth",
+            name: "Todo A-B",
             info: "Forth info",
             status: TodoStatus.NEED_ATTENTION,
-            parent: null,
+            parent: 1,
+        },
+        {
+            id: 5,
+            name: "Todo A-A-A",
+            info: "Third info",
+            status: TodoStatus.ON_HOLD,
+            parent: 3,
+        },
+        {
+            id: 6,
+            name: "Todo A-A-B",
+            info: "Forth info",
+            status: TodoStatus.NEED_ATTENTION,
+            parent: 3,
+        },
+        {
+            id: 7,
+            name: "Todo A-A-C",
+            info: "Forth info",
+            status: TodoStatus.NEED_ATTENTION,
+            parent: 3,
         }
 	]
 };

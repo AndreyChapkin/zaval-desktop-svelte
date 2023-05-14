@@ -11,7 +11,7 @@ export async function callGet<T>(url:string, params: Record<string, any> | null 
 }
 
 export async function callPost<T = void>(url:string, body: any) {
-    return await axios.post(url, body, {
+    return await axios.post<AxiosResponse<T>>(url, body, {
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json'
@@ -20,7 +20,7 @@ export async function callPost<T = void>(url:string, body: any) {
 }
 
 export async function callPatch<T = void>(url:string, body: any) {
-    return await axios.patch<T>(url, body, {
+    return await axios.patch<AxiosResponse<T>>(url, body, {
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json'

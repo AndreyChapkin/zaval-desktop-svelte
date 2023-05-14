@@ -1,8 +1,40 @@
 import type { Todo, TodoHierachy } from "$lib/types/todo";
 
+export function allHierarchyBranchIds(arr: Todo[], rootId: number): number[] {
+    const resultHierarchyBranchIds: number[] = [];
+    const parentIdToChildrenMap = constructParentIdToChildrenMap(arr);
+    const lookingForQueue: number[] = [rootId];
+    // collect all hierarchy branch ids
+    while (lookingForQueue.length > 0) {
+        const curParentId = lookingForQueue.shift() as number;
+        resultHierarchyBranchIds.push(curParentId);
+        const curChildrenIds = parentIdToChildrenMap[curParentId]?.map(i => i.id);
+        if (curChildrenIds) {
+            for (let curChildId of curChildrenIds) {
+                lookingForQueue.push(curChildId);
+            }
+        }
+    }
+    return resultHierarchyBranchIds;
+}
+
+export function constructParentIdToChildrenMap(arr: Todo[]): Record<number, Todo[]> {
+    const resultMap = {} as Record<number, Todo[]>;
+    // and root elements - without parents
+    for (let todo of arr) {
+        if (todo.parent != null) {
+            if (!resultMap[todo.parent]) {
+                resultMap[todo.parent] = [];
+            }
+            resultMap[todo.parent].push(todo);
+        }
+    }
+    return resultMap;
+}
+
 export function constructHierarchy(arr: Todo[]): TodoHierachy[] {
-    const buckets = {} as Record<number, Todo[]>;
     // collect "parent id -> childs" pairs
+    const buckets = {} as Record<number, Todo[]>;
     // and root elements - without parents
     const roots: TodoHierachy[] = [];
     for (let todo of arr) {

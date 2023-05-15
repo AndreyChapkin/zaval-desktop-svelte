@@ -97,7 +97,7 @@
 					<TodoCard
 						{todo}
 						isSelected={todo.id === selectedTodo.id}
-						on:select={selectParentHandler}
+						on:open={selectParentHandler}
 					/>
 					{#if todo.id !== root.id}
 						<img

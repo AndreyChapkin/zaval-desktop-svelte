@@ -124,8 +124,8 @@
 
 		.todo-info-text {
 			border-color: $base-dark-color;
-			border-bottom-width: $narrow-border-size;
-			border-top-width: $narrow-border-size;
+			border-bottom-width: $border-narrow-size;
+			border-top-width: $border-narrow-size;
 			@apply p-2 resize-none outline-none flex-1;
 		}
 	}

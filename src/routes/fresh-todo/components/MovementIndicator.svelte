@@ -30,8 +30,8 @@
 
 	.motion-indicator {
 		position: absolute;
-		top: $indicatodWidth + 20px;
-		left: calc((100vw - $indicatodWidth) / 2);
+		top: 2 * $indicatodWidth;
+		@include screen-centered-x($indicatodWidth);
 
 		width: $indicatodWidth;
 		height: $indicatorHeight;

@@ -3,10 +3,14 @@
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { statusImageUrl } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
+	import TodoMenu from './TodoMenu.svelte';
 
-	// data
+	// state
 	export let todo: TodoHierachy = STAB_TODO_HIERARCHY;
 	export let isSelected: boolean = false;
+	let isMenuOpen = false;
+	let menuX = 0;
+	let menuY = 0;
 
 	// events
 	type EventType = {
@@ -17,6 +21,18 @@
 	const dispatch = createEventDispatcher<EventType>();
 	const issueSelectEvent = () => dispatch('select', todo);
 	const issueOpenEvent = () => dispatch('open', todo);
+
+	// handlers
+	const backgroundClickHandler = () => (isMenuOpen = false);
+	const specificRightClickHandler = (e: MouseEvent) => {
+		if (e.ctrlKey) {
+			isMenuOpen = true;
+			menuX = e.clientX;
+			menuY = e.clientY;
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -24,6 +40,7 @@
 	class="todo-card"
 	class:todo-card-selected={isSelected}
 	on:click={issueSelectEvent}
+	on:contextmenu={specificRightClickHandler}
 >
 	{#if todo.childs.length > 0}
 		<div
@@ -43,6 +60,17 @@
 	<div class="todo-name">
 		{todo.name}
 	</div>
+	{#if isMenuOpen}
+		<TodoMenu
+			{todo}
+			x={menuX}
+			y={menuY}
+			on:save
+			on:create
+			on:delete
+			on:backgroundClick={backgroundClickHandler}
+		/>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -54,7 +82,7 @@
 		@apply p-2 space-x-2;
 
 		.todo-complex-image {
-			@include bordered(right, $base-light-color, $narrow-border-size);
+			@include bordered(right, $base-light-color, $border-narrow-size);
 			@apply pr-2;
 
 			img {

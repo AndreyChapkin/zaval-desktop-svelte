@@ -56,7 +56,7 @@
 		}
 		.split-separator {
 			background-color: $base-dark-color;
-			width: $extrawide-border-size;
+			width: $border-wide-size;
 			cursor: col-resize;
 		}
 		.split-right {

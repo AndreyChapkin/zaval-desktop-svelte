@@ -1,15 +1,22 @@
 <script lang="ts">
 	import { TodoStatus } from '$lib/types/todo';
+	import {
+		TODO_STATUS_IN_PROGRESS_ICON_URL,
+		TODO_STATUS_NEED_ATTENTION_ICON_URL,
+		TODO_STATUS_ON_HOLD_ICON_URL
+	} from '$lib/utils/assets-references';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
 	export let currentStatus: TodoStatus;
-
 	$: otherStatuses = [TodoStatus.IN_PROGRESS, TodoStatus.ON_HOLD, TodoStatus.NEED_ATTENTION].filter(
 		(i) => i !== currentStatus
 	);
-
 	let isOpen = false;
+	let optionsY = 0;
+
+	// elements
+	let currentStatusElem: HTMLDivElement;
 
 	// events
 	type EventType = {
@@ -22,18 +29,22 @@
 		isOpen = false;
 		dispatch('select', status);
 	};
-	const openHandler = () => (isOpen = !isOpen);
+	const openHandler = (e: MouseEvent) => {
+		const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+		optionsY = rect.bottom + window.pageYOffset;
+		(isOpen = !isOpen);
+	}
 
 	// utils
 
 	function statusImageUrl(status: TodoStatus): string {
 		switch (status) {
 			case TodoStatus.IN_PROGRESS:
-				return '/todo-status/in_progress.svg';
+				return TODO_STATUS_IN_PROGRESS_ICON_URL;
 			case TodoStatus.NEED_ATTENTION:
-				return '/todo-status/need_attention.svg';
+				return TODO_STATUS_NEED_ATTENTION_ICON_URL;
 			default:
-				return '/todo-status/on_hold.svg';
+				return TODO_STATUS_ON_HOLD_ICON_URL;
 		}
 	}
 </script>
@@ -43,6 +54,7 @@
 	<div
 		on:click={openHandler}
 		class="current-status"
+		bind:this={currentStatusElem}
 	>
 		<img
 			src={statusImageUrl(currentStatus)}
@@ -50,7 +62,7 @@
 		/>
 	</div>
 	{#if isOpen}
-		<div class="options-pane">
+		<div class="options-pane" style={`top: ${optionsY}px;`}>
 			{#each otherStatuses as status (status)}
 				<div
 					class="option-status"
@@ -69,16 +81,27 @@
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
 
-	.todo-status-menu img {
-		@include icon-normal-sized;
-	}
-	.options-pane {
-		position: absolute;
-	}
-	.option-status {
-		@apply bg-slate-200 p-1;
-	}
-	.current-status {
-		@apply bg-slate-600 p-1;
+	.todo-status-menu {
+		@include row-stretched;
+
+		img {
+			@include icon-normal-sized;
+		}
+
+		.current-status {
+			background-color: $base-dark-color;
+			@apply p-1;
+			@include row-centered;
+		}
+
+		.options-pane {
+			position: absolute;
+			@include normal-shadow;
+		}
+
+		.option-status {
+			background-color: $base-color;
+			@apply p-1;
+		}
 	}
 </style>

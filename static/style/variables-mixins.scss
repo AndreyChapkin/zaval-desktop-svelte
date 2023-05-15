@@ -9,14 +9,20 @@ $attractive-color: #484054;
 $attractive-light-color: #55395a;
 $attractive-border-color: rgb(39, 200, 225);
 // size
-$normal-icon-size: 20px;
-$large-icon-size: 24px;
-$extrawide-border-size: 12px;
-$wide-border-size: 6px;
-$normal-border-size: 3px;
-$narrow-border-size: 2px;
+$icon-normal-size: 20px;
+$icon-large-size: 24px;
+
+$border-extrawide-size: 12px;
+$border-wide-size: 6px;
+$border-normal-size: 3px;
+$border-narrow-size: 2px;
+
 $normal-size: 10px;
 $narrow-size: 3px;
+
+$space-normal-size: 30px;
+
+// appearance
 
 @mixin dark-component {
 	background-color: $base-dark-color;
@@ -26,10 +32,10 @@ $narrow-size: 3px;
 @mixin attractive-component {
 	background: linear-gradient(215deg, $attractive-light-color 0%, $attractive-color 100%);
 	border-color: $attractive-border-color;
-	border-bottom-width: $normal-border-size;
+	border-bottom-width: $border-normal-size;
 }
 
-@mixin bordered($side: all, $color: $attractive-border-color, $size: $normal-border-size) {
+@mixin bordered($side: all, $color: $attractive-border-color, $size: $border-normal-size) {
 	border-color: $color;
 	@if $side == all {
 		border-width: $size;
@@ -44,32 +50,49 @@ $narrow-size: 3px;
 	}
 }
 
+@mixin normal-shadow {
+	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+@mixin styled-scrollbar {
+	&::-webkit-scrollbar {
+		width: 10px;
+	}
+
+	&::-webkit-scrollbar-track {
+		border-radius: 10px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: $base-dark-color;
+		border-radius: 10px;
+	}
+}
+
+// composition
+
 @mixin row {
+	@apply flex flex-row;
+}
+
+@mixin row-centered {
 	@apply flex flex-row items-center;
 }
 
-@mixin column {
-	@apply flex flex-col items-center items-stretch;
+@mixin row-stretched {
+	@apply flex flex-row items-stretch;
 }
 
-@mixin move-animation($name, $duration: 300ms, $distance: 100px) {
-	animation: $name $duration;
+@mixin column {
+	@apply flex flex-col;
+}
 
-	@keyframes #{$name} {
-		0% {
-			translate: -$distance / 2;
-			opacity: 0;
-		}
+@mixin column-stretched {
+	@apply flex flex-col items-stretch;
+}
 
-		50% {
-			opacity: 1;
-		}
-
-		100% {
-			translate: $distance / 2;
-			opacity: 0;
-		}
-	}
+@mixin column-centered {
+	@apply flex flex-col items-center;
 }
 
 @mixin responsive-grid($min-cell-width: 200px) {
@@ -78,14 +101,37 @@ $narrow-size: 3px;
 	gap: $normal-size $normal-size;
 }
 
+@mixin modal-window-background {
+	position: absolute;
+	z-index: 10;
+	padding: $space-normal-size;
+	@include full-screen;
+	@apply flex justify-center items-start;
+}
+
+// alignments
+
+@mixin screen-centered-x($element-width) {
+	left: calc((100vw - $indicatodWidth) / 2);
+}
+
+@mixin screen-centered-y($element-height) {
+	left: calc((100vh - $element-height) / 2);
+}
+
+// sizes
+
+$min-modal-desktop-width: 400px;
+$max-modal-desktop-width: 800px;
+
 @mixin icon-normal-sized {
-	height: $normal-icon-size;
-	min-width: $normal-icon-size;
+	height: $icon-normal-size;
+	min-width: $icon-normal-size;
 }
 
 @mixin icon-large-sized {
-	height: $large-icon-size;
-	min-width: $large-icon-size;
+	height: $icon-large-size;
+	min-width: $icon-large-size;
 }
 
 @mixin full-screen-height {
@@ -101,17 +147,31 @@ $narrow-size: 3px;
 	bottom: 0;
 }
 
-@mixin styled-scrollbar {
-	&::-webkit-scrollbar {
-		width: 10px;
-	}
+@mixin modal-window-desktop {
+	min-width: $min-modal-desktop-width;
+	max-width: $max-modal-desktop-width;
+	width: 100%;
+	@apply mr-auto ml-auto;
+}
 
-	&::-webkit-scrollbar-track {
-		border-radius: 10px;
-	}
+// animations
 
-	&::-webkit-scrollbar-thumb {
-		background-color: $base-dark-color;
-		border-radius: 10px;
+@mixin move-animation($name, $duration: 300ms, $distance: 100px) {
+	animation: $name $duration;
+
+	@keyframes #{$name} {
+		0% {
+			translate: calc(-1 * $distance / 2);
+			opacity: 0;
+		}
+
+		50% {
+			opacity: 1;
+		}
+
+		100% {
+			translate: calc($distance / 2);
+			opacity: 0;
+		}
 	}
 }

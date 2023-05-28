@@ -5,14 +5,14 @@ import { allHierarchyBranchIds, constructHierarchy } from '$lib/utils/structure-
 import { extractUrlParams } from '$lib/utils/url-helpers';
 import { json } from '@sveltejs/kit';
 import { db } from '../../../lib/server/database';
-import { TodoStatus, TODO_PRESENTATIONS, type Todo, type TodoHierachy } from '../../../lib/types/todo';
+import { TodoStatus, TODO_PRESENTATIONS, type DeprTodo, type DeprTodoHierachy } from '../../../lib/types/todo';
 
 // Create new Todo item
 export async function GET({ request }) {
 	const params = extractUrlParams(request.url);
 	const presentationParam = params[TODO_PRESENTATION_PARAM].toUpperCase();
 	const presentation = TODO_PRESENTATIONS.find((i) => i === presentationParam);
-	let result: Todo[] | TodoHierachy[] | Todo | undefined;
+	let result: DeprTodo[] | DeprTodoHierachy[] | DeprTodo | undefined;
 	switch (presentation) {
 		case 'ALL':
 			result = db.todos;
@@ -33,7 +33,7 @@ export async function GET({ request }) {
 
 // Create Todo item
 export async function POST({ request }) {
-	const newTodo = (await request.json()) as Todo;
+	const newTodo = (await request.json()) as DeprTodo;
 	newTodo.id = db.todos.length + 1;
 	db.todos.push(newTodo);
 
@@ -51,7 +51,7 @@ export async function PATCH({ request }) {
 				storedTodo.info = payloadTodo.info;
 				break;
 			case "general":
-				const editedTodo = payloadTodo as Todo;
+				const editedTodo = payloadTodo as DeprTodo;
 				storedTodo.name = editedTodo.name;
 				storedTodo.status = editedTodo.status;
 				// if active, move all parent tasks to active too
@@ -70,7 +70,7 @@ export async function PATCH({ request }) {
 
 // Remove Todo item
 export async function DELETE({ request }) {
-	const deletedTodo = (await request.json()) as Todo;
+	const deletedTodo = (await request.json()) as DeprTodo;
 	// delete todo and this all-level children
 	const deleteIds: number[] = allHierarchyBranchIds(db.todos, deletedTodo.id);
 	// preserve only those items which are not in the deleteIds

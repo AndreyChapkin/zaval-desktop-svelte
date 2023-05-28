@@ -24,7 +24,7 @@
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
 
-	$move-distance: 500px;
+	$move-distance: 600px;
 	$indicatodWidth: 25px;
 	$indicatorHeight: 20px;
 
@@ -40,10 +40,10 @@
 	}
 
 	.forward-move {
-		@include move-animation(forward, $distance: 500px);
+		@include move-animation(forward, $distance: $move-distance);
 	}
 
 	.backward-move {
-		@include move-animation(back, $distance: -500px);
+		@include move-animation(back, $distance: calc(-1 * $move-distance));
 	}
 </style>

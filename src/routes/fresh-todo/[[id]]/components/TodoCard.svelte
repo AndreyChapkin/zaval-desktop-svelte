@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { STAB_TODO_HIERARCHY, type TodoHierachy } from '$lib/types/todo';
+	import { ROOT_TODO_HIERARCHY, STAB_TODO_HIERARCHY, type TodoHierachy } from '$lib/types/todo';
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { statusImageUrl } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
@@ -42,15 +42,17 @@
 	on:click={issueSelectEvent}
 	on:contextmenu={specificRightClickHandler}
 >
-	{#if todo.childs.length > 0}
+	{#if todo.isComplex}
 		<div
 			class="todo-complex-image"
 			on:click={issueOpenEvent}
 		>
-			<img
-				src={TODO_COMPLEX_ICON_URL}
-				alt="composition"
-			/>
+			<a href={`/fresh-todo/${todo.id === ROOT_TODO_HIERARCHY.id ? "" : todo.id}`}
+				><img
+					src={TODO_COMPLEX_ICON_URL}
+					alt="composition"
+				/></a
+			>
 		</div>
 	{/if}
 	<img
@@ -63,8 +65,6 @@
 	{#if isMenuOpen}
 		<TodoMenu
 			{todo}
-			x={menuX}
-			y={menuY}
 			on:save
 			on:create
 			on:delete
@@ -88,6 +88,10 @@
 			img {
 				@include icon-large-sized;
 			}
+		}
+
+		.todo-name {
+			@apply flex-1;
 		}
 
 		img {

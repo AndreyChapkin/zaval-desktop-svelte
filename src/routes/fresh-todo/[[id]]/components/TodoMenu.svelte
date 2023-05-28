@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TodoStatus, type Todo, type TodoHierachy, STAB_TODO } from '$lib/types/todo';
+	import { TodoStatus, type DeprTodo, type TodoHierachy, STAB_TODO } from '$lib/types/todo';
 	import { createEventDispatcher } from 'svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
 
@@ -13,7 +13,7 @@
 	type EventType = {
 		backgroundClick: null;
 		save: TodoHierachy;
-		create: Todo;
+		create: DeprTodo;
 		delete: TodoHierachy;
 	};
 	const dispatch = createEventDispatcher<EventType>();
@@ -23,7 +23,7 @@
 		if (e.target === e.currentTarget) {
 			dispatch('backgroundClick');
 		}
-	}
+	};
 	const backgroundClickEventIssuer = () => dispatch('backgroundClick');
 	const saveEventIssuer = () => {
 		backgroundClickEventIssuer();
@@ -31,7 +31,6 @@
 			...(todo as TodoHierachy),
 			name: editName,
 			status: editStatus as TodoStatus,
-			childs: []
 		});
 	};
 	const enterHandler = (e: KeyboardEvent) => {
@@ -68,7 +67,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="todo-menu" on:click={backgroundClickHandler}>
+<div
+	class="todo-menu"
+	on:click={backgroundClickHandler}
+>
 	<div class="todo-menu-content">
 		<div class="edit-pane">
 			<TodoStatusMenu
@@ -124,7 +126,11 @@
 	$top-padding: 50px;
 	.todo-menu {
 		@include modal-window-background;
-		background-color: adjust-color($base-pale-color, $alpha: -0.5);
+		background: linear-gradient(
+			0deg,
+			adjust-color($attractive-color, $alpha: -0) 0%,
+			adjust-color($base-pale-color, $alpha: -0.1) 100%
+		);
 
 		/* .todo-menu-background {
 			@include full-screen;
@@ -139,7 +145,6 @@
 				@apply mb-1;
 				@include row-stretched;
 				@include normal-shadow;
-
 
 				input {
 					@apply p-1 text-black;

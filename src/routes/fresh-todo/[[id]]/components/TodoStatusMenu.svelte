@@ -103,5 +103,9 @@
 			background-color: $base-color;
 			@apply p-1;
 		}
+
+		.option-status:hover {
+			background-color: $base-dark-color;
+		}
 	}
 </style>

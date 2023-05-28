@@ -1,55 +1,55 @@
-import { TodoStatus, type Todo } from '../types/todo';
+import { TodoStatus, type Todo, type TodoInfo } from '../types/todo';
 
-export const db: { todos: Todo[] } = {
+export const db: { todos: Todo[], todosInfo: TodoInfo[] } = {
 	todos: [
 		{
             id: 1,
             name: "Todo A",
-            info: "First info",
             status: TodoStatus.IN_PROGRESS,
-            parent: null,
+            parentId: null,
         },
         {
             id: 2,
             name: "Todo B",
-            info: "Second info",
             status: TodoStatus.ON_HOLD,
-            parent: null,
+            parentId: null,
         },
         {
             id: 3,
             name: "Todo A-A",
-            info: "Third info",
             status: TodoStatus.ON_HOLD,
-            parent: 1,
+            parentId: 1,
         },
         {
             id: 4,
             name: "Todo A-B",
-            info: "Forth info",
             status: TodoStatus.NEED_ATTENTION,
-            parent: 1,
+            parentId: 1,
         },
         {
             id: 5,
             name: "Todo A-A-A",
-            info: "Third info",
             status: TodoStatus.ON_HOLD,
-            parent: 3,
+            parentId: 3,
         },
         {
             id: 6,
             name: "Todo A-A-B",
-            info: "Forth info",
             status: TodoStatus.NEED_ATTENTION,
-            parent: 3,
+            parentId: 3,
         },
         {
             id: 7,
             name: "Todo A-A-C",
-            info: "Forth info",
             status: TodoStatus.NEED_ATTENTION,
-            parent: 3,
+            parentId: 3,
         }
-	]
+	],
+    todosInfo: [
+        {
+            id: 1,
+            info: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            todoId: 1,
+        }
+    ],
 };

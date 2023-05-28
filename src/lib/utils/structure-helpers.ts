@@ -1,6 +1,6 @@
-import type { Todo, TodoHierachy } from "$lib/types/todo";
+import { ROOT_TODO_HIERARCHY, type DeprTodo, type DeprTodoHierachy, type Todo, type TodoHierachy } from "$lib/types/todo";
 
-export function allHierarchyBranchIds(arr: Todo[], rootId: number): number[] {
+export function allHierarchyBranchIds(arr: DeprTodo[], rootId: number): number[] {
     const resultHierarchyBranchIds: number[] = [];
     const parentIdToChildrenMap = constructParentIdToChildrenMap(arr);
     const lookingForQueue: number[] = [rootId];
@@ -20,23 +20,90 @@ export function allHierarchyBranchIds(arr: Todo[], rootId: number): number[] {
 
 export function constructParentIdToChildrenMap(arr: Todo[]): Record<number, Todo[]> {
     const resultMap = {} as Record<number, Todo[]>;
-    // and root elements - without parents
     for (let todo of arr) {
-        if (todo.parent != null) {
-            if (!resultMap[todo.parent]) {
-                resultMap[todo.parent] = [];
-            }
-            resultMap[todo.parent].push(todo);
+        const curParentId = todo.parentId === null ? ROOT_TODO_HIERARCHY.id : todo.parentId;
+        if (!resultMap[curParentId]) {
+            resultMap[curParentId] = [todo];
+        } else {
+            resultMap[curParentId].push(todo);
         }
     }
     return resultMap;
 }
 
-export function constructHierarchy(arr: Todo[]): TodoHierachy[] {
+// return  parent <- parent <- todo -> children
+export function constructShallowHierarchyBranch(arr: Todo[], id: number | null): TodoHierachy | null {
     // collect "parent id -> childs" pairs
-    const buckets = {} as Record<number, Todo[]>;
+    const buckets = constructParentIdToChildrenMap(arr);
     // and root elements - without parents
-    const roots: TodoHierachy[] = [];
+    let result: TodoHierachy | null = null;
+    if (id !== null) {
+        const requestedTodo = arr.find(i => i.id === id);
+        if (requestedTodo) {
+            result = {
+                ...requestedTodo,
+                children: null,
+                parent: null,
+                isComplex: !!buckets[requestedTodo.id],
+            };
+            // initialize parent chain
+            let curChild = result;
+            let curParent = requestedTodo.parentId === null ? null : arr.find(i => i.id === requestedTodo.parentId);
+            while (curParent) {
+                curChild.parent = {
+                    ...curParent,
+                    children: null,
+                    parent: null,
+                    isComplex: true,
+                };
+                curChild = curChild.parent;
+                curParent = curParent.parentId === null ? null : arr.find(i => i.id === curParent!!.parentId);
+            }
+            curChild.parent = {
+                ...ROOT_TODO_HIERARCHY
+            };
+            // initialize children
+            result.children = buckets[result.id] ? buckets[result.id].map(i => ({
+                ...i,
+                parent: null,
+                children: null,
+                isComplex: !!buckets[i.id],
+            })) : null;
+        }
+    } else {
+        result = {...ROOT_TODO_HIERARCHY};
+        // initialize children
+        result.children = buckets[ROOT_TODO_HIERARCHY.id] ? buckets[ROOT_TODO_HIERARCHY.id].map(i => ({
+            ...i,
+            parent: null,
+            children: null,
+            isComplex: !!buckets[i.id],
+        })) : null;
+    }
+    return result;
+}
+
+// return  parent <- parent <- todo -> children
+export function childrenOf(arr: Todo[], id: number | null): TodoHierachy[] | null {
+    // collect "parent id -> childs" pairs
+    const buckets = constructParentIdToChildrenMap(arr);
+    let result: TodoHierachy[] | null = null;
+    if (id !== null) {
+        result = buckets[id].map(i => ({
+            ...i,
+            parent: null,
+            children: null,
+            isComplex: !!buckets[i.id],
+        })) ?? null;
+    }
+    return result;
+}
+
+export function constructHierarchy(arr: DeprTodo[]): DeprTodoHierachy[] {
+    // collect "parent id -> childs" pairs
+    const buckets = {} as Record<number, DeprTodo[]>;
+    // and root elements - without parents
+    const roots: DeprTodoHierachy[] = [];
     for (let todo of arr) {
         if (todo.parent != null) {
             if (!buckets[todo.parent]) {
@@ -48,13 +115,13 @@ export function constructHierarchy(arr: Todo[]): TodoHierachy[] {
         }
     }
     // build hierarchy
-    const parentsQueue: TodoHierachy[] = [...roots];
+    const parentsQueue: DeprTodoHierachy[] = [...roots];
     while (parentsQueue.length > 0) {
-        const curParent = parentsQueue.shift() as TodoHierachy;
+        const curParent = parentsQueue.shift() as DeprTodoHierachy;
         const curChilds = buckets[curParent.id];
         if (curChilds) {
             for (const child of curChilds) {
-                const childHierarchy: TodoHierachy = {
+                const childHierarchy: DeprTodoHierachy = {
                     id: child.id,
                     name: child.name,
                     status: child.status,

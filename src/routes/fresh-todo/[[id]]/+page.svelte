@@ -1,20 +1,14 @@
 <script lang="ts">
-	import { STAB_TODO_HIERARCHY, TodoStatus, type TodoHierachy } from '$lib/types/todo';
-	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
-	import SplitPane from '../components/SplitPane.svelte';
+	import type { TodoHierachy } from '$lib/types/todo';
+	import { returnWithAllParents } from '$lib/utils/todo-helpers';
+	import SplitPane from '../../components/SplitPane.svelte';
 	import MovementIndicator from './components/MovementIndicator.svelte';
 	import TodoCard from './components/TodoCard.svelte';
 
 	// state
-	export let data: { todos: TodoHierachy[] };
-	const root: TodoHierachy = {
-		id: -100,
-		name: 'Root',
-		status: TodoStatus.ON_HOLD,
-		childs: [...data.todos]
-	};
-	let parentTodos = [root];
-	let selectedTodo: TodoHierachy = STAB_TODO_HIERARCHY;
+	export let data: { todo: TodoHierachy };
+	$: parentTodos = returnWithAllParents(data.todo);
+	$: selectedTodo = data.todo;
 	let showIndicator = false;
 	let forwardIndicator = true;
 
@@ -54,21 +48,21 @@
 	// 	// refetch all hierachies
 	// 	await refetchTodos();
 	// };
-	const selectParentHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
-		let payloadTodo = selectEvent.detail;
-		const selectedParentIndex = parentTodos.findIndex((i) => i.id === payloadTodo.id);
-		selectedTodo = payloadTodo;
-		showIndicator = true;
-		forwardIndicator = true;
-		parentTodos = parentTodos.slice(selectedParentIndex);
-	};
-	const openChildHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
-		let payloadTodo = selectEvent.detail;
-		parentTodos = [payloadTodo, ...parentTodos];
-		selectedTodo = payloadTodo;
-		showIndicator = true;
-		forwardIndicator = false;
-	};
+	// const selectHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
+	// 	let payloadTodo = selectEvent.detail;
+	// 	const selectedParentIndex = parentTodos.findIndex((i) => i.id === payloadTodo.id);
+	// 	selectedTodo = payloadTodo;
+	// 	showIndicator = true;
+	// 	forwardIndicator = true;
+	// 	parentTodos = parentTodos.slice(selectedParentIndex);
+	// };
+	// const openChildHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
+	// 	let payloadTodo = selectEvent.detail;
+	// 	parentTodos = [payloadTodo, ...parentTodos];
+	// 	selectedTodo = payloadTodo;
+	// 	showIndicator = true;
+	// 	forwardIndicator = false;
+	// };
 
 	// other
 	// const refetchTodos = async () => {
@@ -97,25 +91,17 @@
 					<TodoCard
 						{todo}
 						isSelected={todo.id === selectedTodo.id}
-						on:open={selectParentHandler}
 					/>
-					{#if todo.id !== root.id}
-						<img
-							src={EXPANDER_ARROW_ICON_URL}
-							alt="arrow"
-						/>
-					{/if}
 				{/each}
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="selected-todo-children">
-				{#each selectedTodo.childs as child}
-					<TodoCard
-						todo={child}
-						on:open={openChildHandler}
-					/>
-				{/each}
+				{#if selectedTodo.children}
+					{#each selectedTodo.children as child}
+						<TodoCard todo={child} />
+					{/each}
+				{/if}
 			</div>
 		</svelte:fragment>
 	</SplitPane>

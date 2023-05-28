@@ -1,12 +1,12 @@
 // base colors
 $base-dark-color: #334155;
 $base-color: #4f5e70;
-$base-pale-color: #9aa7b7;
+$base-pale-color: #91a2b7;
 $base-light-color: #ffffff;
 // attractive colors
 $attention-color: rgb(228, 45, 45);
 $attractive-color: #484054;
-$attractive-light-color: #55395a;
+$attractive-light-color: #6b4771;
 $attractive-border-color: rgb(39, 200, 225);
 // size
 $icon-normal-size: 20px;
@@ -23,6 +23,10 @@ $narrow-size: 3px;
 $space-normal-size: 30px;
 
 // appearance
+
+@mixin component {
+	background-color: $base-color;
+}
 
 @mixin dark-component {
 	background-color: $base-dark-color;
@@ -172,6 +176,26 @@ $max-modal-desktop-width: 800px;
 		100% {
 			translate: calc($distance / 2);
 			opacity: 0;
+		}
+	}
+}
+
+@mixin background-animation($name, $duration: 1000ms) {
+	background: linear-gradient(
+		90deg,
+		adjust-color($attractive-light-color, $alpha: -0),
+		adjust-color($attractive-light-color, $alpha: -0),
+		adjust-color($attractive-color, $alpha: -0),
+	);
+	background-size: 200% 200%;
+	animation: $name $duration infinite alternate;
+
+	@keyframes #{$name} {
+		0% {
+			background-position: 0% 0%;
+		}
+		100% {
+			background-position: 100% 0%;
 		}
 	}
 }

@@ -48,7 +48,7 @@ export enum TodoPageMode {
 
 export interface UpdateTodoAction {
     type: "general" | "info";
-    todo: DeprTodo | TodoInfo;
+    todo: Todo;
 }
 
 export interface CustomSvelteEvent<T> {

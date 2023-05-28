@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { TodoHierachy } from '$lib/types/todo';
+	import { TODO_PRESENTATION_PARAM } from '$lib/api/param/todo-params';
+	import { ROOT_TODO_HIERARCHY, type Todo, type TodoHierachy, type UpdateTodoAction } from '$lib/types/todo';
+	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
+	import { callGet, callPatch } from '$lib/utils/call-helpers';
 	import { returnWithAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import MovementIndicator from './components/MovementIndicator.svelte';
@@ -13,16 +16,16 @@
 	let forwardIndicator = true;
 
 	// handlers
-	// const updateTodoHandler = async (saveTodoEvent: any) => {
-	// 	const editedTodo = saveTodoEvent.detail;
-	// 	const updateTodoAction: UpdateTodoAction = {
-	// 		type: 'general',
-	// 		todo: editedTodo
-	// 	};
-	// 	await callPatch<Todo>('/api/todo', updateTodoAction);
-	// 	// refetch all hierachies
-	// 	await refetchTodos();
-	// };
+	const updateTodoHandler = async (saveTodoEvent: any) => {
+		const editedTodo = saveTodoEvent.detail;
+		const updateTodoAction: UpdateTodoAction = {
+			type: 'general',
+			todo: editedTodo
+		};
+		await callPatch<Todo>('/api/todo', updateTodoAction);
+		// refetch all hierachies
+		await refetchTodos();
+	};
 	// const updateTodoInfoHandler = async (
 	// 	saveTodoInfoEvent: CustomSvelteEvent<SaveInfoEventPayload>
 	// ) => {
@@ -65,18 +68,18 @@
 	// };
 
 	// other
-	// const refetchTodos = async () => {
-	// 	const res = await callGet<TodoHierachy[]>('/api/todo', {
-	// 		[TODO_PRESENTATION_PARAM]: 'HIERARCHY'
-	// 	});
-	// 	const changedHierarchy = res.data.data;
-	// 	data = {
-	// 		todos: changedHierarchy
-	// 	};
-	// };
+	const refetchTodos = async () => {
+		const res = await callGet<TodoHierachy>('/api/todo', {
+			[TODO_PRESENTATION_PARAM]: 'HIERARCHY'
+		});
+		const changedHierarchy = res.data.data;
+		data = {
+			todos: changedHierarchy
+		};
+	};
 </script>
 
-<div class="todos-page">
+<div class="todos-page" on:save={save}>
 	<!-- <button on:click={swithModeHandler}>Switch mode</button> -->
 	{#if showIndicator}
 		<MovementIndicator
@@ -92,13 +95,19 @@
 						{todo}
 						isSelected={todo.id === selectedTodo.id}
 					/>
+					{#if todo.id !== ROOT_TODO_HIERARCHY.id}
+						<img
+							src={EXPANDER_ARROW_ICON_URL}
+							alt="arrow"
+						/>
+					{/if}
 				{/each}
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="selected-todo-children">
 				{#if selectedTodo.children}
-					{#each selectedTodo.children as child}
+					{#each selectedTodo.children as child (child.id)}
 						<TodoCard todo={child} />
 					{/each}
 				{/if}

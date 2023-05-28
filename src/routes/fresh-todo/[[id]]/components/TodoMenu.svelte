@@ -30,7 +30,7 @@
 		dispatch('save', {
 			...(todo as TodoHierachy),
 			name: editName,
-			status: editStatus as TodoStatus,
+			status: editStatus as TodoStatus
 		});
 	};
 	const enterHandler = (e: KeyboardEvent) => {
@@ -89,21 +89,21 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={null && saveEventIssuer}
+					on:click={saveEventIssuer}
 				>
 					Save
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={null && addHandler}
+					on:click={addHandler}
 				>
 					Add
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={null && deleteEventIssuer}
+					on:click={deleteEventIssuer}
 				>
 					Delete
 				</div>
@@ -128,8 +128,8 @@
 		@include modal-window-background;
 		background: linear-gradient(
 			0deg,
-			adjust-color($attractive-color, $alpha: -0) 0%,
-			adjust-color($base-pale-color, $alpha: -0.1) 100%
+			adjust-color($base-dark-color, $alpha: -0.15) 0%,
+			adjust-color($base-pale-color, $alpha: -0.15) 100%
 		);
 
 		/* .todo-menu-background {
@@ -140,11 +140,20 @@
 
 		.todo-menu-content {
 			width: 600px;
+			/* @include normal-shadow; */
+			@include bordered($color: $base-dark-color, $size: $border-normal-size);
+			@apply p-4 rounded-md;
+			background-color: $base-pale-color;
+			/* background: linear-gradient(
+				0deg,
+				adjust-color($attractive-color, $alpha: -0) 0%,
+				adjust-color($attractive-light-color, $alpha: -0) 100%
+			); */
 
 			.edit-pane {
 				@apply mb-1;
 				@include row-stretched;
-				@include normal-shadow;
+				/* @include normal-shadow; */
 
 				input {
 					@apply p-1 text-black;
@@ -155,8 +164,8 @@
 				@include row-centered;
 
 				.todo-menu-action {
-					@include normal-shadow;
-					@include dark-component;
+					/* @include normal-shadow; */
+					@include component;
 					@apply p-1;
 				}
 			}

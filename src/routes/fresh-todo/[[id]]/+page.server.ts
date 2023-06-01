@@ -1,16 +1,14 @@
-import { db } from '$lib/server/database';
-import type { TodoHierachy } from '$lib/types/todo';
-import { constructShallowHierarchyBranch } from '$lib/utils/structure-helpers';
-import { redirect } from '@sveltejs/kit';
+import { getTodoHierarchy } from '$lib/api/todo-calls';
+import type { TodoHierachyDto } from '$lib/types/todo';
 
-export function load({ params }: {params: any}): { todo: TodoHierachy } {
-	const todoId: number | null = params.id;
-	const result = constructShallowHierarchyBranch(db.todos, params.id ? parseInt(params.id) : null);
+export async function load({ params }: { params: any }): Promise<{ todoHierachyDto: TodoHierachyDto } | null> {
+	const todoId: number | undefined = params.id;
+	const result = await getTodoHierarchy(todoId ?? null);
 	if (result) {
 		return {
-			todo: result,
+			todoHierachyDto: result
 		};
 	} else {
-		throw redirect(307, '/fresh-todo')
+		return null;
 	}
 }

@@ -1,4 +1,4 @@
-import { ROOT_TODO_HIERARCHY, type DeprTodo, type DeprTodoHierachy, type Todo, type TodoHierachy } from "$lib/types/todo";
+import { ROOT_TODO_HIERARCHY, type DeprTodo, type DeprTodoHierachy, type Todo, type TodoHierachyDto } from "$lib/types/todo";
 
 export function allHierarchyBranchIds(arr: DeprTodo[], rootId: number): number[] {
     const resultHierarchyBranchIds: number[] = [];
@@ -32,11 +32,11 @@ export function constructParentIdToChildrenMap(arr: Todo[]): Record<number, Todo
 }
 
 // return  parent <- parent <- todo -> children
-export function constructShallowHierarchyBranch(arr: Todo[], id: number | null): TodoHierachy | null {
+export function constructShallowHierarchyBranch(arr: Todo[], id: number | null): TodoHierachyDto | null {
     // collect "parent id -> childs" pairs
     const buckets = constructParentIdToChildrenMap(arr);
     // and root elements - without parents
-    let result: TodoHierachy | null = null;
+    let result: TodoHierachyDto | null = null;
     if (id !== null) {
         const requestedTodo = arr.find(i => i.id === id);
         if (requestedTodo) {
@@ -84,10 +84,10 @@ export function constructShallowHierarchyBranch(arr: Todo[], id: number | null):
 }
 
 // return  parent <- parent <- todo -> children
-export function childrenOf(arr: Todo[], id: number | null): TodoHierachy[] | null {
+export function childrenOf(arr: Todo[], id: number | null): TodoHierachyDto[] | null {
     // collect "parent id -> childs" pairs
     const buckets = constructParentIdToChildrenMap(arr);
-    let result: TodoHierachy[] | null = null;
+    let result: TodoHierachyDto[] | null = null;
     if (id !== null) {
         result = buckets[id].map(i => ({
             ...i,

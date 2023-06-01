@@ -35,8 +35,8 @@ $space-normal-size: 30px;
 
 @mixin attractive-component {
 	background: linear-gradient(215deg, $attractive-light-color 0%, $attractive-color 100%);
-	border-color: $attractive-border-color;
-	border-bottom-width: $border-normal-size;
+	// border-color: $attractive-border-color;
+	// border-bottom-width: $border-normal-size;
 }
 
 @mixin bordered($side: all, $color: $attractive-border-color, $size: $border-normal-size) {

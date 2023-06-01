@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { TODO_PRESENTATION_PARAM } from '$lib/api/param/todo-params';
-	import { ROOT_TODO_HIERARCHY, type Todo, type TodoHierachy, type UpdateTodoAction } from '$lib/types/todo';
+	import { createTodo, deleteTodo, updateTodo } from '$lib/api/todo-calls';
+	import type { CustomSvelteEvent } from '$lib/types/general';
+	import {
+		ROOT_TODO_HIERARCHY,
+		type CreateTodoDto,
+		type Todo,
+		type TodoHierachyDto,
+		type UpdateTodoData,
+		type UpdateTodoDto
+	} from '$lib/types/todo';
 	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
 	import { callGet, callPatch } from '$lib/utils/call-helpers';
 	import { returnWithAllParents } from '$lib/utils/todo-helpers';
@@ -9,77 +18,35 @@
 	import TodoCard from './components/TodoCard.svelte';
 
 	// state
-	export let data: { todo: TodoHierachy };
-	$: parentTodos = returnWithAllParents(data.todo);
-	$: selectedTodo = data.todo;
+	export let data: { todoHierachyDto: TodoHierachyDto };
+	$: parentTodos = returnWithAllParents(data.todoHierachyDto);
+	$: selectedTodo = data.todoHierachyDto;
 	let showIndicator = false;
 	let forwardIndicator = true;
 
 	// handlers
-	const updateTodoHandler = async (saveTodoEvent: any) => {
-		const editedTodo = saveTodoEvent.detail;
-		const updateTodoAction: UpdateTodoAction = {
-			type: 'general',
-			todo: editedTodo
-		};
-		await callPatch<Todo>('/api/todo', updateTodoAction);
-		// refetch all hierachies
-		await refetchTodos();
+	const updateTodoHandler = async (saveTodoEvent: CustomSvelteEvent<UpdateTodoData>) => {
+		const updateData = saveTodoEvent.detail;
+		console.log('@@@ updateData = ' + updateData);
+		await updateTodo(updateData.id, updateData.updatedTodoDto);
+		// TODO: make slighter
+		window.location.reload();
 	};
-	// const updateTodoInfoHandler = async (
-	// 	saveTodoInfoEvent: CustomSvelteEvent<SaveInfoEventPayload>
-	// ) => {
-	// 	const saveInfoPayload = saveTodoInfoEvent.detail;
-	// 	saveInfoPayload.saveCallbackStarter(async (saveInfo) => {
-	// 		const updateTodoInfoAction: UpdateTodoAction = {
-	// 			type: 'info',
-	// 			todo: saveInfo
-	// 		};
-	// 		const response = await callPatch<Todo>('/api/todo', updateTodoInfoAction);
-	// 		return response.data.data;
-	// 	});
-	// };
-	// const createTodoHandler = async (createEvent: any) => {
-	// 	const todo = createEvent.detail;
-	// 	await callPost('/api/todo', todo);
-	// 	// refetch all hierachies
-	// 	await refetchTodos();
-	// };
-	// const deleteTodoHandler = async (deleteEvent: any) => {
-	// 	const todo = deleteEvent.detail;
-	// 	await callDelete('/api/todo', todo);
-	// 	// refetch all hierachies
-	// 	await refetchTodos();
-	// };
-	// const selectHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
-	// 	let payloadTodo = selectEvent.detail;
-	// 	const selectedParentIndex = parentTodos.findIndex((i) => i.id === payloadTodo.id);
-	// 	selectedTodo = payloadTodo;
-	// 	showIndicator = true;
-	// 	forwardIndicator = true;
-	// 	parentTodos = parentTodos.slice(selectedParentIndex);
-	// };
-	// const openChildHandler = (selectEvent: CustomEvent<TodoHierachy>) => {
-	// 	let payloadTodo = selectEvent.detail;
-	// 	parentTodos = [payloadTodo, ...parentTodos];
-	// 	selectedTodo = payloadTodo;
-	// 	showIndicator = true;
-	// 	forwardIndicator = false;
-	// };
 
-	// other
-	const refetchTodos = async () => {
-		const res = await callGet<TodoHierachy>('/api/todo', {
-			[TODO_PRESENTATION_PARAM]: 'HIERARCHY'
-		});
-		const changedHierarchy = res.data.data;
-		data = {
-			todos: changedHierarchy
-		};
+	const createTodoHandler = async (createTodoEvent: CustomSvelteEvent<CreateTodoDto>) => {
+		await createTodo(createTodoEvent.detail);
+		// TODO: make slighter
+		window.location.reload();
+	};
+
+	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
+		await deleteTodo(deleteTodoEvent.detail);
+		// TODO: make slighter
+		window.location.href = '/fresh-todo';
 	};
 </script>
 
-<div class="todos-page" on:save={save}>
+<div class="todos-page">
 	<!-- <button on:click={swithModeHandler}>Switch mode</button> -->
 	{#if showIndicator}
 		<MovementIndicator
@@ -93,6 +60,9 @@
 				{#each parentTodos as todo (todo.id)}
 					<TodoCard
 						{todo}
+						on:update={updateTodoHandler}
+						on:create={createTodoHandler}
+						on:delete={deleteTodoHandler}
 						isSelected={todo.id === selectedTodo.id}
 					/>
 					{#if todo.id !== ROOT_TODO_HIERARCHY.id}
@@ -108,7 +78,12 @@
 			<div class="selected-todo-children">
 				{#if selectedTodo.children}
 					{#each selectedTodo.children as child (child.id)}
-						<TodoCard todo={child} />
+						<TodoCard
+							todo={child}
+							on:update={updateTodoHandler}
+							on:create={createTodoHandler}
+							on:delete={deleteTodoHandler}
+						/>
 					{/each}
 				{/if}
 			</div>
@@ -128,7 +103,10 @@
 
 		.parent-stack {
 			@include column;
+			@include styled-scrollbar;
 			padding: $normal-size;
+			overflow-y: auto;
+			max-height: 100vh;
 
 			img {
 				margin-top: $narrow-size;

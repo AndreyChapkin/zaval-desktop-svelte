@@ -1,20 +1,25 @@
 <script lang="ts">
-	import { TodoStatus, type DeprTodo, type TodoHierachy, STAB_TODO } from '$lib/types/todo';
 	import { createEventDispatcher } from 'svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
+	import type {
+		CreateTodoDto,
+		TodoHierachyDto,
+		TodoStatus,
+		UpdateTodoData,
+	} from '$lib/types/todo';
 
 	// data
-	export let todo: TodoHierachy | null;
-	let editName: string = todo?.name ?? '';
-	let editStatus: TodoStatus = todo?.status ?? TodoStatus.NEED_ATTENTION;
-	let isCreateMode = todo === null;
+	export let todoHierarchyDto: TodoHierachyDto | null;
+	let editName: string = todoHierarchyDto?.name ?? '';
+	let editStatus: TodoStatus = todoHierarchyDto?.status ?? 'BACKLOG';
+	let isCreateMode = todoHierarchyDto === null;
 
-	// events
+	// events and issuers
 	type EventType = {
 		backgroundClick: null;
-		save: TodoHierachy;
-		create: DeprTodo;
-		delete: TodoHierachy;
+		update: UpdateTodoData;
+		create: CreateTodoDto;
+		delete: number;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
@@ -24,41 +29,52 @@
 			dispatch('backgroundClick');
 		}
 	};
-	const backgroundClickEventIssuer = () => dispatch('backgroundClick');
-	const saveEventIssuer = () => {
-		backgroundClickEventIssuer();
-		dispatch('save', {
-			...(todo as TodoHierachy),
-			name: editName,
-			status: editStatus as TodoStatus
+	const updateHandler = () => {
+		dispatch('backgroundClick');
+		dispatch('update', {
+			id: todoHierarchyDto!!.id,
+			updatedTodoDto: {
+				name: editName,
+				status: editStatus
+			}
 		});
 	};
-	const enterHandler = (e: KeyboardEvent) => {
+	const enterKeyHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Enter') {
 			if (isCreateMode) {
-				createEventIssuer();
+				dispatch('backgroundClick');
+				dispatch('create', {
+					name: editName,
+					status: editStatus,
+					parentId: todoHierarchyDto?.id ?? null
+				});
 			} else {
-				saveEventIssuer();
+				dispatch('update', {
+					id: todoHierarchyDto!!.id,
+					updatedTodoDto: {
+						name: editName,
+						status: editStatus
+					}
+				});
 			}
 		}
 	};
 	const addHandler = () => {
 		isCreateMode = true;
 		editName = '';
-		editStatus = TodoStatus.NEED_ATTENTION;
+		editStatus = 'BACKLOG';
 	};
-	const createEventIssuer = () => {
-		backgroundClickEventIssuer();
+	const createHandler = () => {
+		dispatch('backgroundClick');
 		dispatch('create', {
-			...STAB_TODO,
 			name: editName,
-			status: editStatus as TodoStatus,
-			parent: todo?.id ?? null
+			status: editStatus,
+			parentId: todoHierarchyDto?.id ?? null
 		});
 	};
 	const deleteEventIssuer = () => {
-		backgroundClickEventIssuer();
-		dispatch('delete', todo!);
+		dispatch('backgroundClick');
+		dispatch('delete', todoHierarchyDto?.id);
 	};
 	const selectStatusHandler = (selectEvent: any) => {
 		const selectedStatus = selectEvent.detail as TodoStatus;
@@ -78,7 +94,7 @@
 				on:select={selectStatusHandler}
 			/>
 			<input
-				on:keyup={enterHandler}
+				on:keyup={enterKeyHandler}
 				class="w-full"
 				type="text"
 				bind:value={editName}
@@ -89,16 +105,16 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={saveEventIssuer}
+					on:click={updateHandler}
 				>
-					Save
+					Update
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
 					on:click={addHandler}
 				>
-					Add
+					Add subtask
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
@@ -111,7 +127,7 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={createEventIssuer}
+					on:click={createHandler}
 				>
 					Create
 				</div>

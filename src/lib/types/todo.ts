@@ -1,17 +1,37 @@
-export interface DeprTodoHierachy {
+export interface TodoHierachyDto {
     id: number;
     name: string;
     status: TodoStatus;
-    childs: DeprTodoHierachy[];
+    parent: TodoHierachyDto | null;
+    children: TodoHierachyDto[] | null;
 }
 
-export interface TodoHierachy {
+export interface TodoDto {
     id: number;
     name: string;
     status: TodoStatus;
-    parent: TodoHierachy | null;
-    isComplex: boolean;
-    children: TodoHierachy[] | null;
+    parentId: number | null;
+}
+
+export interface CreateTodoDto {
+    name: string;
+    status: TodoStatus;
+    parentId: number | null;
+}
+
+export interface UpdateTodoData {
+    id: number;
+    updatedTodoDto: UpdateTodoDto;
+}
+
+export interface UpdateTodoDto {
+    name: string;
+    status: TodoStatus;
+}
+
+export interface MoveTodoDto {
+    todoId: number;
+    parentId: number | null;
 }
 
 export interface Todo {
@@ -21,65 +41,21 @@ export interface Todo {
     parentId: number | null;
 }
 
-export interface TodoInfo {
-    id: number;
-    info: string;
-    todoId: number;
-}
+export type TodoStatus = "DONE" | "BACKLOG" | "WILL_BE_BACK" | "PING_ME" | "IN_PROGRESS";
+export const All_TODO_STATUSES: TodoStatus[] = ["DONE", "BACKLOG", "WILL_BE_BACK", "PING_ME", "IN_PROGRESS"];
 
-export interface DeprTodo {
-    id: number;
-    name: string;
-    info: string;
-    status: TodoStatus;
-    parent: number | null;
-}
-
-export enum TodoStatus {
-    NEED_ATTENTION,
-    ON_HOLD,
-    IN_PROGRESS
-}
-
-export enum TodoPageMode {
-    ALL_TASKS,
-    IN_PROGRESS_TASKS,
-}
-
-export interface UpdateTodoAction {
-    type: "general" | "info";
-    todo: Todo;
-}
-
-export interface CustomSvelteEvent<T> {
-    detail: T
-}
-
-export const STAB_TODO: DeprTodo = {
-    id: -100,
-    name: 'nothing',
-    info: '-',
-    status: TodoStatus.ON_HOLD,
-    parent: null
-};
-
-export const ROOT_TODO_HIERARCHY: TodoHierachy = {
+export const ROOT_TODO_HIERARCHY: TodoHierachyDto = {
     id: -1000,
     name: "root",
-    status: TodoStatus.IN_PROGRESS,
+    status: "BACKLOG",
     parent: null,
     children: null,
-    isComplex: true,
 };
 
-export const STAB_TODO_HIERARCHY: TodoHierachy = {
+export const STAB_TODO_HIERARCHY: TodoHierachyDto = {
     id: -100,
-    name: 'nothing',
-    status: TodoStatus.ON_HOLD,
+    name: '',
+    status: "BACKLOG",
     children: null,
     parent: null,
-    isComplex: false,
 };
-
-export const TODO_PRESENTATIONS = ["ALL", "HIERARCHY", "ITEM"] as const;
-export type TodoPresentationsType = typeof TODO_PRESENTATIONS[number];

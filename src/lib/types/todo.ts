@@ -13,6 +13,11 @@ export interface TodoDto {
     parentId: number | null;
 }
 
+export interface TodoHistoryDto {
+    todoId: number;
+    records: string[];
+}
+
 export interface CreateTodoDto {
     name: string;
     status: TodoStatus;
@@ -34,11 +39,9 @@ export interface MoveTodoDto {
     parentId: number | null;
 }
 
-export interface Todo {
-    id: number;
-    name: string;
-    status: TodoStatus;
-    parentId: number | null;
+export interface SaveHistoryDto {
+    todoId: number;
+    records: string[];
 }
 
 export type TodoStatus = "DONE" | "BACKLOG" | "WILL_BE_BACK" | "PING_ME" | "IN_PROGRESS";

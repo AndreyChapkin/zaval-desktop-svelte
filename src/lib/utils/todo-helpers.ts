@@ -28,8 +28,8 @@ export function chooseStatusClass(status: TodoStatus): string {
     }
 }
 
-export function returnWithAllParents(todo: TodoHierachyDto): TodoHierachyDto[] {
-    const result = [todo];
+export function returnAllParents(todo: TodoHierachyDto): TodoHierachyDto[] {
+    const result = [];
     let curParent = todo.parent;
     while (curParent) {
         result.push(curParent);

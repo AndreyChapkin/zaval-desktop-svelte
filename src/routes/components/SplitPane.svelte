@@ -50,10 +50,7 @@
 
 	.split-pane {
 		@apply flex items-stretch;
-		/* @include full-screen-height; */
-		.split-left {
-			height: 100%;
-		}
+		
 		.split-separator {
 			background-color: $base-dark-color;
 			width: $border-wide-size;

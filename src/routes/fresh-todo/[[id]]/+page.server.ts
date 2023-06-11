@@ -1,12 +1,21 @@
-import { getTodoHierarchy } from '$lib/api/todo-calls';
+import { getTodoHierarchy, getTodoHistory } from '$lib/api/todo-calls';
 import type { TodoHierachyDto } from '$lib/types/todo';
 
-export async function load({ params }: { params: any }): Promise<{ todoHierachyDto: TodoHierachyDto } | null> {
+// TODO parallel requests
+export async function load({
+	params
+}: {
+	params: any;
+}): Promise<{ todoHierachyDto: TodoHierachyDto; todoHistoryRecords: string[] | null } | null> {
 	const todoId: number | undefined = params.id;
-	const result = await getTodoHierarchy(todoId ?? null);
-	if (result) {
+	const [todoHierarchyDto, todoHistoryDto] = await Promise.all([
+		getTodoHierarchy(todoId ?? null),
+		getTodoHistory(todoId ?? -1000),
+	]);
+	if (todoHierarchyDto) {
 		return {
-			todoHierachyDto: result
+			todoHierachyDto: todoHierarchyDto,
+			todoHistoryRecords: todoHistoryDto.records
 		};
 	} else {
 		return null;

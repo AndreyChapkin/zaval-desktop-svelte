@@ -1,4 +1,4 @@
-import type { TodoHierachyDto, CreateTodoDto, TodoDto, UpdateTodoDto, MoveTodoDto } from "$lib/types/todo";
+import type { TodoHierachyDto, CreateTodoDto, TodoDto, UpdateTodoDto, MoveTodoDto, TodoHistoryDto } from "$lib/types/todo";
 import { callDelete } from "$lib/utils/call-helpers";
 import { callGet, callPatch, callPost } from "$lib/utils/call-helpers";
 import { baseURL } from "./base";
@@ -43,4 +43,16 @@ export async function getAllTodos(): Promise<TodoDto[]> {
 export async function moveTodo(moveTodoDto: MoveTodoDto): Promise<void> {
     const url = `${baseTodoURL}/move`;
 	await callPatch<void>(url, moveTodoDto);
+}
+
+export async function getTodoHistory(todoId: number): Promise<TodoHistoryDto> {
+    const url = `${baseTodoURL}/${todoId}/history`;
+    const response = await callGet<TodoHistoryDto>(url);
+	return response.data;
+}
+
+export async function updateTodoHistory(todoId: number, todoHistoryDto: TodoHistoryDto): Promise<TodoHistoryDto> {
+    const url = `${baseTodoURL}/${todoId}/history`;
+    const response = await callPatch<TodoHistoryDto>(url, todoHistoryDto);
+	return response.data;
 }

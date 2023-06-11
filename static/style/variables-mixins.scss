@@ -91,6 +91,10 @@ $space-normal-size: 30px;
 	@apply flex flex-col;
 }
 
+@mixin column-justifyied {
+	@apply flex flex-col justify-between;
+}
+
 @mixin column-stretched {
 	@apply flex flex-col items-stretch;
 }

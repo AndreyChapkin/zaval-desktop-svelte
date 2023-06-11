@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
 
 export function load() {
-    throw redirect(307, '/fresh-todo');
+    throw redirect(307, '/todo');
 }

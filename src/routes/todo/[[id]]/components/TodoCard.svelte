@@ -42,7 +42,7 @@
 	<div
 		class="todo-complex-image"
 	>
-		<a href={`/fresh-todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
+		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
 			<img
 				src={TODO_COMPLEX_ICON_URL}
 				alt="composition"

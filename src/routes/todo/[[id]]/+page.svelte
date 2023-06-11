@@ -1,16 +1,22 @@
 <script lang="ts">
 	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
-	import type { CreateTodoDto, SaveHistoryDto, TodoHierachyDto, UpdateTodoData } from '$lib/types/todo';
-	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
+	import type { TodoDetailedPageData } from '$lib/types/pages-data';
+	import type {
+		CreateTodoDto,
+		SaveHistoryDto,
+		TodoHierachyDto,
+		UpdateTodoData
+	} from '$lib/types/todo';
+	import { EXPANDER_ARROW_ICON_URL, ROOT_MENU_ICON_URL } from '$lib/utils/assets-references';
 	import { returnAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
+	import SideMenu from './components/SideMenu.svelte';
 	import TodoCard from './components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
-	
 
 	// state
-	export let data: { todoHierachyDto: TodoHierachyDto; todoHistoryRecords: string[] | null };
+	export let data: TodoDetailedPageData;
 	$: parentTodos = returnAllParents(data.todoHierachyDto);
 	$: selectedTodo = data.todoHierachyDto;
 
@@ -31,7 +37,7 @@
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
 		await deleteTodo(deleteTodoEvent.detail);
 		// TODO: make slighter
-		window.location.href = '/fresh-todo';
+		window.location.href = '/todo';
 	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {
@@ -39,46 +45,56 @@
 		const savedTodoHistoryDto = await updateTodoHistory(saveHistoryDto.todoId, saveHistoryDto);
 		data = {
 			...data,
-			todoHistoryRecords: savedTodoHistoryDto.records,
+			todoHistoryRecords: savedTodoHistoryDto.records
 		};
 	};
 </script>
 
 <div class="todos-page">
+	<SideMenu />
 	<SplitPane>
 		<svelte:fragment slot="left">
-			<div class="left-dock">
-				<div class="todo-top-branch">
-					<div class="main-todo">
-						<TodoCard
-							todo={data.todoHierachyDto}
-							on:update={updateTodoHandler}
-							on:create={createTodoHandler}
-							on:delete={deleteTodoHandler}
-							isSelected={true}
-						/>
-					</div>
-					<div class="parent-todos">
-						{#each parentTodos as todo (todo.id)}
-							<img
-								src={EXPANDER_ARROW_ICON_URL}
-								alt="arrow"
-							/>
+			{#if !data.isRoot}
+				<div class="left-dock">
+					<div class="todo-top-branch">
+						<div class="main-todo">
 							<TodoCard
-								{todo}
+								todo={data.todoHierachyDto}
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
 								on:delete={deleteTodoHandler}
+								isSelected={true}
 							/>
-						{/each}
+						</div>
+						<div class="parent-todos">
+							{#each parentTodos as todo (todo.id)}
+								<img
+									src={EXPANDER_ARROW_ICON_URL}
+									alt="arrow"
+								/>
+								<TodoCard
+									{todo}
+									on:update={updateTodoHandler}
+									on:create={createTodoHandler}
+									on:delete={deleteTodoHandler}
+								/>
+							{/each}
+						</div>
 					</div>
+					<TodoHistory
+						todoId={data.todoHierachyDto.id}
+						records={data.todoHistoryRecords ?? []}
+						on:save={historySaveHandler}
+					/>
 				</div>
-				<TodoHistory
-					todoId={data.todoHierachyDto.id}
-					records={data.todoHistoryRecords ?? []}
-					on:save={historySaveHandler}
-				/>
-			</div>
+			{:else}
+				<div class="root-logo">
+					<img
+						src={ROOT_MENU_ICON_URL}
+						alt="root"
+					/>
+				</div>
+			{/if}
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="right-dock">
@@ -104,9 +120,20 @@
 
 	.todos-page {
 		background-color: $base-color;
+		@include row;
 
 		:global(.split-pane) {
 			@include full-screen-height;
+		}
+
+		.root-logo {
+			padding: $wide-size;
+			@include content-centered;
+			height: 100%;
+
+			img {
+				@include icon-super-large-sized;
+			}
 		}
 
 		.left-dock {
@@ -114,7 +141,7 @@
 			@include column-justifyied;
 
 			.todo-top-branch {
-				padding: $normal-size;
+				padding: $wide-size;
 				@apply flex-1;
 
 				.parent-todos {
@@ -142,8 +169,8 @@
 
 		.right-dock {
 			.todo-children {
-				padding: $normal-size;
-				@include responsive-grid(300px);
+				padding: $wide-size;
+				@include responsive-grid(300px, $x-gap: $large-size, $y-gap: $wide-size);
 			}
 		}
 	}

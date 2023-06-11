@@ -11,13 +11,16 @@ $attractive-border-color: rgb(39, 200, 225);
 // size
 $icon-normal-size: 20px;
 $icon-large-size: 24px;
+$icon-super-large-size: 124px;
 
 $border-extrawide-size: 12px;
 $border-wide-size: 6px;
 $border-normal-size: 3px;
 $border-narrow-size: 2px;
 
-$normal-size: 10px;
+$large-size: 20px;
+$wide-size: 10px;
+$normal-size: 6px;
 $narrow-size: 3px;
 
 $space-normal-size: 30px;
@@ -75,38 +78,54 @@ $space-normal-size: 30px;
 
 // composition
 
-@mixin row {
+@mixin row($gap: 0px) {
 	@apply flex flex-row;
+	gap: $gap;
 }
 
-@mixin row-centered {
+@mixin row-centered($gap: 0px) {
 	@apply flex flex-row items-center;
+	gap: $gap;
 }
 
-@mixin row-stretched {
+@mixin row-justifyied($gap: 0px) {
+	@apply flex flex-row justify-between;
+	gap: $gap;
+}
+
+@mixin row-stretched($gap: 0px) {
 	@apply flex flex-row items-stretch;
+	gap: $gap;
 }
 
-@mixin column {
+@mixin column($gap: 0px) {
 	@apply flex flex-col;
+	gap: $gap;
 }
 
-@mixin column-justifyied {
+@mixin column-justifyied($gap: 0px) {
 	@apply flex flex-col justify-between;
+	gap: $gap;
 }
 
-@mixin column-stretched {
+@mixin column-stretched($gap: 0px) {
 	@apply flex flex-col items-stretch;
+	gap: $gap;
 }
 
-@mixin column-centered {
+@mixin column-centered($gap: 0px) {
 	@apply flex flex-col items-center;
+	gap: $gap;
 }
 
-@mixin responsive-grid($min-cell-width: 200px) {
+@mixin content-centered {
+	@apply flex flex-col items-center justify-center;
+}
+
+@mixin responsive-grid($min-cell-width: 200px, $x-gap: $normal-size, $y-gap: $normal-size) {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax($min-cell-width, 1fr));
-	gap: $normal-size $normal-size;
+	gap: $x-gap $y-gap;
 }
 
 @mixin modal-window-background {
@@ -140,6 +159,11 @@ $max-modal-desktop-width: 800px;
 @mixin icon-large-sized {
 	height: $icon-large-size;
 	min-width: $icon-large-size;
+}
+
+@mixin icon-super-large-sized {
+	height: $icon-super-large-size;
+	min-width: $icon-super-large-size;
 }
 
 @mixin full-screen-height {

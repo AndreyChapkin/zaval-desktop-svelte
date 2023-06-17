@@ -1,7 +1,11 @@
-import type { TodoHierachyDto } from "./todo";
+import type { TodoHierachyDto as TodoHierarchyDto } from "./todo";
 
 export interface TodoDetailedPageData {
-	todoHierachyDto: TodoHierachyDto;
+	todoHierachyDto: TodoHierarchyDto;
 	todoHistoryRecords: string[] | null;
 	isRoot: boolean;
+}
+
+export interface TodosWithStatusPageData {
+	todoHierarchyDtos: TodoHierarchyDto[];
 }

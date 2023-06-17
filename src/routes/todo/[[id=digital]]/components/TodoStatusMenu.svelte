@@ -1,16 +1,11 @@
 <script lang="ts">
 	import { All_TODO_STATUSES, type TodoStatus } from '$lib/types/todo';
-	import {
-		TODO_STATUS_IN_PROGRESS_ICON_URL,
-		TODO_STATUS_NEED_ATTENTION_ICON_URL,
-		TODO_STATUS_ON_HOLD_ICON_URL
-	} from '$lib/utils/assets-references';
 	import { statusImageUrl } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
 	export let currentStatus: TodoStatus;
-	$: otherStatuses = All_TODO_STATUSES.filter(i => i !== currentStatus);
+	$: otherStatuses = All_TODO_STATUSES.filter((i) => i !== currentStatus);
 	let isOpen = false;
 	let optionsY = 0;
 
@@ -30,18 +25,36 @@
 		optionsY = rect.bottom + window.pageYOffset;
 		isOpen = !isOpen;
 	};
+
+	function chooseStatusColor(status: TodoStatus): string {
+		switch (status) {
+			case 'DONE':
+				return 'done-status-color';
+			case 'BACKLOG':
+				return 'backlog-status-color';
+			case 'WILL_BE_BACK':
+				return 'will-be-back-status-color';
+			case 'PING_ME':
+				return 'ping-me-status-color';
+			case 'NEXT_TO_TAKE':
+				return 'next-to-take-status-color';
+			case 'IN_PROGRESS':
+				return 'in-progress-status-color';
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="todo-status-menu">
 	<div
 		on:click={openHandler}
-		class="current-status"
+		class={`current-status ${chooseStatusColor(currentStatus)}`}
 	>
-		<img
+		<!-- <img
 			src={statusImageUrl(currentStatus)}
 			alt="status"
-		/>
+		/> -->
+		{currentStatus}
 	</div>
 	{#if isOpen}
 		<div
@@ -50,13 +63,14 @@
 		>
 			{#each otherStatuses as status (status)}
 				<div
-					class="option-status"
+					class={`option-status ${chooseStatusColor(status)}`}
 					on:click={selectHandler(status)}
 				>
-					<img
+					<!-- <img
 						src={statusImageUrl(status)}
 						alt="status"
-					/>
+					/> -->
+					{status}
 				</div>
 			{/each}
 		</div>
@@ -65,6 +79,7 @@
 
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/todo-variables.scss';
 
 	.todo-status-menu {
 		@include row-stretched;
@@ -92,5 +107,29 @@
 		.option-status:hover {
 			background-color: $base-dark-color;
 		}
+	}
+
+	.done-status-color {
+		color: $done-status-color;
+	}
+
+	.backlog-status-color {
+		color: $backlog-status-color;
+	}
+
+	.will-be-back-status-color {
+		color: $will-be-back-status-color;
+	}
+
+	.ping-me-status-color {
+		color: $ping-me-status-color;
+	}
+
+	.next-to-take-status-color {
+		color: $next-to-take-status-color;
+	}
+
+	.in-progress-status-color {
+		color: $in-progress-status-color;
 	}
 </style>

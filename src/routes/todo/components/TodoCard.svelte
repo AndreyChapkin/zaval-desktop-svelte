@@ -3,14 +3,14 @@
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
-	import TodoMenu from './TodoMenu.svelte';
+	import TodoMenu from '../[[id=digital]]/components/TodoMenu.svelte';
 
 	// state
 	export let todo: TodoHierachyDto;
 	export let isSelected: boolean = false;
 	let isMenuOpen = false;
 
-	$: statusClass = chooseStatusClass(todo.status);
+	$: statusClass = chooseStatusClass(todo.status); //dsfsdf d
 
 	// events
 	type EventType = {
@@ -39,6 +39,13 @@
 	on:click={cardClickHandler}
 	on:contextmenu={specificRightClickHandler}
 >
+	<!-- <img
+		src={statusImageUrl(todo.status)}
+		alt="status"
+	/> -->
+	<div class="todo-name">
+		{todo.name}
+	</div>
 	<div
 		class="todo-complex-image"
 	>
@@ -48,13 +55,6 @@
 				alt="composition"
 			/>
 		</a>
-	</div>
-	<!-- <img
-		src={statusImageUrl(todo.status)}
-		alt="status"
-	/> -->
-	<div class="todo-name">
-		{todo.name}
 	</div>
 	{#if isMenuOpen}
 		<TodoMenu
@@ -79,8 +79,8 @@
 		border-radius: 5px 0px 0px 15px;
 
 		.todo-complex-image {
-			@include bordered(right, $base-light-color, $border-narrow-size);
-			@apply pr-2;
+			@include bordered(left, $base-light-color, $border-narrow-size);
+			@apply pl-2;
 
 			img {
 				@include icon-large-sized;
@@ -108,6 +108,11 @@
 	.ping-me-status {
 		border-color: $ping-me-status-color;
 	}
+
+	.next-to-take-status {
+		border-color: $next-to-take-status-color;
+	}
+
 	.in-progress-status {
 		border-color: $in-progress-status-color;
 	}

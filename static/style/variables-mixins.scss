@@ -61,18 +61,25 @@ $space-normal-size: 30px;
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-@mixin styled-scrollbar {
+@mixin styled-scrollbar($background-color: auto) {
+
 	&::-webkit-scrollbar {
-		width: 10px;
+		width: $wide-size;
+		height: $wide-size;
+		background-color: $background-color;
 	}
 
 	&::-webkit-scrollbar-track {
-		border-radius: 10px;
+		border-radius: $narrow-size;
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background-color: $base-dark-color;
-		border-radius: 10px;
+		background-color: transparent;
+		border-radius: $normal-size;
+	}
+
+	&:hover::-webkit-scrollbar-thumb {
+		background-color: rgba(200, 200, 200, 0.5);
 	}
 }
 

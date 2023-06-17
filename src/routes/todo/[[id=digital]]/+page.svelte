@@ -5,14 +5,12 @@
 	import type {
 		CreateTodoDto,
 		SaveHistoryDto,
-		TodoHierachyDto,
 		UpdateTodoData
 	} from '$lib/types/todo';
 	import { EXPANDER_ARROW_ICON_URL, ROOT_MENU_ICON_URL } from '$lib/utils/assets-references';
 	import { returnAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
-	import SideMenu from './components/SideMenu.svelte';
-	import TodoCard from './components/TodoCard.svelte';
+	import TodoCard from '../components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
 
 	// state
@@ -29,9 +27,9 @@
 	};
 
 	const createTodoHandler = async (createTodoEvent: CustomSvelteEvent<CreateTodoDto>) => {
-		await createTodo(createTodoEvent.detail);
+		const createdTodo = await createTodo(createTodoEvent.detail);
 		// TODO: make slighter
-		window.location.reload();
+		window.location.href = `/todo/${createdTodo.id}`;
 	};
 
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
@@ -50,8 +48,7 @@
 	};
 </script>
 
-<div class="todos-page">
-	<SideMenu />
+<div class="todo-details">
 	<SplitPane>
 		<svelte:fragment slot="left">
 			{#if !data.isRoot}
@@ -118,9 +115,8 @@
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
 
-	.todos-page {
+	.todo-details {
 		background-color: $base-color;
-		@include row;
 
 		:global(.split-pane) {
 			@include full-screen-height;

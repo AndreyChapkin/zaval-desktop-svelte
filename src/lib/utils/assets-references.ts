@@ -4,6 +4,7 @@ export const TODO_STATUS_NEED_ATTENTION_ICON_URL = '/todo/status/need_attention.
 export const TODO_STATUS_ON_HOLD_ICON_URL = '/todo/status/on_hold.svg';
 export const EXPANDER_ARROW_ICON_URL = '/expander/expander-arrow.svg';
 export const DONE_MENU_ICON_URL = '/todo/menu/done-menu-icon.svg';
+export const SELECT_WITH_STATUS_ICON_URL = '/todo/menu/select-with-status-menu-icon.svg';
 export const BACKLOG_MENU_ICON_URL = '/todo/menu/backlog-menu-icon.svg';
 export const WILL_BE_BACK_MENU_ICON_URL = '/todo/menu/will-be-back-menu-icon.svg';
 export const PING_ME_MENU_ICON_URL = '/todo/menu/ping-me-menu-icon.svg';

@@ -72,23 +72,11 @@
 			</div>
 			<div class="parent-todos">
 				{#each extractAllParents(todoHierarchyDto) as parent}
-					<TodoCard todo={parent} />
+					<TodoCard todo={parent} size="small" />
 				{/each}
 			</div>
 		{/each}
 	</div>
-	<!-- <div class="main-part">
-		<div class="main-todo">main-todo content sdasdas sadasdas dasdasd sadasd as</div>
-	</div>
-	<div class="parent-todos">
-		<div class="parent-todo">parent-todo content</div>
-		<div class="parent-todo">parent-todo content sdasdas sadasdas dasdasd sadasd as</div>
-	</div>
-	<div class="main-todo">main-todo content</div>
-	<div class="parent-todos">
-		<div class="parent-todo">parent-todo content</div>
-		<div class="parent-todo">parent-todo content</div>
-	</div> -->
 </div>
 
 <style lang="scss">
@@ -105,9 +93,8 @@
 		}
 
 		:global(.todo-card) {
-			min-width: 250px;
+			min-width: 450px;
 			max-width: 500px;
-			background-color: red;
 		}
 
 		.main-todo {
@@ -125,13 +112,9 @@
 			@include row(10px);
 			@include styled-scrollbar(transparent);
 			overflow-x: auto;
-			max-width: 1000px;
+			max-width: 90vw;
 			margin-left: 20px;
 			margin-bottom: 20px;
-
-			/* :global(.todo-card) {
-				font-size: small;
-			} */
 		}
 	}
 </style>

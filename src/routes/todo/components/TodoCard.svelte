@@ -9,8 +9,10 @@
 	export let todo: TodoHierachyDto;
 	export let isSelected: boolean = false;
 	let isMenuOpen = false;
+	export let size: "small" | "normal" | "large" = "normal"
 
-	$: statusClass = chooseStatusClass(todo.status); //dsfsdf d
+	$: statusClass = chooseStatusClass(todo.status);
+	$: sizeClass = `${size}-todo`
 
 	// events
 	type EventType = {
@@ -34,7 +36,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-	class={`todo-card ${statusClass}`}
+	class={`todo-card ${statusClass} ${sizeClass}`}
 	class:todo-card-selected={isSelected}
 	on:click={cardClickHandler}
 	on:contextmenu={specificRightClickHandler}
@@ -46,14 +48,14 @@
 	<div class="todo-name">
 		{todo.name}
 	</div>
-	<div
-		class="todo-complex-image"
-	>
+	<div class="go-to-todo">
 		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
-			<img
-				src={TODO_COMPLEX_ICON_URL}
-				alt="composition"
-			/>
+			<div class="link-area">
+				<img
+					src={TODO_COMPLEX_ICON_URL}
+					alt="composition"
+				/>
+			</div>
 		</a>
 	</div>
 	{#if isMenuOpen}
@@ -78,21 +80,38 @@
 		@apply border-l-8;
 		border-radius: 5px 0px 0px 15px;
 
-		.todo-complex-image {
+		.go-to-todo {
 			@include bordered(left, $base-light-color, $border-narrow-size);
 			@apply pl-2;
 
-			img {
-				@include icon-large-sized;
+			.link-area {
+				height: 100%;
 			}
 		}
 
 		.todo-name {
 			@apply flex-1;
 		}
+	}
 
+	.small-todo {
+		font-size: small;
+		img {
+			@include icon-normal-sized;
+		}
+	}
+
+	.normal-todo {
+		font-size: medium;
 		img {
 			@include icon-large-sized;
+		}
+	}
+
+	.large-todo {
+		font-size: large;
+		img {
+			@include icon-super-large-sized;
 		}
 	}
 

@@ -19,6 +19,7 @@
 		backgroundClick: null;
 		update: UpdateTodoData;
 		create: CreateTodoDto;
+		move: TodoHierachyDto;
 		delete: number;
 	};
 	const dispatch = createEventDispatcher<EventType>();
@@ -169,7 +170,6 @@
 			.edit-pane {
 				@apply mb-1;
 				@include row-stretched;
-				/* @include normal-shadow; */
 
 				input {
 					@apply p-1 text-black;
@@ -180,7 +180,6 @@
 				@include row-centered;
 
 				.todo-menu-action {
-					/* @include normal-shadow; */
 					@include component;
 					@apply p-1;
 				}

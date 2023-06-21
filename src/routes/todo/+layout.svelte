@@ -1,5 +1,5 @@
 <script>
-	import SideMenu from './[[id=digital]]/components/SideMenu.svelte';
+	import SideMenu from './components/SideMenu.svelte';
 </script>
 
 <div class="todos-page">

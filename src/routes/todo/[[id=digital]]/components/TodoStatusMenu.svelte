@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { All_TODO_STATUSES, type TodoStatus } from '$lib/types/todo';
-	import { statusImageUrl } from '$lib/utils/todo-helpers';
+	import { chooseStatusImgUrl } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
@@ -50,11 +50,11 @@
 		on:click={openHandler}
 		class={`current-status ${chooseStatusColor(currentStatus)}`}
 	>
-		<!-- <img
-			src={statusImageUrl(currentStatus)}
-			alt="status"
-		/> -->
-		{currentStatus}
+		<img
+			src={chooseStatusImgUrl(currentStatus)}
+			alt="img"
+		/>
+		<span>{currentStatus.replaceAll('_', ' ')}</span>
 	</div>
 	{#if isOpen}
 		<div
@@ -66,11 +66,11 @@
 					class={`option-status ${chooseStatusColor(status)}`}
 					on:click={selectHandler(status)}
 				>
-					<!-- <img
-						src={statusImageUrl(status)}
-						alt="status"
-					/> -->
-					{status}
+					<img
+						src={chooseStatusImgUrl(status)}
+						alt="img"
+					/>
+					{status.replaceAll('_', ' ')}
 				</div>
 			{/each}
 		</div>
@@ -88,10 +88,15 @@
 			@include icon-normal-sized;
 		}
 
+		.option-status,
 		.current-status {
 			background-color: $base-dark-color;
-			@apply p-1;
-			@include row-centered;
+			padding: $normal-size $normal-size $normal-size $normal-size;
+			@include row-centered($narrow-size);
+		}
+
+		.current-status {
+			min-width: 140px;
 		}
 
 		.options-pane {
@@ -99,9 +104,8 @@
 			@include normal-shadow;
 		}
 
-		.option-status {
+		.option-status:hover {
 			background-color: $base-color;
-			@apply p-1;
 		}
 
 		.option-status:hover {

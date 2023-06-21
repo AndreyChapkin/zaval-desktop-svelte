@@ -45,10 +45,8 @@ export interface SaveHistoryDto {
 }
 
 export type TodoStatus = "DONE" | "BACKLOG" | "WILL_BE_BACK" | "PING_ME" | "NEXT_TO_TAKE" | "IN_PROGRESS";
+
 export const All_TODO_STATUSES: TodoStatus[] = ["DONE", "BACKLOG", "WILL_BE_BACK", "PING_ME", "NEXT_TO_TAKE", "IN_PROGRESS"];
-export function todoStatusFromUrlForm(value: string): TodoStatus {
-    return value.replaceAll("-", "_").toUpperCase() as TodoStatus;
-}
 
 export const ROOT_TODO_HIERARCHY: TodoHierachyDto = {
     id: -1000,

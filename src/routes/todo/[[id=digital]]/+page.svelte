@@ -2,11 +2,7 @@
 	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type {
-		CreateTodoDto,
-		SaveHistoryDto,
-		UpdateTodoData
-	} from '$lib/types/todo';
+	import type { CreateTodoDto, SaveHistoryDto, UpdateTodoData } from '$lib/types/todo';
 	import { EXPANDER_ARROW_ICON_URL, ROOT_MENU_ICON_URL } from '$lib/utils/assets-references';
 	import { returnAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
@@ -15,6 +11,7 @@
 
 	// state
 	export let data: TodoDetailedPageData;
+	let movindTodo: string | null;
 	$: parentTodos = returnAllParents(data.todoHierachyDto);
 	$: selectedTodo = data.todoHierachyDto;
 
@@ -49,6 +46,9 @@
 </script>
 
 <div class="todo-details">
+	{#if movindTodo}
+		<div class="moving-todo">{movindTodo}</div>
+	{/if}
 	<SplitPane>
 		<svelte:fragment slot="left">
 			{#if !data.isRoot}

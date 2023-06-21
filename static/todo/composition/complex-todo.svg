@@ -1,15 +1,4 @@
-<svg viewBox="0 0 48 48" fill="none"
-    xmlns="http://www.w3.org/2000/svg">
-    <rect width="48" height="48" fill="#fff" fill-opacity="0.01" style=""></rect>
-    <path d="M48 0H0V48H48V0Z" fill="#fff" fill-opacity="0.01" style=""></path>
-    <path d="M15.5 9L7 14V24V34L15.5 39L24 44L32.5001 39L41 34V24V14L32.5001 9L24 4L15.5 9Z" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M41 14L24 24" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M7 14L24 24" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M24 44V24" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M32 19L32 39" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M41.0002 24L24.0002 34" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M24 34L7 24" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M16 39L16 19" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M32 9L16 19" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
-    <path d="M32 19L16 9" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style=""></path>
+<svg id="Flat"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" height="128" width="128">
+    <path d="M168,112h48a16.01833,16.01833,0,0,0,16-16V48a16.01833,16.01833,0,0,0-16-16H168a16.01833,16.01833,0,0,0-16,16V64h-8a32.03635,32.03635,0,0,0-32,32v24H88V108A16.01833,16.01833,0,0,0,72,92H32a16.01833,16.01833,0,0,0-16,16v40a16.01833,16.01833,0,0,0,16,16H72a16.01833,16.01833,0,0,0,16-16V136h24v24a32.03635,32.03635,0,0,0,32,32h8v16a16.01833,16.01833,0,0,0,16,16h48a16.01833,16.01833,0,0,0,16-16V160a16.01833,16.01833,0,0,0-16-16H168a16.01833,16.01833,0,0,0-16,16v16h-8a16.01833,16.01833,0,0,1-16-16V96a16.01833,16.01833,0,0,1,16-16h8V96A16.01833,16.01833,0,0,0,168,112ZM72,148H32V108H72l.00488,19.90381C72.00452,127.936,72,127.96777,72,128c0,.03271.00452.06445.00488.09717l.00489,19.90234Zm96,12h48l.00977,47.99951L216,208H168Zm0-112h48l.00977,47.99951L216,96H168Z" fill="#fff" style=""></path>
 </svg>

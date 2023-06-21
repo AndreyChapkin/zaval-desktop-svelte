@@ -1,7 +1,7 @@
-import { todoStatusFromUrlForm } from '$lib/types/todo';
-import { getAllTodoUpBranches, getTodoHierarchy, getTodoHistory } from '$lib/api/todo-calls';
-import type { TodoDetailedPageData, TodosWithStatusPageData } from '$lib/types/pages-data';
+import { getAllTodoUpBranches } from '$lib/api/todo-calls';
+import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 import type { TodoStatus } from '$lib/types/todo';
+import { todoStatusFromUrlForm } from '$lib/utils/todo-helpers';
 
 export const ssr = false;
 

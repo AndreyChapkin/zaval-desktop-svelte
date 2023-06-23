@@ -2,7 +2,7 @@
 	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type { CreateTodoDto, SaveHistoryDto, UpdateTodoData } from '$lib/types/todo';
+	import type { CreateTodoDto, SaveHistoryDto, TodoHierachyDto, UpdateTodoData } from '$lib/types/todo';
 	import { EXPANDER_ARROW_ICON_URL, ROOT_MENU_ICON_URL } from '$lib/utils/assets-references';
 	import { returnAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
@@ -27,6 +27,10 @@
 		const createdTodo = await createTodo(createTodoEvent.detail);
 		// TODO: make slighter
 		window.location.href = `/todo/${createdTodo.id}`;
+	};
+
+	const moveTodoHandler = async (moveTodoEvent: CustomSvelteEvent<TodoHierachyDto>) => {
+		movindTodo = moveTodoEvent.detail.name;
 	};
 
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
@@ -59,6 +63,7 @@
 								todo={data.todoHierachyDto}
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
+								on:move={moveTodoHandler}
 								on:delete={deleteTodoHandler}
 								isSelected={true}
 							/>
@@ -73,6 +78,7 @@
 									{todo}
 									on:update={updateTodoHandler}
 									on:create={createTodoHandler}
+									on:move={moveTodoHandler}
 									on:delete={deleteTodoHandler}
 								/>
 							{/each}
@@ -102,6 +108,7 @@
 								todo={child}
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
+								on:move={moveTodoHandler}
 								on:delete={deleteTodoHandler}
 							/>
 						{/each}
@@ -117,6 +124,11 @@
 
 	.todo-details {
 		background-color: $base-color;
+
+		.moving-todo {
+			position: absolute;
+			background-color: red;
+		}
 
 		:global(.split-pane) {
 			@include full-screen-height;

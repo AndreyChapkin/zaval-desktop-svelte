@@ -73,6 +73,10 @@
 			parentId: todoHierarchyDto?.id ?? null
 		});
 	};
+	const moveHandler = () => {
+		dispatch('backgroundClick');
+		dispatch('move', todoHierarchyDto!!);
+	};
 	const deleteEventIssuer = () => {
 		dispatch('backgroundClick');
 		dispatch('delete', todoHierarchyDto?.id);
@@ -116,6 +120,13 @@
 					on:click={addHandler}
 				>
 					Add subtask
+				</div>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<div
+					class="todo-menu-action"
+					on:click={moveHandler}
+				>
+					Move
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div

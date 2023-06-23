@@ -63,6 +63,7 @@
 			todoHierarchyDto={todo}
 			on:update
 			on:create
+			on:move
 			on:delete
 			on:backgroundClick={backgroundClickHandler}
 		/>

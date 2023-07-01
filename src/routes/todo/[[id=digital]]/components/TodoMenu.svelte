@@ -90,7 +90,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	class="todo-menu"
-	on:click={backgroundClickHandler}
+	on:mousedown={backgroundClickHandler}
 >
 	<div class="todo-menu-content">
 		<div class="edit-pane">

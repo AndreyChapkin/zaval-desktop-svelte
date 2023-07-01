@@ -57,7 +57,7 @@
 		let parents = [] as TodoHierachyDto[];
 		let curParent = todoHierarchyDto.parent;
 		while (curParent) {
-			parents.unshift(curParent);
+			parents.push(curParent);
 			curParent = curParent.parent;
 		}
 		return parents;

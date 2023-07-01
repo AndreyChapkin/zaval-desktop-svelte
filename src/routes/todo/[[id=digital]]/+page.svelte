@@ -2,9 +2,14 @@
 	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type { CreateTodoDto, SaveHistoryDto, TodoHierachyDto, UpdateTodoData } from '$lib/types/todo';
-	import { EXPANDER_ARROW_ICON_URL, ROOT_MENU_ICON_URL } from '$lib/utils/assets-references';
-	import { returnAllParents } from '$lib/utils/todo-helpers';
+	import type {
+		CreateTodoDto,
+		SaveHistoryDto,
+		TodoHierachyDto,
+		UpdateTodoData
+	} from '$lib/types/todo';
+	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
+	import { findParentOfInHeirarchy, returnAllParents } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
@@ -34,9 +39,10 @@
 	};
 
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
+		const parentTodo = findParentOfInHeirarchy(deleteTodoEvent.detail, data.todoHierachyDto);
 		await deleteTodo(deleteTodoEvent.detail);
 		// TODO: make slighter
-		window.location.href = '/todo';
+		window.location.href = `/todo/${parentTodo?.id ?? ''}`;
 	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {
@@ -49,13 +55,30 @@
 	};
 </script>
 
+<!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
 <div class="todo-details">
 	{#if movindTodo}
 		<div class="moving-todo">{movindTodo}</div>
 	{/if}
-	<SplitPane>
-		<svelte:fragment slot="left">
-			{#if !data.isRoot}
+	{#if data.isRoot}
+		<div class="right-dock">
+			<div class="todo-children">
+				{#if selectedTodo.children}
+					{#each selectedTodo.children as child (child.id)}
+						<TodoCard
+							todo={child}
+							on:update={updateTodoHandler}
+							on:create={createTodoHandler}
+							on:move={moveTodoHandler}
+							on:delete={deleteTodoHandler}
+						/>
+					{/each}
+				{/if}
+			</div>
+		</div>
+	{:else}
+		<SplitPane>
+			<svelte:fragment slot="left">
 				<div class="left-dock">
 					<div class="todo-top-branch">
 						<div class="main-todo">
@@ -90,33 +113,26 @@
 						on:save={historySaveHandler}
 					/>
 				</div>
-			{:else}
-				<div class="root-logo">
-					<img
-						src={ROOT_MENU_ICON_URL}
-						alt="root"
-					/>
+			</svelte:fragment>
+			<svelte:fragment slot="right">
+				<div class="right-dock">
+					<div class="todo-children">
+						{#if selectedTodo.children}
+							{#each selectedTodo.children as child (child.id)}
+								<TodoCard
+									todo={child}
+									on:update={updateTodoHandler}
+									on:create={createTodoHandler}
+									on:move={moveTodoHandler}
+									on:delete={deleteTodoHandler}
+								/>
+							{/each}
+						{/if}
+					</div>
 				</div>
-			{/if}
-		</svelte:fragment>
-		<svelte:fragment slot="right">
-			<div class="right-dock">
-				<div class="todo-children">
-					{#if selectedTodo.children}
-						{#each selectedTodo.children as child (child.id)}
-							<TodoCard
-								todo={child}
-								on:update={updateTodoHandler}
-								on:create={createTodoHandler}
-								on:move={moveTodoHandler}
-								on:delete={deleteTodoHandler}
-							/>
-						{/each}
-					{/if}
-				</div>
-			</div>
-		</svelte:fragment>
-	</SplitPane>
+			</svelte:fragment>
+		</SplitPane>
+	{/if}
 </div>
 
 <style lang="scss">

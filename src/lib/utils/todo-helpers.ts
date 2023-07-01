@@ -24,15 +24,15 @@ export function statusImageUrl(status: TodoStatus): string {
 }
 
 export function todoStatusFromUrlForm(value: string): TodoStatus {
-    return value.replaceAll("-", "_").toUpperCase() as TodoStatus;
+	return value.replaceAll('-', '_').toUpperCase() as TodoStatus;
 }
 
 export function todoStatusToUrlForm(status: TodoStatus): TodoStatus {
-    return status.replaceAll("_", "-").toLowerCase() as TodoStatus;
+	return status.replaceAll('_', '-').toLowerCase() as TodoStatus;
 }
 
 export function todoStatusToLabel(status: TodoStatus): string {
-    return status.replaceAll("_", " ");
+	return status.replaceAll('_', ' ');
 }
 
 export function chooseStatusImgUrl(status: TodoStatus): string {
@@ -77,4 +77,34 @@ export function returnAllParents(todo: TodoHierachyDto): TodoHierachyDto[] {
 		curParent = curParent.parent;
 	}
 	return result;
+}
+
+/*
+ * Without super parents and children
+ */
+export function findParentOfInHeirarchy(id: number, todo: TodoHierachyDto): TodoHierachyDto | null {
+	let childTodo: TodoHierachyDto | null = null;
+	if (todo.id === id) {
+		// look on the todo
+		childTodo = todo;
+	} else {
+		// look into children
+		const searchedTodo = todo.children?.find((it) => it.id === id) ?? null;
+		if (searchedTodo) {
+			searchedTodo.parent = { ...todo, children: null, parent: null };
+			childTodo = searchedTodo;
+		} else {
+			// look into parents
+			let searchedTodo: TodoHierachyDto | null = null;
+			let curParent = todo.parent;
+			while (curParent && searchedTodo == null) {
+				if (curParent.id === id) {
+					searchedTodo = { ...curParent, children: null };
+				}
+				curParent = curParent.parent;
+			}
+			childTodo = searchedTodo;
+		}
+	}
+	return childTodo?.parent ?? null;
 }

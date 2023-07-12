@@ -156,8 +156,8 @@
 		@include modal-window-background;
 		background: linear-gradient(
 			0deg,
-			adjust-color($base-dark-color, $alpha: -0.15) 0%,
-			adjust-color($base-pale-color, $alpha: -0.15) 100%
+			rgba($color: #000000, $alpha: 1.0) 0%,
+			rgba($color: #000000, $alpha: 0.6) 100%
 		);
 
 		/* .todo-menu-background {

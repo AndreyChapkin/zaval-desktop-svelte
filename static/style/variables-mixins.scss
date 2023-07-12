@@ -38,6 +38,7 @@ $space-normal-size: 30px;
 
 @mixin attractive-component {
 	background: linear-gradient(215deg, $attractive-light-color 0%, $attractive-color 100%);
+	color: $base-light-color;
 	// border-color: $attractive-border-color;
 	// border-bottom-width: $border-normal-size;
 }
@@ -61,7 +62,7 @@ $space-normal-size: 30px;
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-@mixin styled-scrollbar($background-color: auto) {
+@mixin styled-scrollbar($background-color: transparent) {
 
 	&::-webkit-scrollbar {
 		width: $wide-size;
@@ -105,6 +106,11 @@ $space-normal-size: 30px;
 	gap: $gap;
 }
 
+@mixin row-start($gap: 0px) {
+	@apply flex flex-row items-start;
+	gap: $gap;
+}
+
 @mixin column($gap: 0px) {
 	@apply flex flex-col;
 	gap: $gap;
@@ -132,6 +138,7 @@ $space-normal-size: 30px;
 @mixin responsive-grid($min-cell-width: 200px, $x-gap: $normal-size, $y-gap: $normal-size) {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax($min-cell-width, 1fr));
+	align-content: start;
 	gap: $x-gap $y-gap;
 }
 
@@ -155,8 +162,10 @@ $space-normal-size: 30px;
 
 // sizes
 
-$min-modal-desktop-width: 400px;
-$max-modal-desktop-width: 800px;
+@mixin min-max-width($min-width: 400px, $max-width: 800px) {
+	min-width: $min-width;
+	max-width: $max-width;
+}
 
 @mixin icon-normal-sized {
 	height: $icon-normal-size;
@@ -186,11 +195,9 @@ $max-modal-desktop-width: 800px;
 	bottom: 0;
 }
 
-@mixin modal-window-desktop {
-	min-width: $min-modal-desktop-width;
-	max-width: $max-modal-desktop-width;
-	width: 100%;
-	@apply mr-auto ml-auto;
+@mixin scrollable {
+	overflow-y: auto;
+	@include styled-scrollbar;
 }
 
 // animations

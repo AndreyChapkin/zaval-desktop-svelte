@@ -79,6 +79,30 @@ export function returnAllParents(todo: TodoHierachyDto): TodoHierachyDto[] {
 	return result;
 }
 
+export function returnMockParents(): TodoHierachyDto[] {
+	const result = [];
+	for (let i = 0; i < 100; i++) {
+		result.push({
+			id: i,
+			name: i + "",
+			status: "BACKLOG",
+			parent: null,
+			children: null,
+		} as TodoHierachyDto);
+	}
+	return result;
+}
+
+export function returnHierarchyTopPart(todo: TodoHierachyDto): TodoHierachyDto[] {
+	const result = [todo];
+	let curParent = todo.parent;
+	while (curParent) {
+		result.push(curParent);
+		curParent = curParent.parent;
+	}
+	return result;
+}
+
 /*
  * Without super parents and children
  */

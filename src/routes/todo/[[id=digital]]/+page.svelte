@@ -5,7 +5,6 @@
 	import type {
 		CreateTodoDto,
 		SaveHistoryDto,
-		TodoHierachyDto,
 		UpdateTodoData
 	} from '$lib/types/todo';
 	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
@@ -16,12 +15,13 @@
 
 	// state
 	export let data: TodoDetailedPageData;
-	let movindTodo: string | null;
+	$: mainTodo = data.todoHierachyDto;
 	$: parentTodos = returnAllParents(data.todoHierachyDto);
-	$: selectedTodo = data.todoHierachyDto;
+	
 
 	// handlers
 	const updateTodoHandler = async (saveTodoEvent: CustomSvelteEvent<UpdateTodoData>) => {
+		alert("hello");
 		const updateData = saveTodoEvent.detail;
 		await updateTodo(updateData.id, updateData.updatedTodoDto);
 		// TODO: make slighter
@@ -32,10 +32,6 @@
 		const createdTodo = await createTodo(createTodoEvent.detail);
 		// TODO: make slighter
 		window.location.href = `/todo/${createdTodo.id}`;
-	};
-
-	const moveTodoHandler = async (moveTodoEvent: CustomSvelteEvent<TodoHierachyDto>) => {
-		movindTodo = moveTodoEvent.detail.name;
 	};
 
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
@@ -57,19 +53,16 @@
 
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
 <div class="todo-details">
-	{#if movindTodo}
-		<div class="moving-todo">{movindTodo}</div>
-	{/if}
 	{#if data.isRoot}
 		<div class="right-dock">
 			<div class="todo-children">
-				{#if selectedTodo.children}
-					{#each selectedTodo.children as child (child.id)}
+				{#if mainTodo.children}
+					{#each mainTodo.children as child (child.id)}
 						<TodoCard
 							todo={child}
+							parentTodo={null}
 							on:update={updateTodoHandler}
 							on:create={createTodoHandler}
-							on:move={moveTodoHandler}
 							on:delete={deleteTodoHandler}
 						/>
 					{/each}
@@ -83,25 +76,22 @@
 					<div class="todo-top-branch">
 						<div class="main-todo">
 							<TodoCard
-								todo={data.todoHierachyDto}
+								todo={mainTodo}
+								parentTodo={mainTodo.parent}
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
-								on:move={moveTodoHandler}
 								on:delete={deleteTodoHandler}
 								isSelected={true}
 							/>
 						</div>
 						<div class="parent-todos">
 							{#each parentTodos as todo (todo.id)}
-								<img
-									src={EXPANDER_ARROW_ICON_URL}
-									alt="arrow"
-								/>
+								<div class="arrow">/\</div>
 								<TodoCard
 									{todo}
+									parentTodo={todo.parent}
 									on:update={updateTodoHandler}
 									on:create={createTodoHandler}
-									on:move={moveTodoHandler}
 									on:delete={deleteTodoHandler}
 								/>
 							{/each}
@@ -117,13 +107,13 @@
 			<svelte:fragment slot="right">
 				<div class="right-dock">
 					<div class="todo-children">
-						{#if selectedTodo.children}
-							{#each selectedTodo.children as child (child.id)}
+						{#if mainTodo.children}
+							{#each mainTodo.children as child (child.id)}
 								<TodoCard
 									todo={child}
+									parentTodo={mainTodo}
 									on:update={updateTodoHandler}
 									on:create={createTodoHandler}
-									on:move={moveTodoHandler}
 									on:delete={deleteTodoHandler}
 								/>
 							{/each}
@@ -141,23 +131,8 @@
 	.todo-details {
 		background-color: $base-color;
 
-		.moving-todo {
-			position: absolute;
-			background-color: red;
-		}
-
 		:global(.split-pane) {
 			@include full-screen-height;
-		}
-
-		.root-logo {
-			padding: $wide-size;
-			@include content-centered;
-			height: 100%;
-
-			img {
-				@include icon-super-large-sized;
-			}
 		}
 
 		.left-dock {
@@ -175,11 +150,12 @@
 					overflow-y: auto;
 					max-height: 100vh;
 
-					img {
+					.arrow {
+						color: white;
 						margin-top: $narrow-size;
 						margin-bottom: $narrow-size;
-						rotate: 180deg;
-						@include icon-normal-sized;
+						margin-left: auto;
+						margin-right: auto;
 					}
 				}
 			}

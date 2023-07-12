@@ -4,15 +4,19 @@
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import TodoMenu from '../[[id=digital]]/components/TodoMenu.svelte';
+	import MovingTodoPanel from '../[[id=digital]]/components/MovingTodoPanel.svelte';
 
 	// state
 	export let todo: TodoHierachyDto;
+	export let parentTodo: TodoHierachyDto | null;
+	$: console.log("@@@ todo: " + JSON.stringify(todo) + "\nparentTodo: " + JSON.stringify(parentTodo)) /* @@@ delete */
 	export let isSelected: boolean = false;
 	let isMenuOpen = false;
-	export let size: "small" | "normal" | "large" = "normal"
+	let isMoveMenuOpen = false;
+	export let size: 'small' | 'normal' | 'large' = 'normal';
 
 	$: statusClass = chooseStatusClass(todo.status);
-	$: sizeClass = `${size}-todo`
+	$: sizeClass = `${size}-todo`;
 
 	// events
 	type EventType = {
@@ -32,6 +36,12 @@
 			e.stopPropagation();
 		}
 	};
+	const moveHandler = () => {
+		isMoveMenuOpen = true;
+	};
+	const moveMenuCloseHandler = () => {
+		isMoveMenuOpen = false;
+	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -41,10 +51,6 @@
 	on:click={cardClickHandler}
 	on:contextmenu={specificRightClickHandler}
 >
-	<!-- <img
-		src={statusImageUrl(todo.status)}
-		alt="status"
-	/> -->
 	<div class="todo-name">
 		{todo.name}
 	</div>
@@ -63,9 +69,16 @@
 			todoHierarchyDto={todo}
 			on:update
 			on:create
-			on:move
+			on:move={moveHandler}
 			on:delete
 			on:backgroundClick={backgroundClickHandler}
+		/>
+	{/if}
+	{#if isMoveMenuOpen}
+		<MovingTodoPanel
+			movingTodoDto={todo}
+			potentialNewParentDto={parentTodo}
+			on:close={moveMenuCloseHandler}
 		/>
 	{/if}
 </div>

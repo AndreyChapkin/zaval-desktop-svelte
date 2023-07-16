@@ -7,8 +7,7 @@
 		SaveHistoryDto,
 		UpdateTodoData
 	} from '$lib/types/todo';
-	import { EXPANDER_ARROW_ICON_URL } from '$lib/utils/assets-references';
-	import { findParentOfInHeirarchy, returnAllParents } from '$lib/utils/todo-helpers';
+	import { directParent, findParentOfInHeirarchy } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
@@ -16,7 +15,7 @@
 	// state
 	export let data: TodoDetailedPageData;
 	$: mainTodo = data.todoHierachyDto;
-	$: parentTodos = returnAllParents(data.todoHierachyDto);
+	$: parentTodos = (mainTodo.parents ?? []).reverse();
 	
 
 	// handlers
@@ -77,7 +76,7 @@
 						<div class="main-todo">
 							<TodoCard
 								todo={mainTodo}
-								parentTodo={mainTodo.parent}
+								parentTodo={directParent(mainTodo)}
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
 								on:delete={deleteTodoHandler}
@@ -89,7 +88,7 @@
 								<div class="arrow">/\</div>
 								<TodoCard
 									{todo}
-									parentTodo={todo.parent}
+									parentTodo={directParent(todo)}
 									on:update={updateTodoHandler}
 									on:create={createTodoHandler}
 									on:delete={deleteTodoHandler}

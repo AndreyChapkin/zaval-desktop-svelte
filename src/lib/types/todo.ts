@@ -2,7 +2,7 @@ export interface TodoHierachyDto {
     id: number;
     name: string;
     status: TodoStatus;
-    parent: TodoHierachyDto | null;
+    parents: TodoHierachyDto[] | null;
     children: TodoHierachyDto[] | null;
 }
 
@@ -52,7 +52,7 @@ export const ROOT_TODO_HIERARCHY: TodoHierachyDto = {
     id: -1000,
     name: "root",
     status: "BACKLOG",
-    parent: null,
+    parents: null,
     children: null,
 };
 
@@ -61,5 +61,5 @@ export const STAB_TODO_HIERARCHY: TodoHierachyDto = {
     name: '',
     status: "BACKLOG",
     children: null,
-    parent: null,
+    parents: null,
 };

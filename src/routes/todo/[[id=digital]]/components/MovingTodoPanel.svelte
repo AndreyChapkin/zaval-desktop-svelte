@@ -2,7 +2,6 @@
 	import { getTodoHierarchy, moveTodo } from '$lib/api/todo-calls';
 	import { ROOT_TODO_ID } from '$lib/constants/todo/fields';
 	import type { TodoHierachyDto } from '$lib/types/todo';
-	import { returnAllParents } from '$lib/utils/todo-helpers';
 	import { onMount } from 'svelte';
 	import ModalWindow from './../../../components/ModalWindow.svelte';
 	import MoveTodoCard from './MoveTodoCard.svelte';
@@ -14,10 +13,9 @@
 	// data
 	export let movingTodoDto: TodoHierachyDto;
 	export let potentialNewParentDto: TodoHierachyDto | null;
-	$: console.log("@@@ potentialNewParentDto: " + JSON.stringify(potentialNewParentDto))
 	$: showParents = potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID;
 	$: layoutClass = showParents ? withParentsLayoutClass : onlyChildrenLayoutClass;
-	$: parentTodos = potentialNewParentDto ? returnAllParents(potentialNewParentDto) : [];
+	$: parentTodos = potentialNewParentDto?.parents ?? [];
 	$: childrenTodos = potentialNewParentDto?.children?.filter((it) => it.id !== movingTodoDto.id) ?? [];
 	$: isLoading = true;
 
@@ -89,38 +87,6 @@
 					/>
 				{/each}
 			</div>
-			<!-- <div class="parents-and-children">
-				{#if potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID}
-					<div class="parents">
-						<div class="potential-new-parent">
-							<MoveTodoCard
-								todo={potentialNewParentDto}
-								on:select={createSelectHandler(potentialNewParentDto)}
-								on:visit={createGoToHandler(potentialNewParentDto)}
-							/>
-						</div>
-						<div class="upper-parents">
-							{#each parentTodos as parentTodo (parentTodo.id)}
-								<div class="arrow">/\</div>
-								<MoveTodoCard
-									todo={parentTodo}
-									on:select={createSelectHandler(parentTodo)}
-									on:visit={createGoToHandler(parentTodo)}
-								/>
-							{/each}
-						</div>
-					</div>
-				{/if}
-				<div class="children">
-					{#each childrenTodos as childTodo (childTodo.id)}
-						<MoveTodoCard
-							todo={childTodo}
-							on:select={createSelectHandler(childTodo)}
-							on:visit={createGoToHandler(childTodo)}
-						/>
-					{/each}
-				</div>
-			</div> -->
 		{/if}
 	</div>
 </ModalWindow>

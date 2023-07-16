@@ -69,40 +69,6 @@ export function chooseStatusClass(status: TodoStatus): string {
 	}
 }
 
-export function returnAllParents(todo: TodoHierachyDto): TodoHierachyDto[] {
-	const result = [];
-	let curParent = todo.parent;
-	while (curParent) {
-		result.push(curParent);
-		curParent = curParent.parent;
-	}
-	return result;
-}
-
-export function returnMockParents(): TodoHierachyDto[] {
-	const result = [];
-	for (let i = 0; i < 100; i++) {
-		result.push({
-			id: i,
-			name: i + "",
-			status: "BACKLOG",
-			parent: null,
-			children: null,
-		} as TodoHierachyDto);
-	}
-	return result;
-}
-
-export function returnHierarchyTopPart(todo: TodoHierachyDto): TodoHierachyDto[] {
-	const result = [todo];
-	let curParent = todo.parent;
-	while (curParent) {
-		result.push(curParent);
-		curParent = curParent.parent;
-	}
-	return result;
-}
-
 /*
  * Without super parents and children
  */
@@ -115,20 +81,35 @@ export function findParentOfInHeirarchy(id: number, todo: TodoHierachyDto): Todo
 		// look into children
 		const searchedTodo = todo.children?.find((it) => it.id === id) ?? null;
 		if (searchedTodo) {
-			searchedTodo.parent = { ...todo, children: null, parent: null };
+			searchedTodo.parents = [{ ...todo, children: null, parents: null }];
 			childTodo = searchedTodo;
 		} else {
 			// look into parents
 			let searchedTodo: TodoHierachyDto | null = null;
-			let curParent = todo.parent;
-			while (curParent && searchedTodo == null) {
+			// let curParent = todo.parent;
+			// while (curParent && searchedTodo == null) {
+			// 	if (curParent.id === id) {
+			// 		searchedTodo = { ...curParent, children: null };
+			// 	}
+			// 	curParent = curParent.parent;
+			// }
+			let i = 0;
+			while (searchedTodo == null && todo.parents && i < todo.parents.length) {
+				let curParent = todo.parents[i];
 				if (curParent.id === id) {
 					searchedTodo = { ...curParent, children: null };
 				}
-				curParent = curParent.parent;
+				i++;
 			}
 			childTodo = searchedTodo;
 		}
 	}
-	return childTodo?.parent ?? null;
+	return childTodo ? directParent(childTodo) : null;
+}
+
+export function directParent(todo: TodoHierachyDto): TodoHierachyDto | null {
+	if (todo.parents && todo.parents.length > 0) {
+		return todo.parents[todo.parents.length - 1];
+	}
+	return null;
 }

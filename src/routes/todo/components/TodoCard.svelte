@@ -8,8 +8,7 @@
 
 	// state
 	export let todo: TodoHierachyDto;
-	export let parentTodo: TodoHierachyDto | null;
-	$: console.log("@@@ todo: " + JSON.stringify(todo) + "\nparentTodo: " + JSON.stringify(parentTodo)) /* @@@ delete */
+	export let parentTodo: TodoHierachyDto | null = null;
 	export let isSelected: boolean = false;
 	let isMenuOpen = false;
 	let isMoveMenuOpen = false;

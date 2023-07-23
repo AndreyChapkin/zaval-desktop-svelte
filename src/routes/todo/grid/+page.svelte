@@ -2,6 +2,7 @@
 	import FlexGrid from './FlexGrid.svelte';
 	import FlexSplit from './FlexSplit.svelte';
 	import FlexSplitV2 from './FlexSplitV2.svelte';
+	import FlexSplitV3 from '../../components/SplitPane.svelte';
 	import Grid from './Grid.svelte';
 
 	// const
@@ -37,11 +38,11 @@
 </div> -->
 <!-- END OF GOOD ONE -->
 
-<FlexSplitV2
+<FlexSplitV3
 	type="vertical"
 	contextName="gridPage"
 >
-	<FlexSplitV2
+	<FlexSplitV3
 		type="horizontal"
 		contextName="gridPageFirstRow"
 		slot="first"
@@ -62,26 +63,16 @@
 				<div>Second {i}</div>
 			{/each}
 		</div>
-	</FlexSplitV2>
-	<!-- BEST ONE -->
-	<!-- <div class="flex-row" slot="second">
 		<div
-			class="second-first"
+			class="second-third"
+			slot="third"
 		>
 			{#each data as i}
 				<div>Second {i}</div>
 			{/each}
 		</div>
-		<div class="dumb-separator"></div>
-		<div
-			class="second-second"
-		>
-			{#each data as i}
-				<div>Second {i}</div>
-			{/each}
-		</div>
-	</div> -->
-	<FlexSplitV2
+	</FlexSplitV3>
+	<FlexSplitV3
 		type="horizontal"
 		contextName="gridPageSecondRow"
 		slot="second"
@@ -102,8 +93,16 @@
 				<div>Second {i}</div>
 			{/each}
 		</div>
-	</FlexSplitV2>
-	<FlexSplitV2
+		<div
+			class="second-third"
+			slot="third"
+		>
+			{#each data as i}
+				<div>Second {i}</div>
+			{/each}
+		</div>
+	</FlexSplitV3>
+	<FlexSplitV3
 		type="horizontal"
 		contextName="gridPageThirdRow"
 		slot="third"
@@ -132,59 +131,27 @@
 				<div>Second {i}</div>
 			{/each}
 		</div>
-	</FlexSplitV2>
-</FlexSplitV2>
-
-<!-- <FlexGrid>
-	<div
-		class="first"
-		slot="first"
-	>
-		<div class="short-header">Header</div>
-		<div class="long-content">
-			{#each data as i}
-				<div>First {i}</div>
-			{/each}
-		</div>
-	</div>
-	<div
-		class="second"
-		slot="second"
-	>
-		{#each data as i}
-			<div>Second {i}</div>
-		{/each}
-	</div>
-	<div
-		class="bottom"
-		slot="bottom"
-	>
-		{#each data as i}
-			<div>Bottom {i}</div>
-		{/each}
-	</div>
-</FlexGrid> -->
+	</FlexSplitV3>
+</FlexSplitV3>
 
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
 	/* BEST ONE */
-	.flex-row {
+	/* .flex-row {
 		display: flex;
 		flex: 1;
 		height: 100%;
 
 		& > div {
 			background-color: orange;
-			/* height: 100%; */
 			overflow: auto;
-			/* flex: 1; */
 		}
 
 		.dumb-separator {
 			width: 3px;
 			background-color: red;
 		}
-	}
+	} */
 
 	/* GOOD ONE */
 

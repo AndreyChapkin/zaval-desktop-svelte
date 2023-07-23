@@ -20,7 +20,6 @@
 
 	// handlers
 	const updateTodoHandler = async (saveTodoEvent: CustomSvelteEvent<UpdateTodoData>) => {
-		alert("hello");
 		const updateData = saveTodoEvent.detail;
 		await updateTodo(updateData.id, updateData.updatedTodoDto);
 		// TODO: make slighter

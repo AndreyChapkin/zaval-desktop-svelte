@@ -12,3 +12,7 @@ export const NEXT_TO_TAKE_MENU_ICON_URL = '/assets/todo/menu/next-to-take-menu-i
 export const IN_PROGRESS_MENU_ICON_URL = '/assets/todo/menu/in-progress-menu-icon.svg';
 export const ROOT_MENU_ICON_URL = '/assets/todo/menu/root-menu-icon.svg';
 export const CHOOSE_ICON_URL = '/assets/todo/choose-icon.svg';
+export const HISTORY_RECORD_SIGN_URL = '/assets/todo/history/record-sign.svg';
+export const EDIT_ICON_URL = '/assets/common/edit-icon.svg';
+export const SAVE_ICON_URL = '/assets/common/save-icon.svg';
+export const CANCEL_ICON_URL = '/assets/common/cancel-icon.svg';

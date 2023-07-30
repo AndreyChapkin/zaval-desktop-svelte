@@ -9,11 +9,13 @@
 	// state
 	export let todo: TodoHierachyDto;
 	export let parentTodo: TodoHierachyDto | null = null;
-	export let isSelected: boolean = false;
 	let isMenuOpen = false;
 	let isMoveMenuOpen = false;
 	export let size: 'small' | 'normal' | 'large' = 'normal';
-
+	export let type: 'interactive' | 'simple' = 'interactive';
+	export let style: 'dark' | 'normal' | 'attractive' = 'dark';
+	
+	$: styleClass = `${style}-colored`;
 	$: statusClass = chooseStatusClass(todo.status);
 	$: sizeClass = `${size}-todo`;
 
@@ -45,24 +47,25 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-	class={`todo-card ${statusClass} ${sizeClass}`}
-	class:todo-card-selected={isSelected}
+	class={`todo-card ${statusClass} ${sizeClass} ${styleClass}`}
 	on:click={cardClickHandler}
 	on:contextmenu={specificRightClickHandler}
 >
 	<div class="todo-name">
 		{todo.name}
 	</div>
-	<div class="go-to-todo">
-		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
-			<div class="link-area">
-				<img
-					src={TODO_COMPLEX_ICON_URL}
-					alt="composition"
-				/>
-			</div>
-		</a>
-	</div>
+	{#if type === 'interactive'}
+		<div class="go-to-todo">
+			<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
+				<div class="link-area">
+					<img
+						src={TODO_COMPLEX_ICON_URL}
+						alt="composition"
+					/>
+				</div>
+			</a>
+		</div>
+	{/if}
 	{#if isMenuOpen}
 		<TodoMenu
 			todoHierarchyDto={todo}
@@ -109,6 +112,7 @@
 
 	.small-todo {
 		font-size: small;
+		font-weight: bold;
 		img {
 			@include icon-normal-sized;
 		}
@@ -149,7 +153,15 @@
 		border-color: $in-progress-status-color;
 	}
 
-	.todo-card-selected {
+	.dark-colored {
+		@include dark-component;
+	}
+
+	.normal-colored {
+		@include normal-component;
+	}
+
+	.attractive-colored {
 		@include attractive-component;
 	}
 </style>

@@ -15,7 +15,7 @@
 	export let potentialNewParentDto: TodoHierachyDto | null;
 	$: showParents = potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID;
 	$: layoutClass = showParents ? withParentsLayoutClass : onlyChildrenLayoutClass;
-	$: parentTodos = potentialNewParentDto?.parents ?? [];
+	$: parentTodos = potentialNewParentDto?.parents?.reverse() ?? [];
 	$: childrenTodos = potentialNewParentDto?.children?.filter((it) => it.id !== movingTodoDto.id) ?? [];
 	$: isLoading = true;
 
@@ -153,86 +153,4 @@
 		@include responsive-grid();
 		@include scrollable;
 	}
-
-	/* .moving-todo-panel {
-		padding: $normal-size;
-		background-color: $base-color;
-
-		width: 90vw;
-		height: 90vh;
-		@include column-stretched;
-
-		.moving-todo {
-			padding: $normal-size;
-			@include attractive-component;
-			@include bordered($side: bottom, $color: $base-dark-color);
-		}
-
-		.parents-and-children {
-			flex: 1;
-			@include row-stretched($normal-size);
-
-			.parents {
-				flex: 2;
-				@include bordered($side: right, $color: $base-dark-color);
-				@include column;
-				padding-top: $normal-size;
-				padding-right: $normal-size;
-				background-color: red;
-				@include scrollable;
-
-				.potential-new-parent {
-					@include bordered($side: bottom);
-				}
-
-				.upper-parents {
-					@include column-stretched;
-					background-color: pink;
-					flex: 1;
-
-					.arrow {
-						color: white;
-						margin-top: $narrow-size;
-						margin-bottom: $narrow-size;
-						margin-left: auto;
-						margin-right: auto;
-					}
-				}
-			}
-
-			.children {
-				flex: 3;
-				padding-top: $normal-size;
-				@include responsive-grid(300px);
-			}
-		}
-
-		.main-and-parents-todos {
-			width: 45%;
-			@include column-stretched;
-
-			.main-todo {
-				border-color: red;
-				border-width: 2px;
-				padding: $normal-size;
-
-				@include attractive-component;
-			}
-		}
-
-		.children-todos {
-			@apply flex-1;
-			@include responsive-grid;
-		}
-
-		img {
-			@include icon-normal-sized;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
-		.button-like {
-			background-color: pink;
-		}
-	} */
 </style>

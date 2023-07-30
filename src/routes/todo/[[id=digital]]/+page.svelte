@@ -2,11 +2,7 @@
 	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type {
-		CreateTodoDto,
-		SaveHistoryDto,
-		UpdateTodoData
-	} from '$lib/types/todo';
+	import type { CreateTodoDto, SaveHistoryDto, UpdateTodoData } from '$lib/types/todo';
 	import { directParent, findParentOfInHeirarchy } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
@@ -16,7 +12,8 @@
 	export let data: TodoDetailedPageData;
 	$: mainTodo = data.todoHierachyDto;
 	$: parentTodos = (mainTodo.parents ?? []).reverse();
-	
+
+	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 
 	// handlers
 	const updateTodoHandler = async (saveTodoEvent: CustomSvelteEvent<UpdateTodoData>) => {
@@ -29,7 +26,7 @@
 	const createTodoHandler = async (createTodoEvent: CustomSvelteEvent<CreateTodoDto>) => {
 		const createdTodo = await createTodo(createTodoEvent.detail);
 		// TODO: make slighter
-		window.location.href = `/todo/${createdTodo.id}`;
+		window.location.reload();
 	};
 
 	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
@@ -52,73 +49,96 @@
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
 <div class="todo-details">
 	{#if data.isRoot}
-		<div class="right-dock">
-			<div class="todo-children">
-				{#if mainTodo.children}
-					{#each mainTodo.children as child (child.id)}
+		<div class="root-todos">
+			{#if mainTodo.children}
+				{#each mainTodo.children as child (child.id)}
+					<TodoCard
+						todo={child}
+						parentTodo={mainTodo}
+						size="small"
+						on:update={updateTodoHandler}
+						on:create={createTodoHandler}
+						on:delete={deleteTodoHandler}
+					/>
+				{/each}
+			{/if}
+		</div>
+	{:else}
+		<SplitPane
+			type="vertical"
+			contextName="TodoWithIdPage-0"
+			{shownItems}
+			class="container-split"
+		>
+			<SplitPane
+				type="horizontal"
+				contextName="TodoWithIdPage-1"
+				slot="first"
+				class="main-split"
+			>
+				<div
+					class="main-todo"
+					slot="first"
+				>
+					<TodoCard
+						todo={mainTodo}
+						parentTodo={directParent(mainTodo)}
+						on:update={updateTodoHandler}
+						on:create={createTodoHandler}
+						on:delete={deleteTodoHandler}
+						type="simple"
+						style="attractive"
+					/>
+				</div>
+				<TodoHistory
+					slot="second"
+					todoId={data.todoHierachyDto.id}
+					records={data.todoHistoryRecords ?? []}
+					on:save={historySaveHandler}
+				/>
+			</SplitPane>
+			<SplitPane
+				type="horizontal"
+				contextName="TodoWithIdPage-2"
+				slot="second"
+				class="secondary-split"
+				><div
+					class="parent-todos"
+					slot="first"
+				>
+					{#each parentTodos as todo (todo.id)}
+						<div class="arrow">/\</div>
 						<TodoCard
-							todo={child}
-							parentTodo={null}
+							{todo}
+							parentTodo={directParent(todo)}
+							size="small"
+							style="normal"
 							on:update={updateTodoHandler}
 							on:create={createTodoHandler}
 							on:delete={deleteTodoHandler}
 						/>
 					{/each}
-				{/if}
-			</div>
-		</div>
-	{:else}
-		<SplitPane>
-			<svelte:fragment slot="left">
-				<div class="left-dock">
-					<div class="todo-top-branch">
-						<div class="main-todo">
+				</div>
+				<div
+					class="children-todos"
+					slot="second"
+				>
+					{#if mainTodo.children}
+						{#each mainTodo.children as child (child.id)}
+							<div class="arrow">||</div>
 							<TodoCard
-								todo={mainTodo}
-								parentTodo={directParent(mainTodo)}
+								todo={child}
+								parentTodo={mainTodo}
+								size="small"
+								style="normal"
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
 								on:delete={deleteTodoHandler}
-								isSelected={true}
 							/>
-						</div>
-						<div class="parent-todos">
-							{#each parentTodos as todo (todo.id)}
-								<div class="arrow">/\</div>
-								<TodoCard
-									{todo}
-									parentTodo={directParent(todo)}
-									on:update={updateTodoHandler}
-									on:create={createTodoHandler}
-									on:delete={deleteTodoHandler}
-								/>
-							{/each}
-						</div>
-					</div>
-					<TodoHistory
-						todoId={data.todoHierachyDto.id}
-						records={data.todoHistoryRecords ?? []}
-						on:save={historySaveHandler}
-					/>
+						{/each}
+					{/if}
 				</div>
-			</svelte:fragment>
-			<svelte:fragment slot="right">
-				<div class="right-dock">
-					<div class="todo-children">
-						{#if mainTodo.children}
-							{#each mainTodo.children as child (child.id)}
-								<TodoCard
-									todo={child}
-									parentTodo={mainTodo}
-									on:update={updateTodoHandler}
-									on:create={createTodoHandler}
-									on:delete={deleteTodoHandler}
-								/>
-							{/each}
-						{/if}
-					</div>
-				</div>
-			</svelte:fragment>
+			</SplitPane>
 		</SplitPane>
 	{/if}
 </div>
@@ -128,48 +148,64 @@
 
 	.todo-details {
 		background-color: $base-color;
+		height: 100vh;
 
-		:global(.split-pane) {
-			@include full-screen-height;
+		.main-todo,
+		.parent-todos,
+		.children-todos {
+			padding: $wide-size;
 		}
 
-		.left-dock {
-			height: 100%;
-			@include column-justifyied;
-
-			.todo-top-branch {
-				padding: $wide-size;
-				@apply flex-1;
-
-				.parent-todos {
-					@include column;
-					@include styled-scrollbar;
-
-					overflow-y: auto;
-					max-height: 100vh;
-
-					.arrow {
-						color: white;
-						margin-top: $narrow-size;
-						margin-bottom: $narrow-size;
-						margin-left: auto;
-						margin-right: auto;
-					}
-				}
-			}
-
-			:global(.todo-history) {
-				height: 250px;
-
-				@include dark-component;
+		:global(.container-split) {
+			:global(.split-separator) {
+				background-color: $base-dark-color;
 			}
 		}
 
-		.right-dock {
-			.todo-children {
-				padding: $wide-size;
-				@include responsive-grid(300px, $x-gap: $large-size, $y-gap: $wide-size);
+		:global(.container-split > .split-area:first-child) {
+			position: relative;
+			z-index: 1;
+			box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.3);
+		}
+
+		:global(.main-split) {
+			background-color: $base-color;
+
+			:global(.split-separator) {
+				background-color: $base-dark-color;
 			}
+		}
+
+		:global(.secondary-split) {
+			background-color: $base-dark-color;
+
+			:global(.split-separator) {
+				background-color: $base-color;
+			}
+		}
+
+		.arrow {
+			color: $base-pale-color;
+			margin-top: $narrow-size;
+			margin-bottom: $narrow-size;
+			margin-left: auto;
+			margin-right: auto;
+			font-weight: bold;
+		}
+
+		.root-todos {
+			padding: $wide-size;
+			@include responsive-grid(300px, $x-gap: $large-size, $y-gap: $wide-size);
+		}
+
+		.parent-todos {
+			@include column;
+			@include styled-scrollbar;
+		}
+
+		.children-todos {
+			padding: $wide-size;
+			@include column;
 		}
 	}
 </style>

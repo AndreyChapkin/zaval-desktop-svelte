@@ -9,7 +9,12 @@
 	let clazz: string = '';
 	export { clazz as class };
 	export let type: 'horizontal' | 'vertical' = 'horizontal';
+	export let shownItems: ('1' | '2' | '3')[] | 'all' = 'all';
 	export let contextName: string;
+
+	$: firstIsShown = (shownItems === 'all' || shownItems.indexOf('1') > -1) && $$slots.first;
+	$: secondIsShown = (shownItems === 'all' || shownItems.indexOf('2') > -1) && $$slots.second;
+	$: thirdIsShown = (shownItems === 'all' || shownItems.indexOf('3') > -1) && $$slots.third;
 
 	const FIRST_AREA_SIZE_KEY = `${contextName}_firstAreaSize`;
 	const SECOND_AREA_SIZE_KEY = `${contextName}_secondAreaSize`;
@@ -118,33 +123,43 @@
 
 <div
 	bind:this={splitContainer}
-	class={`flex-split ${type === 'horizontal' ? 'horizontal' : 'vertical'} ${clazz}`}
+	class={`split-pane ${type === 'horizontal' ? 'horizontal' : 'vertical'} ${clazz ? clazz : 'colored'}`}
 >
-	<div
-		class="split-area"
-		class:not-selectable={areNotSelectable}
-		style={`${type === 'horizontal' ? 'width' : 'height'}: ${resultFirstPercentSize}%`}
-	>
-		<slot name="first" />
-	</div>
-	<div
-		class="split-separator"
-		on:mousedown={createSeparatorMouseDownHandler('first')}
-	/>
-	<div
-		class="split-area"
-		class:not-selectable={areNotSelectable}
-		style={$$slots.third
-			? `${type === 'horizontal' ? 'width' : 'height'}: ${resultSecondPercentSize}%`
-			: 'flex: 1'}
-	>
-		<slot name="second" />
-	</div>
-	{#if $$slots.third}
+	{#if firstIsShown}
+		<div
+			class="split-area"
+			class:not-selectable={areNotSelectable}
+			style={secondIsShown || thirdIsShown
+				? `${type === 'horizontal' ? 'width' : 'height'}: ${resultFirstPercentSize}%`
+				: 'flex: 1'}
+		>
+			<slot name="first" />
+		</div>
+	{/if}
+	{#if firstIsShown && (secondIsShown || thirdIsShown)}
+		<div
+			class="split-separator"
+			on:mousedown={createSeparatorMouseDownHandler('first')}
+		/>
+	{/if}
+	{#if secondIsShown}
+		<div
+			class="split-area"
+			class:not-selectable={areNotSelectable}
+			style={$$slots.third
+				? `${type === 'horizontal' ? 'width' : 'height'}: ${resultSecondPercentSize}%`
+				: 'flex: 1'}
+		>
+			<slot name="second" />
+		</div>
+	{/if}
+	{#if secondIsShown && thirdIsShown}
 		<div
 			class="split-separator"
 			on:mousedown={createSeparatorMouseDownHandler('second')}
 		/>
+	{/if}
+	{#if thirdIsShown}
 		<div
 			class="split-area"
 			class:not-selectable={areNotSelectable}
@@ -158,12 +173,11 @@
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
 
-	.flex-split {
+	.split-pane {
 		display: flex;
 		height: 100%;
 		flex: 1;
 		width: 100%;
-		background-color: red;
 
 		.split-area {
 			overflow: auto;
@@ -171,8 +185,11 @@
 			box-sizing: border-box;
 		}
 
+		:global(.split-area > div) {
+			height: 100%;
+		}
+
 		.split-separator {
-			background-color: $base-dark-color;
 			flex-grow: 0;
 			flex-shrink: 0;
 		}
@@ -198,6 +215,14 @@
 		& > .split-separator {
 			cursor: row-resize;
 			height: 3px;
+		}
+	}
+
+	.colored {
+		background-color: $base-color;
+
+		& > .split-separator {
+			background-color: $base-dark-color;
 		}
 	}
 </style>

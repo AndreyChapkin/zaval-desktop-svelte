@@ -3,6 +3,8 @@ $base-dark-color: #334155;
 $base-color: #4f5e70;
 $base-pale-color: #91a2b7;
 $base-light-color: #ffffff;
+// font colors
+$font-dark-color: rgb(30, 32, 34);
 // attractive colors
 $attention-color: rgb(228, 45, 45);
 $attractive-color: #484054;
@@ -27,8 +29,9 @@ $space-normal-size: 30px;
 
 // appearance
 
-@mixin component {
+@mixin normal-component {
 	background-color: $base-color;
+	color: $base-light-color;
 }
 
 @mixin dark-component {
@@ -39,8 +42,6 @@ $space-normal-size: 30px;
 @mixin attractive-component {
 	background: linear-gradient(215deg, $attractive-light-color 0%, $attractive-color 100%);
 	color: $base-light-color;
-	// border-color: $attractive-border-color;
-	// border-bottom-width: $border-normal-size;
 }
 
 @mixin bordered($side: all, $color: $attractive-border-color, $size: $border-normal-size) {

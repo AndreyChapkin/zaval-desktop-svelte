@@ -1,18 +1,16 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
-	import type {
-		CreateTodoDto,
-		TodoHierachyDto,
-		TodoStatus,
-		UpdateTodoData,
-	} from '$lib/types/todo';
+	import type { CreateTodoDto, TodoHierachyDto, TodoStatus, UpdateTodoData } from '$lib/types/todo';
 
 	// data
 	export let todoHierarchyDto: TodoHierachyDto | null;
 	let editName: string = todoHierarchyDto?.name ?? '';
 	let editStatus: TodoStatus = todoHierarchyDto?.status ?? 'BACKLOG';
 	let isCreateMode = todoHierarchyDto === null;
+
+	// components
+	let splitContainer: HTMLDivElement;
 
 	// events and issuers
 	type EventType = {
@@ -85,12 +83,28 @@
 		const selectedStatus = selectEvent.detail as TodoStatus;
 		editStatus = selectedStatus;
 	};
+	
+	const escapeHandler = (e: KeyboardEvent) => {
+		if (e.code === 'Escape') {
+			dispatch('backgroundClick');
+		}
+	};
+
+	// lifecycle
+	onMount(() => {
+		window.document.body.append(splitContainer);
+		window.document.addEventListener("keyup", escapeHandler);
+		return () => {
+			window.document.removeEventListener("keyup", escapeHandler);
+		};
+	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	class="todo-menu"
 	on:mousedown={backgroundClickHandler}
+	bind:this={splitContainer}
 >
 	<div class="todo-menu-content">
 		<div class="edit-pane">
@@ -156,27 +170,15 @@
 		@include modal-window-background;
 		background: linear-gradient(
 			0deg,
-			rgba($color: #000000, $alpha: 1.0) 0%,
+			rgba($color: #000000, $alpha: 1) 0%,
 			rgba($color: #000000, $alpha: 0.6) 100%
 		);
 
-		/* .todo-menu-background {
-			@include full-screen;
-			background-color: adjust-color($attractive-color, $alpha: -0.5);
-			@apply backdrop-blur-sm;
-		} */
-
 		.todo-menu-content {
 			width: 600px;
-			/* @include normal-shadow; */
 			@include bordered($color: $base-dark-color, $size: $border-normal-size);
 			@apply p-4 rounded-md;
 			background-color: $base-pale-color;
-			/* background: linear-gradient(
-				0deg,
-				adjust-color($attractive-color, $alpha: -0) 0%,
-				adjust-color($attractive-light-color, $alpha: -0) 100%
-			); */
 
 			.edit-pane {
 				@apply mb-1;
@@ -191,7 +193,7 @@
 				@include row-centered;
 
 				.todo-menu-action {
-					@include component;
+					@include normal-component;
 					@apply p-1;
 				}
 			}

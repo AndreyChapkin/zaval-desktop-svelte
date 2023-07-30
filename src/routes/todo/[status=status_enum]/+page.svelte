@@ -4,10 +4,10 @@
 
 	// // state
 	export let data: TodosWithStatusPageData;
-
 </script>
 
 <div class="todos-with-status">
+	<div class="title">Statused</div>
 	<div class="main-todos">
 		{#each data.todoHierarchyDtos as todoHierarchyDto}
 			<div class="main-todo">
@@ -15,7 +15,10 @@
 			</div>
 			<div class="parent-todos">
 				{#each todoHierarchyDto.parents ?? [] as parent}
-					<TodoCard todo={parent} size="small" />
+					<TodoCard
+						todo={parent}
+						size="small"
+					/>
 				{/each}
 			</div>
 		{/each}
@@ -24,6 +27,16 @@
 
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
+
+	.title {
+		font-size: x-large;
+		padding-left: $wide-size;
+		color: $base-pale-color;
+		border-bottom-width: 4px;
+		border-image-slice: 1;
+		border-image-source: linear-gradient(to right, $base-pale-color, transparent 50%, transparent);
+		margin-bottom: $large-size;
+	}
 
 	.todos-with-status {
 		@include full-screen-height;
@@ -43,11 +56,6 @@
 		.main-todo {
 			:global(.todo-card) {
 				@include attractive-component;
-				
-				&:hover {
-					box-shadow: 6px 4px 0px 0px rgba(185, 171, 196, 0.6);
-					translate: -2px -2px;
-				}
 			}
 		}
 

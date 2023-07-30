@@ -1,9 +1,5 @@
 <script lang="ts">
-	import FlexGrid from './FlexGrid.svelte';
-	import FlexSplit from './FlexSplit.svelte';
-	import FlexSplitV2 from './FlexSplitV2.svelte';
 	import FlexSplitV3 from '../../components/SplitPane.svelte';
-	import Grid from './Grid.svelte';
 
 	// const
 
@@ -51,25 +47,25 @@
 			class="second-first"
 			slot="first"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-second"
 			slot="second"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-third"
 			slot="third"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 	</FlexSplitV3>
 	<FlexSplitV3
@@ -81,25 +77,25 @@
 			class="second-first"
 			slot="first"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-second"
 			slot="second"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-third"
 			slot="third"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 	</FlexSplitV3>
 	<FlexSplitV3
@@ -111,25 +107,25 @@
 			class="second-first"
 			slot="first"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-second"
 			slot="second"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 		<div
 			class="second-third"
 			slot="third"
 		>
-			{#each data as i}
+			<!-- {#each data as i}
 				<div>Second {i}</div>
-			{/each}
+			{/each} -->
 		</div>
 	</FlexSplitV3>
 </FlexSplitV3>

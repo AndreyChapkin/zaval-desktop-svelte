@@ -1,13 +1,14 @@
 <script lang="ts">
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 	import TodoCard from '../components/TodoCard.svelte';
+	import { chooseStatusClass, todoStatusToLabel } from '$lib/utils/todo-helpers.js';
 
 	// // state
 	export let data: TodosWithStatusPageData;
 </script>
 
 <div class="todos-with-status">
-	<div class="title">Statused</div>
+	<div class="todo-status-label">{todoStatusToLabel(data.status)}</div>
 	<div class="main-todos">
 		{#each data.todoHierarchyDtos as todoHierarchyDto}
 			<div class="main-todo">
@@ -27,14 +28,15 @@
 
 <style lang="scss">
 	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/todo-variables.scss';
 
-	.title {
+	.todo-status-label {
 		font-size: x-large;
 		padding-left: $wide-size;
-		color: $base-pale-color;
+		color: white;
 		border-bottom-width: 4px;
 		border-image-slice: 1;
-		border-image-source: linear-gradient(to right, $base-pale-color, transparent 50%, transparent);
+		border-image-source: linear-gradient(to right, white, transparent 50%, transparent);
 		margin-bottom: $large-size;
 	}
 

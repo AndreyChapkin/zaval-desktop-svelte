@@ -10,6 +10,7 @@ export async function load({ params }: { params: any }): Promise<TodosWithStatus
 	const status: TodoStatus = todoStatusFromUrlForm(params.status);
 	const todoHierarchyDtos = (await getAllTodoUpBranches(status)) ?? [];
 	return {
-		todoHierarchyDtos
+		todoHierarchyDtos,
+		status
 	};
 }

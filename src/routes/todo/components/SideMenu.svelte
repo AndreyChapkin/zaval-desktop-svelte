@@ -1,26 +1,16 @@
 <script lang="ts">
-	import {
-		BACKLOG_MENU_ICON_URL,
-		DONE_MENU_ICON_URL,
-		IN_PROGRESS_MENU_ICON_URL,
-		NEXT_TO_TAKE_MENU_ICON_URL,
-		PING_ME_MENU_ICON_URL,
-		ROOT_MENU_ICON_URL,
-		WILL_BE_BACK_MENU_ICON_URL
-	} from '$lib/utils/assets-references';
+	import { ROOT_MENU_ICON_URL, SEARCH_ICON_URL } from '$lib/utils/assets-references';
+	import SearchPanel from './SearchPanel.svelte';
 	import SideStatusMenu from './SideStatusMenu.svelte';
 
 	// state
-	let isStatusesVisible = false;
+	let isSearchVisible = false;
 
 	// events
 
 	// handlers
-	const onMouseEnter = (e: MouseEvent) => {
-		isStatusesVisible = true;
-	};
-	const onMouseLeave = (e: MouseEvent) => {
-		isStatusesVisible = false;
+	const showSearchHandler = () => {
+		isSearchVisible = !isSearchVisible;
 	};
 </script>
 
@@ -35,6 +25,16 @@
 		</a>
 	</div>
 	<SideStatusMenu />
+	<div class="todo-side-menu-item">
+		<img
+			src={SEARCH_ICON_URL}
+			alt="search"
+			on:click={showSearchHandler}
+		/>
+	</div>
+	{#if isSearchVisible}
+		<SearchPanel on:close={() => (isSearchVisible = false)} />
+	{/if}
 </div>
 
 <style lang="scss">
@@ -50,7 +50,7 @@
 			cursor: pointer;
 			padding: 1px;
 			@apply rounded-sm;
-			
+
 			img {
 				@include icon-large-sized;
 			}

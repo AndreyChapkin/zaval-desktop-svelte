@@ -16,3 +16,4 @@ export const HISTORY_RECORD_SIGN_URL = '/assets/todo/history/record-sign.svg';
 export const EDIT_ICON_URL = '/assets/common/edit-icon.svg';
 export const SAVE_ICON_URL = '/assets/common/save-icon.svg';
 export const CANCEL_ICON_URL = '/assets/common/cancel-icon.svg';
+export const SEARCH_ICON_URL = '/assets/common/search-icon.svg';

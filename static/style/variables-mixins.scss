@@ -59,6 +59,13 @@ $space-normal-size: 30px;
 	}
 }
 
+@mixin standard-input {
+	padding: $normal-size;
+	border-radius: $normal-size;
+	@include bordered($color: $base-pale-color, $size: 1px);
+	@include dark-component;
+}
+
 @mixin normal-shadow {
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
@@ -194,6 +201,11 @@ $space-normal-size: 30px;
 	right: 0;
 	top: 0;
 	bottom: 0;
+}
+
+@mixin screen-sized($width-percent: 100, $height-percent: 100) {
+	height: #{$height-percent}vh;
+	width: #{$width-percent}vw;
 }
 
 @mixin scrollable {

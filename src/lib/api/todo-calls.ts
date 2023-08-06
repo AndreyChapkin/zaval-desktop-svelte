@@ -64,3 +64,11 @@ export async function updateTodoHistory(todoId: number, todoHistoryDto: TodoHist
     const response = await callPatch<TodoHistoryDto>(url, todoHistoryDto);
 	return response.data;
 }
+
+export async function findTodosWithNameFragment(nameFragment: string): Promise<TodoDto[]> {
+    const url = `${baseTodoURL}/with-name-fragment`;
+    const response = await callGet<TodoDto[]>(url, {
+        "name-fragment": nameFragment
+    });
+	return response.data;
+}

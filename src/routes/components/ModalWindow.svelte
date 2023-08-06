@@ -48,6 +48,8 @@
 		);
 
 		.modal-window-body {
+			border-radius: 5px;
+			overflow: hidden;
 		}
 	}
 </style>

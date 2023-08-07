@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 
 	// const
 
@@ -43,7 +43,7 @@
 		align-items: center;
 		background: linear-gradient(
 			0deg,
-			rgba($color: #000000, $alpha: 1.0) 0%,
+			rgba($color: #000000, $alpha: 1) 0%,
 			rgba($color: #000000, $alpha: 0.6) 100%
 		);
 

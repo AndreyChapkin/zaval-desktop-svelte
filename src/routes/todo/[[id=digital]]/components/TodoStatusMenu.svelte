@@ -92,7 +92,7 @@
 		.current-status {
 			background-color: $base-dark-color;
 			padding: $normal-size $normal-size $normal-size $normal-size;
-			@include row-centered($narrow-size);
+			@include row-centered($small-size);
 		}
 
 		.current-status {

@@ -87,7 +87,6 @@
 						on:create={createTodoHandler}
 						on:delete={deleteTodoHandler}
 						type="simple"
-						style="attractive"
 					/>
 				</div>
 				<TodoHistory
@@ -112,7 +111,6 @@
 							{todo}
 							parentTodo={directParent(todo)}
 							size="small"
-							style="normal"
 							on:update={updateTodoHandler}
 							on:create={createTodoHandler}
 							on:delete={deleteTodoHandler}
@@ -130,7 +128,6 @@
 								todo={child}
 								parentTodo={mainTodo}
 								size="small"
-								style="normal"
 								on:update={updateTodoHandler}
 								on:create={createTodoHandler}
 								on:delete={deleteTodoHandler}
@@ -144,10 +141,13 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	/* @import '/static/style/variables-mixins.scss'; */
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 
 	.todo-details {
-		background-color: $base-color;
 		height: 100vh;
 
 		.main-todo,
@@ -169,25 +169,21 @@
 		}
 
 		:global(.main-split) {
-			background-color: $base-color;
-
 			:global(.split-separator) {
-				background-color: $base-dark-color;
+				background-color: $base-color;
 			}
 		}
 
 		:global(.secondary-split) {
-			background-color: $base-dark-color;
-
 			:global(.split-separator) {
 				background-color: $base-color;
 			}
 		}
 
 		.arrow {
-			color: $base-pale-color;
-			margin-top: $narrow-size;
-			margin-bottom: $narrow-size;
+			color: $base-light-color;
+			margin-top: $small-size;
+			margin-bottom: $small-size;
 			margin-left: auto;
 			margin-right: auto;
 			font-weight: bold;

@@ -9,7 +9,6 @@
 	let editRecords = records.join('\n');
 	// $: editRecords = records.join('\n');
 	let isEditMode = false;
-	$: console.log("@@@ editRecords: " + editRecords)
 
 	// events and issuers
 	type EventType = {
@@ -82,25 +81,30 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	/* @import '/static/style/variables-mixins.scss'; */
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 
 	.todo-history {
 		@include column;
-		background-color: column;
 
 		textarea {
-			padding: $narrow-size;
+			padding: $normal-size;
+			color: $base-contrast-color;
+			background-color: transparent;
 			resize: none;
-			@include dark-component;
-			@include styled-scrollbar;
-			flex: 1;
 			outline: none;
+			flex: 1;
+			@include styled-scrollbar;
 		}
 
 		.todo-history-menu {
-			@include dark-component;
-			@include row-centered($normal-size);
-			padding: $narrow-size;
+			background-color: $base-color;
+			padding: $small-size;
+
+			@include row-centered($normal-size);			
 
 			img {
 				@include icon-normal-sized;
@@ -108,7 +112,8 @@
 		}
 
 		.edit-menu {
-			@include bordered(bottom, white, $border-narrow-size);
+			background: $strong-gradient;
+			@include bordered(bottom, $strong-second-color, $border-small-size);
 		}
 
 		.todo-history-body {
@@ -121,9 +126,9 @@
 		.todo-history-item {
 			margin-bottom: $wide-size;
 			color: white;
-			padding-bottom: $narrow-size;
+			padding-bottom: $small-size;
 			@include row-centered($normal-size);
-			@include bordered(bottom, $base-pale-color, $border-narrow-size);
+			@include bordered(bottom, $base-light-color, $border-small-size);
 
 			img {
 				@include icon-normal-sized;

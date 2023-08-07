@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
+	import { todoStatusToLabel } from '$lib/utils/todo-helpers.js';
 	import TodoCard from '../components/TodoCard.svelte';
-	import { chooseStatusClass, todoStatusToLabel } from '$lib/utils/todo-helpers.js';
 
 	// // state
 	export let data: TodosWithStatusPageData;
@@ -27,24 +27,27 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
-	@import '/static/style/todo-variables.scss';
-
-	.todo-status-label {
-		font-size: x-large;
-		padding-left: $wide-size;
-		color: white;
-		border-bottom-width: 4px;
-		border-image-slice: 1;
-		border-image-source: linear-gradient(to right, white, transparent 50%, transparent);
-		margin-bottom: $large-size;
-	}
+	@import '/static/style/common/color';
+	@import '/static/style/common/size';
+	@import '/static/style/common/facade';
+	@import '/static/style/common/composition';
 
 	.todos-with-status {
+		padding: $wide-size;
+		background-color: $base-dark-color;
+
 		@include full-screen-height;
-		@include styled-scrollbar;
-		overflow-y: auto;
-		padding: 8px;
+		@include scrollable;
+
+		.todo-status-label {
+			font-size: x-large;
+			padding-left: $wide-size;
+			color: white;
+			border-bottom-width: 4px;
+			border-image-slice: 1;
+			border-image-source: linear-gradient(to right, white, transparent 50%, transparent);
+			margin-bottom: $large-size;
+		}
 
 		.main-todo {
 			margin-bottom: 4px;
@@ -53,12 +56,6 @@
 		:global(.todo-card) {
 			min-width: 450px;
 			max-width: 500px;
-		}
-
-		.main-todo {
-			:global(.todo-card) {
-				@include attractive-component;
-			}
 		}
 
 		.parent-todos {

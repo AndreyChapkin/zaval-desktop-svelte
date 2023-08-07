@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { ROOT_MENU_ICON_URL, SEARCH_ICON_URL } from '$lib/utils/assets-references';
+	import { setContext } from 'svelte';
+	import { writable } from 'svelte/store';
 	import SearchPanel from './SearchPanel.svelte';
 	import SideStatusMenu from './SideStatusMenu.svelte';
 
 	// state
-	let isSearchVisible = false;
+	const isOpen = writable(false);
 
 	// events
 
 	// handlers
 	const showSearchHandler = () => {
-		isSearchVisible = !isSearchVisible;
+		$isOpen = true;
 	};
+
+	// context and store
+	setContext('is-search-panel-open', { isOpen });
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -32,17 +37,22 @@
 			on:click={showSearchHandler}
 		/>
 	</div>
-	{#if isSearchVisible}
-		<SearchPanel on:close={() => (isSearchVisible = false)} />
+	{#if $isOpen}
+		<SearchPanel />
 	{/if}
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
-	@import '/static/style/todo-variables.scss';
+	@import '/static/style/common/color/index.scss';
+	@import '/static/style/common/size/index.scss';
+	@import '/static/style/common/composition/index.scss';
+	/* @import '/static/style/common/composition/mixins.scss';
+	@import '/static/style/common/composition/mixins.scss'; */
+	/* @import '/static/style/variables-mixins.scss'; */
+	/* @import '/static/style/todo-variables.scss'; */
 
 	.todo-side-menu {
-		@include dark-component;
+		background-color: $second-color;
 		@include column-centered($normal-size);
 		padding: $normal-size;
 
@@ -57,7 +67,8 @@
 		}
 
 		.todo-side-menu-item:hover {
-			background-color: $base-pale-color;
+			background-color: $second-light-color;
+			/* background-color: $strong-second-color; */
 		}
 
 		:global(.todo-side-menu-item img) {

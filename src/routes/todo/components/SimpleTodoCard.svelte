@@ -7,24 +7,29 @@
 	// state
 	export let todo: TodoHierachyDto | TodoDto;
 	export let size: 'small' | 'normal' | 'large' = 'normal';
-	export let style: 'dark' | 'normal' | 'attractive' = 'dark';
 
-	$: styleClass = `${style}-colored`;
 	$: statusClass = chooseStatusClass(todo.status);
 	$: sizeClass = `${size}-todo`;
 
 	// events
+	type EventType = {
+		select: TodoHierachyDto | TodoDto;
+	};
+	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
+	const selectHandler = () => {
+		dispatch('select', todo);
+	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`simple-todo-card ${statusClass} ${sizeClass} ${styleClass}`}>
+<div class={`simple-todo-card ${statusClass} ${sizeClass}`}>
 	<div class="todo-name">
 		{todo.name}
 	</div>
 	<div class="go-to-todo">
-		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
+		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`} on:click={selectHandler}>
 			<div class="link-area">
 				<img
 					src={TODO_COMPLEX_ICON_URL}
@@ -36,18 +41,23 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
 	@import '/static/style/todo-variables.scss';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/color/';
 
 	.simple-todo-card {
+		background-color: $base-light-color;
+		color: $base-contrast-color;
+		
 		@include row;
-		@include dark-component;
 		@apply p-2 space-x-2;
 		@apply border-l-8;
-		border-radius: 5px 0px 0px 15px;
+		border-radius: $normal-size;
 
 		.go-to-todo {
-			@include bordered(left, $base-light-color, $border-narrow-size);
+			@include bordered(left, $base-light-color, $border-small-size);
 			@apply pl-2;
 
 			.link-area {
@@ -101,17 +111,5 @@
 
 	.in-progress-status {
 		border-color: $in-progress-status-color;
-	}
-
-	.dark-colored {
-		@include dark-component;
-	}
-
-	.normal-colored {
-		@include normal-component;
-	}
-
-	.attractive-colored {
-		@include attractive-component;
 	}
 </style>

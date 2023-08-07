@@ -1,0 +1,72 @@
+@mixin row($gap: 0px) {
+	@apply flex flex-row;
+	gap: $gap;
+}
+
+@mixin row-centered($gap: 0px) {
+	@apply flex flex-row items-center;
+	gap: $gap;
+}
+
+@mixin row-justifyied($gap: 0px) {
+	@apply flex flex-row justify-between;
+	gap: $gap;
+}
+
+@mixin row-stretched($gap: 0px) {
+	@apply flex flex-row items-stretch;
+	gap: $gap;
+}
+
+@mixin row-start($gap: 0px) {
+	@apply flex flex-row items-start;
+	gap: $gap;
+}
+
+@mixin column($gap: 0px) {
+	@apply flex flex-col;
+	gap: $gap;
+}
+
+@mixin column-justifyied($gap: 0px) {
+	@apply flex flex-col justify-between;
+	gap: $gap;
+}
+
+@mixin column-stretched($gap: 0px) {
+	@apply flex flex-col items-stretch;
+	gap: $gap;
+}
+
+@mixin column-centered($gap: 0px) {
+	@apply flex flex-col items-center;
+	gap: $gap;
+}
+
+@mixin content-centered {
+	@apply flex flex-col items-center justify-center;
+}
+
+@mixin responsive-grid($min-cell-width: 200px, $x-gap: $normal-size, $y-gap: $normal-size) {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax($min-cell-width, 1fr));
+	align-content: start;
+	gap: $x-gap $y-gap;
+}
+
+@mixin modal-window-background {
+	position: absolute;
+	z-index: 10;
+	padding: $space-normal-size;
+	@include full-screen;
+	@apply flex justify-center items-start;
+}
+
+// alignments
+@mixin screen-centered-x($element-width) {
+	left: calc((100vw - $indicatodWidth) / 2);
+}
+
+@mixin screen-centered-y($element-height) {
+	left: calc((100vh - $element-height) / 2);
+}

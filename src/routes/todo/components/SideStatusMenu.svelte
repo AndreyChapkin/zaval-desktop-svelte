@@ -105,8 +105,12 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	/* @import '/static/style/variables-mixins.scss'; */
 	@import '/static/style/todo-variables.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/facade/';
 
 	.todo-status-side-menu {
 		@include row-stretched;
@@ -122,13 +126,16 @@
 		}
 
 		.todo-status-side-menu-face:hover {
-			background-color: $base-pale-color;
+			background-color: $base-light-color;
 			@apply rounded-sm;
 		}
 
 		.options-pane {
+			background-color: $second-color;
 			position: absolute;
 			z-index: 100;
+			border-radius: $normal-size;
+			overflow: hidden;
 			@include normal-shadow;
 
 			img {
@@ -136,7 +143,6 @@
 			}
 
 			.todo-status-side-menu-item {
-				background-color: $base-dark-color;
 				padding: $normal-size $normal-size $normal-size $normal-size;
 
 				img {
@@ -144,8 +150,12 @@
 				}
 
 				a {
-					@include row-centered($narrow-size);
+					@include row-centered($small-size);
 				}
+			}
+
+			.todo-status-side-menu-item:hover {
+				background-color: $second-light-color;
 			}
 		}
 

@@ -18,12 +18,12 @@ $icon-super-large-size: 124px;
 $border-extrawide-size: 12px;
 $border-wide-size: 6px;
 $border-normal-size: 3px;
-$border-narrow-size: 2px;
+$border-small-size: 2px;
 
 $large-size: 20px;
 $wide-size: 10px;
 $normal-size: 6px;
-$narrow-size: 3px;
+$small-size: 3px;
 
 $space-normal-size: 30px;
 
@@ -62,7 +62,7 @@ $space-normal-size: 30px;
 @mixin standard-input {
 	padding: $normal-size;
 	border-radius: $normal-size;
-	@include bordered($color: $base-pale-color, $size: 1px);
+	@include bordered($color: $base-color, $size: 1px);
 	@include dark-component;
 }
 
@@ -79,7 +79,7 @@ $space-normal-size: 30px;
 	}
 
 	&::-webkit-scrollbar-track {
-		border-radius: $narrow-size;
+		border-radius: $small-size;
 	}
 
 	&::-webkit-scrollbar-thumb {

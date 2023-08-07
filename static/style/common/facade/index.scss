@@ -1,0 +1,45 @@
+@mixin bordered($side: all, $color: white, $size: $border-normal-size) {
+	border-color: $color;
+	@if $side == all {
+		border-width: $size;
+	} @else if $side == bottom {
+		border-bottom-width: $size;
+	} @else if $side == top {
+		border-top-width: $size;
+	} @else if $side == left {
+		border-left-width: $size;
+	} @else if $side == right {
+		border-right-width: $size;
+	}
+}
+
+@mixin styled-scrollbar($background-color: transparent) {
+
+	&::-webkit-scrollbar {
+		width: $wide-size;
+		height: $wide-size;
+		background-color: $background-color;
+	}
+
+	&::-webkit-scrollbar-track {
+		border-radius: $small-size;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: transparent;
+		border-radius: $normal-size;
+	}
+
+	&:hover::-webkit-scrollbar-thumb {
+		background-color: rgba(200, 200, 200, 0.5);
+	}
+}
+
+@mixin normal-shadow {
+	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+@mixin standard-input {
+	padding: $normal-size;
+	border-radius: $normal-size;
+}

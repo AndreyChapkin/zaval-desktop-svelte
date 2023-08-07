@@ -13,9 +13,7 @@
 	let isMoveMenuOpen = false;
 	export let size: 'small' | 'normal' | 'large' = 'normal';
 	export let type: 'interactive' | 'simple' = 'interactive';
-	export let style: 'dark' | 'normal' | 'attractive' = 'dark';
-	
-	$: styleClass = `${style}-colored`;
+
 	$: statusClass = chooseStatusClass(todo.status);
 	$: sizeClass = `${size}-todo`;
 
@@ -47,7 +45,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-	class={`todo-card ${statusClass} ${sizeClass} ${styleClass}`}
+	class={`todo-card ${statusClass} ${sizeClass}`}
 	on:click={cardClickHandler}
 	on:contextmenu={specificRightClickHandler}
 >
@@ -86,18 +84,23 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
 	@import '/static/style/todo-variables.scss';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/color/';
 
 	.todo-card {
-		@include row;
-		@include dark-component;
+		background-color: $base-light-color;
+		color: $base-contrast-color;
+
+		@include row;		
 		@apply p-2 space-x-2;
-		@apply border-l-8;
-		border-radius: 5px 0px 0px 15px;
+		@include bordered(left, $size: $border-wide-size);
+		border-radius: $normal-size;
 
 		.go-to-todo {
-			@include bordered(left, $base-light-color, $border-narrow-size);
+			@include bordered(left, $base-contrast-color, $border-small-size);
 			@apply pl-2;
 
 			.link-area {
@@ -151,17 +154,5 @@
 
 	.in-progress-status {
 		border-color: $in-progress-status-color;
-	}
-
-	.dark-colored {
-		@include dark-component;
-	}
-
-	.normal-colored {
-		@include normal-component;
-	}
-
-	.attractive-colored {
-		@include attractive-component;
 	}
 </style>

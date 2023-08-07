@@ -10,10 +10,13 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	/* @import '/static/style/variables-mixins.scss'; */
+	@import '/static/style/common/color/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/size/';
 
 	.todos-page {
-		background-color: $base-color;
+		background-color: $base-dark-color;
 		@include row;
         @include full-screen-height;
 

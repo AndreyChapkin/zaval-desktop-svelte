@@ -11,7 +11,7 @@
 	// state
 	export let data: TodoDetailedPageData;
 	$: mainTodo = data.todoHierachyDto;
-	$: parentTodos = (mainTodo.parents ?? []).reverse();
+	$: parentTodos = (mainTodo.parents ?? []).slice().reverse();
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 

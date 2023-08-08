@@ -1,3 +1,4 @@
+import type { TodoBranchDto } from "$lib/types/pages-data";
 import type { TodoHierachyDto, CreateTodoDto, TodoDto, UpdateTodoDto, MoveTodoDto, TodoHistoryDto, TodoStatus } from "$lib/types/todo";
 import { callDelete } from "$lib/utils/call-helpers";
 import { callGet, callPatch, callPost } from "$lib/utils/call-helpers";
@@ -43,6 +44,14 @@ export async function getAllTodos(): Promise<TodoDto[]> {
 export async function getAllTodoUpBranches(status: TodoStatus): Promise<TodoHierachyDto[]> {
     const url = `${baseTodoURL}/up-branch`;
 	const result = await callGet<TodoHierachyDto[]>(url, {
+        status
+    });
+    return result.data;
+}
+
+export async function getAllTodoWithStatusBranches(status: TodoStatus): Promise<TodoBranchDto[]> {
+    const url = `${baseTodoURL}/status-branches`;
+	const result = await callGet<TodoBranchDto[]>(url, {
         status
     });
     return result.data;

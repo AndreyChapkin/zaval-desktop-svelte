@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 	import { todoStatusToLabel } from '$lib/utils/todo-helpers.js';
-	import TodoCard from '../components/TodoCard.svelte';
+	import SimpleTodoCard from '../components/SimpleTodoCard.svelte';
 
 	// // state
 	export let data: TodosWithStatusPageData;
@@ -10,17 +10,21 @@
 <div class="todos-with-status">
 	<div class="todo-status-label">{todoStatusToLabel(data.status)}</div>
 	<div class="main-todos">
-		{#each data.todoHierarchyDtos as todoHierarchyDto}
-			<div class="main-todo">
-				<TodoCard todo={todoHierarchyDto} />
-			</div>
-			<div class="parent-todos">
-				{#each todoHierarchyDto.parents ?? [] as parent}
-					<TodoCard
-						todo={parent}
-						size="small"
-					/>
-				{/each}
+		{#each data.branches as branch}
+			<div class="todos-branch">
+				<div class="parent-todos">
+					{#each branch.parents ?? [] as parent}
+						<SimpleTodoCard
+							todo={parent}
+							size="small"
+						/>
+					{/each}
+				</div>
+				<div class="leaf-todos">
+					{#each branch.leaves ?? [] as leaf}
+						<SimpleTodoCard todo={leaf} />
+					{/each}
+				</div>
 			</div>
 		{/each}
 	</div>
@@ -34,7 +38,6 @@
 
 	.todos-with-status {
 		padding: $wide-size;
-		background-color: $base-dark-color;
 
 		@include full-screen-height;
 		@include scrollable;
@@ -49,22 +52,29 @@
 			margin-bottom: $large-size;
 		}
 
-		.main-todo {
-			margin-bottom: 4px;
+		.todos-branch {
+			margin-bottom: $large-size;
+			padding-bottom: $large-size;
+			width: 90vw;
+			@include bordered(bottom, $color: $second-light-color);
+		}
+
+		.parent-todos {
+			overflow-x: auto;
+			max-width: 90vw;
+			margin-bottom: $normal-size;
+			@include row($normal-size);
+			@include styled-scrollbar(transparent);
+		}
+
+		.leaf-todos {
+			margin-left: $large-size;
+			@include column($normal-size);
 		}
 
 		:global(.todo-card) {
 			min-width: 450px;
 			max-width: 500px;
-		}
-
-		.parent-todos {
-			@include row(10px);
-			@include styled-scrollbar(transparent);
-			overflow-x: auto;
-			max-width: 90vw;
-			margin-left: 20px;
-			margin-bottom: 20px;
 		}
 	}
 </style>

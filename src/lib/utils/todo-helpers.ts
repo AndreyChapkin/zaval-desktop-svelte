@@ -1,3 +1,4 @@
+import type { TodoBranchDto } from '$lib/types/pages-data';
 import type { TodoHierachyDto, TodoStatus } from '$lib/types/todo';
 import {
 	BACKLOG_MENU_ICON_URL,

@@ -1,4 +1,4 @@
-import type { TodoHierachyDto as TodoHierarchyDto, TodoStatus } from "./todo";
+import type { TodoDto, TodoHierachyDto as TodoHierarchyDto, TodoStatus } from './todo';
 
 export interface TodoDetailedPageData {
 	todoHierachyDto: TodoHierarchyDto;
@@ -6,7 +6,12 @@ export interface TodoDetailedPageData {
 	isRoot: boolean;
 }
 
+export interface TodoBranchDto {
+	parents: TodoDto[];
+	leaves: TodoDto[];
+}
+
 export interface TodosWithStatusPageData {
-	todoHierarchyDtos: TodoHierarchyDto[];
+	branches: TodoBranchDto[];
 	status: TodoStatus;
 }

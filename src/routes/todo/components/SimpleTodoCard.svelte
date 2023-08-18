@@ -24,12 +24,21 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`simple-todo-card ${statusClass} ${sizeClass}`}>
-	<div class="todo-name">
-		{todo.name}
+<div class={`simple-todo-card ${sizeClass}`}>
+	<div class="todo-info">
+		<div class={`todo-status-indicator ${statusClass}`} />
+		<div class="todo-name">
+			{todo.name}
+		</div>
+		<div class="todo-priority">
+			{todo.priority}
+		</div>
 	</div>
 	<div class="go-to-todo">
-		<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`} on:click={selectHandler}>
+		<a
+			href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}
+			on:click={selectHandler}
+		>
 			<div class="link-area">
 				<img
 					src={TODO_COMPLEX_ICON_URL}
@@ -50,10 +59,9 @@
 	.simple-todo-card {
 		background-color: $base-light-color;
 		color: $base-contrast-color;
-		
+
 		@include row;
 		@apply p-2 space-x-2;
-		@apply border-l-8;
 		border-radius: $normal-size;
 
 		.go-to-todo {
@@ -65,8 +73,21 @@
 			}
 		}
 
-		.todo-name {
+		.todo-status-indicator {
+			width: 2 * $normal-size;
+			height: $normal-size;
+			border-radius: $small-size;
+			margin-bottom: $small-size;
+		}
+
+		.todo-info {
 			@apply flex-1;
+			@include column;
+
+			.todo-priority {
+				font-size: smaller;
+				color: $base-weak-contrast-color;
+			}
 		}
 	}
 
@@ -93,23 +114,23 @@
 	}
 
 	.done-status {
-		border-color: $done-status-color;
+		background-color: $done-status-color;
 	}
 	.backlog-status {
-		border-color: $backlog-status-color;
+		background-color: $backlog-status-color;
 	}
 	.will-be-back-status {
-		border-color: $will-be-back-status-color;
+		background-color: $will-be-back-status-color;
 	}
 	.ping-me-status {
-		border-color: $ping-me-status-color;
+		background-color: $ping-me-status-color;
 	}
 
 	.next-to-take-status {
-		border-color: $next-to-take-status-color;
+		background-color: $next-to-take-status-color;
 	}
 
 	.in-progress-status {
-		border-color: $in-progress-status-color;
+		background-color: $in-progress-status-color;
 	}
 </style>

@@ -18,3 +18,4 @@ $strong-second-light-color: lighten($strong-second-color, 15%);
 $strong-gradient: linear-gradient(215deg, $strong-light-color 0%, adjust-hue($strong-color, -30%) 50%, $strong-color 100%);
 
 $base-contrast-color: #fff3fe;
+$base-weak-contrast-color: #c4bbc3;

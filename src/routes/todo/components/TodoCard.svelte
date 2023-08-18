@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ROOT_TODO_HIERARCHY, type TodoHierachyDto } from '$lib/types/todo';
-	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
+	import { EDIT_ICON_URL, TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import TodoMenu from '../[[id=digital]]/components/TodoMenu.svelte';
@@ -28,12 +28,8 @@
 
 	// handlers
 	const backgroundClickHandler = () => (isMenuOpen = false);
-	const specificRightClickHandler = (e: MouseEvent) => {
-		if (e.ctrlKey) {
-			isMenuOpen = true;
-			e.preventDefault();
-			e.stopPropagation();
-		}
+	const editClickHandler = (e: MouseEvent) => {
+		isMenuOpen = true;
 	};
 	const moveHandler = () => {
 		isMoveMenuOpen = true;
@@ -45,25 +41,39 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-	class={`todo-card ${statusClass} ${sizeClass}`}
+	class={`todo-card ${sizeClass}`}
 	on:click={cardClickHandler}
-	on:contextmenu={specificRightClickHandler}
 >
-	<div class="todo-name">
-		{todo.name}
-	</div>
 	{#if type === 'interactive'}
-		<div class="go-to-todo">
-			<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
-				<div class="link-area">
-					<img
-						src={TODO_COMPLEX_ICON_URL}
-						alt="composition"
-					/>
-				</div>
-			</a>
+		<div class="todo-interaction-panel">
+			<div class={`todo-status-indicator ${statusClass}`} />
+			<div class="go-to-todo">
+				<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
+					<div class="link-area">
+						<img
+							src={TODO_COMPLEX_ICON_URL}
+							alt="composition"
+						/>
+					</div>
+				</a>
+			</div>
+			<div class="edit-menu">
+				<img
+					src={EDIT_ICON_URL}
+					alt="composition"
+					on:click={editClickHandler}
+				/>
+			</div>
 		</div>
 	{/if}
+	<div class="todo-info">
+		<div class="todo-name">
+			{todo.name}
+		</div>
+		<div class="todo-priority">
+			{todo.priority}
+		</div>
+	</div>
 	{#if isMenuOpen}
 		<TodoMenu
 			todoHierarchyDto={todo}
@@ -93,66 +103,72 @@
 	.todo-card {
 		background-color: $base-light-color;
 		color: $base-contrast-color;
+		padding: $normal-size;
 
-		@include row;		
-		@apply p-2 space-x-2;
-		@include bordered(left, $size: $border-wide-size);
+		@include row;
 		border-radius: $normal-size;
 
-		.go-to-todo {
-			@include bordered(left, $base-contrast-color, $border-small-size);
-			@apply pl-2;
+		.todo-interaction-panel {
+			padding: $small-size $normal-size $small-size 0px;
+			@include bordered(right, $base-contrast-color, $border-small-size);
+			@include column-centered($normal-size);
 
-			.link-area {
-				height: 100%;
+			.go-to-todo, .edit-menu {
+				@include like-normal-button;
 			}
 		}
 
-		.todo-name {
+		.todo-status-indicator {
+			width: 3 * $normal-size;
+			height: 2 * $normal-size;
+			border-radius: $small-size;
+			margin-bottom: $small-size;
+		}
+
+		.todo-info {
+			padding-left: $wide-size;
+
 			@apply flex-1;
+			@include column-justifyied;
+
+			.todo-priority {
+				font-size: smaller;
+				color: $base-weak-contrast-color;
+			}
 		}
 	}
 
 	.small-todo {
 		font-size: small;
 		font-weight: bold;
-		img {
-			@include icon-normal-sized;
-		}
 	}
 
 	.normal-todo {
 		font-size: medium;
-		img {
-			@include icon-large-sized;
-		}
 	}
 
 	.large-todo {
 		font-size: large;
-		img {
-			@include icon-super-large-sized;
-		}
 	}
 
 	.done-status {
-		border-color: $done-status-color;
+		background-color: $done-status-color;
 	}
 	.backlog-status {
-		border-color: $backlog-status-color;
+		background-color: $backlog-status-color;
 	}
 	.will-be-back-status {
-		border-color: $will-be-back-status-color;
+		background-color: $will-be-back-status-color;
 	}
 	.ping-me-status {
-		border-color: $ping-me-status-color;
+		background-color: $ping-me-status-color;
 	}
 
 	.next-to-take-status {
-		border-color: $next-to-take-status-color;
+		background-color: $next-to-take-status-color;
 	}
 
 	.in-progress-status {
-		border-color: $in-progress-status-color;
+		background-color: $in-progress-status-color;
 	}
 </style>

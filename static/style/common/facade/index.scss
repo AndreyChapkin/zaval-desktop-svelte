@@ -43,3 +43,11 @@
 	padding: $normal-size;
 	border-radius: $normal-size;
 }
+
+@mixin like-normal-button {
+	cursor: pointer;
+
+	img {
+		@include icon-normal-sized;
+	}
+}

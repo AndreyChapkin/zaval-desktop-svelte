@@ -7,6 +7,7 @@
 	export let todoHierarchyDto: TodoHierachyDto | null;
 	let editName: string = todoHierarchyDto?.name ?? '';
 	let editStatus: TodoStatus = todoHierarchyDto?.status ?? 'BACKLOG';
+	let editPriority: number = todoHierarchyDto?.priority ?? 0;
 	let isCreateMode = todoHierarchyDto === null;
 
 	// components
@@ -34,6 +35,7 @@
 			id: todoHierarchyDto!!.id,
 			updatedTodoDto: {
 				name: editName,
+				priority: editPriority,
 				status: editStatus
 			}
 		});
@@ -52,6 +54,7 @@
 					id: todoHierarchyDto!!.id,
 					updatedTodoDto: {
 						name: editName,
+						priority: editPriority,
 						status: editStatus
 					}
 				});
@@ -107,16 +110,21 @@
 	bind:this={splitContainer}
 >
 	<div class="todo-menu-content">
-		<div class="edit-pane">
+		<div class="edit-pane" on:keyup={enterKeyHandler}>
 			<TodoStatusMenu
 				currentStatus={editStatus}
 				on:select={selectStatusHandler}
 			/>
 			<input
-				on:keyup={enterKeyHandler}
 				class="w-full"
 				type="text"
 				bind:value={editName}
+			/>
+			<input
+				on:keyup={enterKeyHandler}
+				class="w-full"
+				type="text"
+				bind:value={editPriority}
 			/>
 		</div>
 		<div class="action-pane">

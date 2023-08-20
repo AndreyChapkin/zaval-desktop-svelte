@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ROOT_TODO_HIERARCHY, type TodoHierachyDto } from '$lib/types/todo';
+	import { ROOT_TODO_HIERARCHY, type TodoDto, type TodoHierachyDto } from '$lib/types/todo';
 	import { EDIT_ICON_URL, TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
@@ -7,19 +7,18 @@
 	import MovingTodoPanel from '../[[id=digital]]/components/MovingTodoPanel.svelte';
 
 	// state
-	export let todo: TodoHierachyDto;
+	export let todo: TodoHierachyDto | TodoDto;
 	export let parentTodo: TodoHierachyDto | null = null;
 	let isMenuOpen = false;
 	let isMoveMenuOpen = false;
-	export let size: 'small' | 'normal' | 'large' = 'normal';
-	export let type: 'interactive' | 'simple' = 'interactive';
+	export let externalClass = '';
+	export let isNavigable: boolean = true;
 
 	$: statusClass = chooseStatusClass(todo.status);
-	$: sizeClass = `${size}-todo`;
 
 	// events
 	type EventType = {
-		select: TodoHierachyDto;
+		select: TodoHierachyDto | TodoDto;
 		visit: TodoHierachyDto;
 		rightClick: { todo: TodoHierachyDto; x: number; y: number };
 	};
@@ -27,6 +26,7 @@
 	const cardClickHandler = () => dispatch('select', todo);
 
 	// handlers
+
 	const backgroundClickHandler = () => (isMenuOpen = false);
 	const editClickHandler = (e: MouseEvent) => {
 		isMenuOpen = true;
@@ -41,12 +41,12 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-	class={`todo-card ${sizeClass}`}
+	class={`todo-card ${externalClass}`}
 	on:click={cardClickHandler}
 >
-	{#if type === 'interactive'}
-		<div class="todo-interaction-panel">
-			<div class={`todo-status-indicator ${statusClass}`} />
+	<div class={`todo-status-indicator ${statusClass}`} />
+	<div class="todo-interaction-panel">
+		{#if isNavigable}
 			<div class="go-to-todo">
 				<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
 					<div class="link-area">
@@ -57,15 +57,15 @@
 					</div>
 				</a>
 			</div>
-			<div class="edit-menu">
-				<img
-					src={EDIT_ICON_URL}
-					alt="composition"
-					on:click={editClickHandler}
-				/>
-			</div>
+		{/if}
+		<div class="edit-menu">
+			<img
+				src={EDIT_ICON_URL}
+				alt="composition"
+				on:click={editClickHandler}
+			/>
 		</div>
-	{/if}
+	</div>
 	<div class="todo-info">
 		<div class="todo-name">
 			{todo.name}
@@ -76,11 +76,8 @@
 	</div>
 	{#if isMenuOpen}
 		<TodoMenu
-			todoHierarchyDto={todo}
-			on:update
-			on:create
+			todoDto={todo}
 			on:move={moveHandler}
-			on:delete
 			on:backgroundClick={backgroundClickHandler}
 		/>
 	{/if}
@@ -104,6 +101,7 @@
 		background-color: $base-light-color;
 		color: $base-contrast-color;
 		padding: $normal-size;
+		position: relative;
 
 		@include row;
 		border-radius: $normal-size;
@@ -113,16 +111,21 @@
 			@include bordered(right, $base-contrast-color, $border-small-size);
 			@include column-centered($normal-size);
 
-			.go-to-todo, .edit-menu {
+			.go-to-todo,
+			.edit-menu {
 				@include like-normal-button;
 			}
 		}
 
 		.todo-status-indicator {
-			width: 3 * $normal-size;
+			width: 2 * $normal-size;
 			height: 2 * $normal-size;
-			border-radius: $small-size;
+			border-radius: $normal-size;
 			margin-bottom: $small-size;
+			top: -$normal-size / 4;
+			left: -$normal-size / 4;
+
+			position: absolute;
 		}
 
 		.todo-info {

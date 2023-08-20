@@ -1,30 +1,31 @@
 <script lang="ts">
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 	import { todoStatusToLabel } from '$lib/utils/todo-helpers.js';
-	import SimpleTodoCard from '../components/SimpleTodoCard.svelte';
+	import TodoCard from '../components/TodoCard.svelte';
+	import PrimitiveCard from './components/PrimitiveCard.svelte';
 
 	// // state
 	export let data: TodosWithStatusPageData;
+	$: todosList = data.todosList.todos;
+	$: parentsMap = data.todosList.parentBranchesMap;
 </script>
 
 <div class="todos-with-status">
 	<div class="todo-status-label">{todoStatusToLabel(data.status)}</div>
 	<div class="main-todos">
-		{#each data.branches as branch}
-			<div class="todos-branch">
-				<div class="parent-todos">
-					{#each branch.parents ?? [] as parent}
-						<SimpleTodoCard
-							todo={parent}
-							size="small"
-						/>
-					{/each}
-				</div>
-				<div class="leaf-todos">
-					{#each branch.leaves ?? [] as leaf}
-						<SimpleTodoCard todo={leaf} />
-					{/each}
-				</div>
+		{#each todosList as todoAndParentBranchIdDto}
+			<div class="main-todo-and-parents">
+				<TodoCard
+					todo={todoAndParentBranchIdDto.todo}
+					externalClass="main-todo"
+				/>
+				{#if todoAndParentBranchIdDto.parentBranchId != null}
+					<div class="parents">
+						{#each [...parentsMap[todoAndParentBranchIdDto.parentBranchId]].reverse() as parentTodoDto}
+							<PrimitiveCard todo={parentTodoDto} />
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{/each}
 	</div>
@@ -59,21 +60,30 @@
 			@include bordered(bottom, $color: $second-light-color);
 		}
 
-		.parent-todos {
+		.main-todo-and-parents {
+			@include row($wide-size);
+		}
+
+		.parents {
 			overflow-x: auto;
-			max-width: 90vw;
+			max-width: 60vw;
 			margin-bottom: $normal-size;
-			@include row($normal-size);
+			@include row-align-start($normal-size);
 			@include styled-scrollbar(transparent);
 		}
 
-		.leaf-todos {
+		.main-todos {
 			margin-left: $large-size;
-			@include column($normal-size);
+			@include column($large-size);
+		}
+
+		:global(.main-todo) {
+			min-width: 450px !important;
+			max-width: 500px;
 		}
 
 		:global(.todo-card) {
-			min-width: 450px;
+			min-width: 150px;
 			max-width: 500px;
 		}
 	}

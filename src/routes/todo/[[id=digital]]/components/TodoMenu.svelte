@@ -1,14 +1,22 @@
 <script lang="ts">
+	import { createTodo, deleteTodo, updateTodo } from '$lib/api/todo-calls';
+	import type {
+		CreateTodoDto,
+		TodoDto,
+		TodoHierachyDto,
+		TodoStatus,
+		UpdateTodoData
+	} from '$lib/types/todo';
+	import { returnParentId } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
-	import type { CreateTodoDto, TodoHierachyDto, TodoStatus, UpdateTodoData } from '$lib/types/todo';
 
 	// data
-	export let todoHierarchyDto: TodoHierachyDto | null;
-	let editName: string = todoHierarchyDto?.name ?? '';
-	let editStatus: TodoStatus = todoHierarchyDto?.status ?? 'BACKLOG';
-	let editPriority: number = todoHierarchyDto?.priority ?? 0;
-	let isCreateMode = todoHierarchyDto === null;
+	export let todoDto: TodoHierachyDto | TodoDto | null;
+	let editName: string = todoDto?.name ?? '';
+	let editStatus: TodoStatus = todoDto?.status ?? 'BACKLOG';
+	let editPriority: number = todoDto?.priority ?? 0;
+	let isCreateMode = todoDto === null;
 
 	// components
 	let splitContainer: HTMLDivElement;
@@ -18,75 +26,84 @@
 		backgroundClick: null;
 		update: UpdateTodoData;
 		create: CreateTodoDto;
-		move: TodoHierachyDto;
+		move: TodoHierachyDto | TodoDto;
 		delete: number;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
+	const requestTodoUpdate = async () => {
+		if (todoDto) {
+			await updateTodo(todoDto.id, {
+				name: editName,
+				priority: editPriority,
+				status: editStatus
+			});
+		}
+		// TODO: make slighter
+		window.location.reload();
+	};
+
+	const requestTodoCreate = async () => {
+		await createTodo({
+			name: editName,
+			status: editStatus,
+			parentId: todoDto?.id ?? null
+		});
+		// TODO: make slighter
+		window.location.reload();
+	};
+
+	const requestTodoDelete = async () => {
+		if (todoDto) {
+			const parentTodoId = returnParentId(todoDto);
+			await deleteTodo(todoDto.id);
+			// TODO: make slighter
+			window.location.href = `/todo/${parentTodoId ?? ''}`;
+		}
+	};
+
 	const backgroundClickHandler = (e: MouseEvent) => {
 		if (e.target === e.currentTarget) {
 			dispatch('backgroundClick');
 		}
 	};
+	const createHandler = () => {
+		dispatch('backgroundClick');
+		requestTodoCreate();
+	};
 	const updateHandler = () => {
 		dispatch('backgroundClick');
-		dispatch('update', {
-			id: todoHierarchyDto!!.id,
-			updatedTodoDto: {
-				name: editName,
-				priority: editPriority,
-				status: editStatus
-			}
-		});
+		requestTodoUpdate();
+	};
+	const deleteEventIssuer = () => {
+		dispatch('backgroundClick');
+		requestTodoDelete();
 	};
 	const enterKeyHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Enter') {
+			dispatch('backgroundClick');
 			if (isCreateMode) {
-				dispatch('backgroundClick');
-				dispatch('create', {
-					name: editName,
-					status: editStatus,
-					parentId: todoHierarchyDto?.id ?? null
-				});
+				requestTodoCreate();
 			} else {
-				dispatch('update', {
-					id: todoHierarchyDto!!.id,
-					updatedTodoDto: {
-						name: editName,
-						priority: editPriority,
-						status: editStatus
-					}
-				});
+				requestTodoUpdate();
 			}
 		}
 	};
-	const addHandler = () => {
+	const addSubtaskHandler = () => {
 		isCreateMode = true;
 		editName = '';
 		editStatus = 'BACKLOG';
 	};
-	const createHandler = () => {
-		dispatch('backgroundClick');
-		dispatch('create', {
-			name: editName,
-			status: editStatus,
-			parentId: todoHierarchyDto?.id ?? null
-		});
-	};
 	const moveHandler = () => {
 		dispatch('backgroundClick');
-		dispatch('move', todoHierarchyDto!!);
+		dispatch('move', todoDto!!);
 	};
-	const deleteEventIssuer = () => {
-		dispatch('backgroundClick');
-		dispatch('delete', todoHierarchyDto?.id);
-	};
+	
 	const selectStatusHandler = (selectEvent: any) => {
 		const selectedStatus = selectEvent.detail as TodoStatus;
 		editStatus = selectedStatus;
 	};
-	
 	const escapeHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Escape') {
 			dispatch('backgroundClick');
@@ -96,9 +113,9 @@
 	// lifecycle
 	onMount(() => {
 		window.document.body.append(splitContainer);
-		window.document.addEventListener("keyup", escapeHandler);
+		window.document.addEventListener('keyup', escapeHandler);
 		return () => {
-			window.document.removeEventListener("keyup", escapeHandler);
+			window.document.removeEventListener('keyup', escapeHandler);
 		};
 	});
 </script>
@@ -110,7 +127,10 @@
 	bind:this={splitContainer}
 >
 	<div class="todo-menu-content">
-		<div class="edit-pane" on:keyup={enterKeyHandler}>
+		<div
+			class="edit-pane"
+			on:keyup={enterKeyHandler}
+		>
 			<TodoStatusMenu
 				currentStatus={editStatus}
 				on:select={selectStatusHandler}
@@ -139,7 +159,7 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={addHandler}
+					on:click={addSubtaskHandler}
 				>
 					Add subtask
 				</div>

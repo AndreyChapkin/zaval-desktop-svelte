@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { createTodo, deleteTodo, updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
+	import { updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type { CreateTodoDto, SaveHistoryDto, UpdateTodoData } from '$lib/types/todo';
-	import { directParent, findParentOfInHeirarchy } from '$lib/utils/todo-helpers';
+	import type { SaveHistoryDto } from '$lib/types/todo';
+	import { directParent } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
@@ -16,25 +16,6 @@
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 
 	// handlers
-	const updateTodoHandler = async (saveTodoEvent: CustomSvelteEvent<UpdateTodoData>) => {
-		const updateData = saveTodoEvent.detail;
-		await updateTodo(updateData.id, updateData.updatedTodoDto);
-		// TODO: make slighter
-		window.location.reload();
-	};
-
-	const createTodoHandler = async (createTodoEvent: CustomSvelteEvent<CreateTodoDto>) => {
-		const createdTodo = await createTodo(createTodoEvent.detail);
-		// TODO: make slighter
-		window.location.reload();
-	};
-
-	const deleteTodoHandler = async (deleteTodoEvent: CustomSvelteEvent<number>) => {
-		const parentTodo = findParentOfInHeirarchy(deleteTodoEvent.detail, data.todoHierachyDto);
-		await deleteTodo(deleteTodoEvent.detail);
-		// TODO: make slighter
-		window.location.href = `/todo/${parentTodo?.id ?? ''}`;
-	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {
 		const saveHistoryDto = saveHistoryEvent.detail;
@@ -55,10 +36,6 @@
 					<TodoCard
 						todo={child}
 						parentTodo={mainTodo}
-						size="small"
-						on:update={updateTodoHandler}
-						on:create={createTodoHandler}
-						on:delete={deleteTodoHandler}
 					/>
 				{/each}
 			{/if}
@@ -83,10 +60,7 @@
 					<TodoCard
 						todo={mainTodo}
 						parentTodo={directParent(mainTodo)}
-						on:update={updateTodoHandler}
-						on:create={createTodoHandler}
-						on:delete={deleteTodoHandler}
-						type="simple"
+						isNavigable={false}
 					/>
 				</div>
 				<TodoHistory
@@ -110,10 +84,6 @@
 						<TodoCard
 							{todo}
 							parentTodo={directParent(todo)}
-							size="small"
-							on:update={updateTodoHandler}
-							on:create={createTodoHandler}
-							on:delete={deleteTodoHandler}
 						/>
 					{/each}
 				</div>
@@ -127,10 +97,6 @@
 							<TodoCard
 								todo={child}
 								parentTodo={mainTodo}
-								size="small"
-								on:update={updateTodoHandler}
-								on:create={createTodoHandler}
-								on:delete={deleteTodoHandler}
 							/>
 						{/each}
 					{/if}

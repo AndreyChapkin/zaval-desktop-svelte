@@ -1,5 +1,5 @@
 import type { TodoBranchDto } from '$lib/types/pages-data';
-import type { TodoHierachyDto, TodoStatus } from '$lib/types/todo';
+import type { TodoDto, TodoHierachyDto, TodoStatus } from '$lib/types/todo';
 import {
 	BACKLOG_MENU_ICON_URL,
 	DONE_MENU_ICON_URL,
@@ -106,6 +106,18 @@ export function findParentOfInHeirarchy(id: number, todo: TodoHierachyDto): Todo
 		}
 	}
 	return childTodo ? directParent(childTodo) : null;
+}
+
+export function returnParentId(todo: TodoHierachyDto | TodoDto): number | null {
+	const todoDto = todo as TodoDto;
+	if (Number.isInteger(new Number(todoDto.parentId))) {
+		return todoDto.parentId;
+	}
+	const todoHierarchyDto = todo as TodoHierachyDto;
+	if (todoHierarchyDto.parents && todoHierarchyDto.parents.length > 0) {
+		return todoHierarchyDto.parents[todoHierarchyDto.parents.length - 1].id;
+	}
+	return null;
 }
 
 export function directParent(todo: TodoHierachyDto): TodoHierachyDto | null {

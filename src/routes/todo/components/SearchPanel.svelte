@@ -4,8 +4,8 @@
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { getContext } from 'svelte';
 	import ModalWindow from '../../components/ModalWindow.svelte';
-	import SimpleTodoCard from './SimpleTodoCard.svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
+	import TodoCard from './TodoCard.svelte';
 
 	// data
 	let searchValue: string;
@@ -49,7 +49,7 @@
 			<div class="found-todo">
 				{#if todos && todos.length > 0}
 					{#each todos as todo}
-						<SimpleTodoCard
+						<TodoCard
 							{todo}
 							on:select={closeHandler}
 						/>
@@ -61,8 +61,6 @@
 </ModalWindow>
 
 <style lang="scss">
-	/* @import '/static/style/variables-mixins.scss';
-	@import '/static/style/todo-variables.scss'; */
 	@import '/static/style/common/color/';
 	@import '/static/style/common/size/';
 	@import '/static/style/common/composition/';

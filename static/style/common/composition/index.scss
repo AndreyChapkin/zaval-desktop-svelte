@@ -23,6 +23,11 @@
 	gap: $gap;
 }
 
+@mixin row-align-start($gap: 0px) {
+	@apply flex flex-row items-start content-start;
+	gap: $gap;
+}
+
 @mixin column($gap: 0px) {
 	@apply flex flex-col;
 	gap: $gap;

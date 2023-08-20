@@ -11,7 +11,17 @@ export interface TodoBranchDto {
 	leaves: TodoDto[];
 }
 
+export interface TodoAndParentBranchIdDto {
+    todo: TodoDto;
+    parentBranchId: number | null;
+}
+
+export interface TodosListDto {
+    todos: TodoAndParentBranchIdDto[];
+    parentBranchesMap: Record<number, TodoDto[]>;
+}
+
 export interface TodosWithStatusPageData {
-	branches: TodoBranchDto[];
+	todosList: TodosListDto;
 	status: TodoStatus;
 }

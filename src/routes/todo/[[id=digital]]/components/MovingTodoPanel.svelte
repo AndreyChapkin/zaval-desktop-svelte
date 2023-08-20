@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getTodoHierarchy, moveTodo } from '$lib/api/todo-calls';
 	import { ROOT_TODO_ID } from '$lib/constants/todo/fields';
-	import type { TodoHierachyDto } from '$lib/types/todo';
+	import type { TodoDto, TodoHierachyDto } from '$lib/types/todo';
 	import { onMount } from 'svelte';
 	import ModalWindow from './../../../components/ModalWindow.svelte';
 	import MoveTodoCard from './MoveTodoCard.svelte';
@@ -11,7 +11,7 @@
 	const onlyChildrenLayoutClass = "only-children-layout";
 
 	// data
-	export let movingTodoDto: TodoHierachyDto;
+	export let movingTodoDto: TodoHierachyDto | TodoDto;
 	export let potentialNewParentDto: TodoHierachyDto | null;
 	$: showParents = potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID;
 	$: layoutClass = showParents ? withParentsLayoutClass : onlyChildrenLayoutClass;

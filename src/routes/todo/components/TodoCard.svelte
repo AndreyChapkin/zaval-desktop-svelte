@@ -29,7 +29,7 @@
 
 	const backgroundClickHandler = () => {
 		isMenuOpen = false;
-	}
+	};
 	const editClickHandler = (e: MouseEvent) => {
 		isMenuOpen = true;
 	};
@@ -42,14 +42,14 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-	class={`todo-card ${externalClass}`}
-	on:click={cardClickHandler}
->
+<div class={`todo-card ${externalClass}`}>
 	<div class={`todo-status-indicator ${statusClass}`} />
 	<div class="todo-interaction-panel">
 		{#if isNavigable}
-			<div class="go-to-todo">
+			<div
+				class="go-to-todo"
+				on:click={cardClickHandler}
+			>
 				<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
 					<div class="link-area">
 						<img
@@ -100,6 +100,7 @@
 	@import '/static/style/common/color/';
 
 	.todo-card {
+		min-height: 10 * $normal-size;
 		background-color: $base-light-color;
 		color: $base-contrast-color;
 		padding: $normal-size;

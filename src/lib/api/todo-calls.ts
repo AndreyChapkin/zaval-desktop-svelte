@@ -29,7 +29,7 @@ export async function deleteTodo(todoId: number): Promise<void> {
 }
 
 export async function getTodoHierarchy(todoId: number | null): Promise<TodoHierachyDto> {
-    const url = `${baseTodoURL}/hierarchy/${todoId === null ? '' : todoId}`;
+    const url = `${baseTodoURL}/detailed/${todoId === null ? '' : todoId}`;
 	const result = await callGet<TodoHierachyDto>(url);
     return result.data;
 }
@@ -37,14 +37,6 @@ export async function getTodoHierarchy(todoId: number | null): Promise<TodoHiera
 export async function getAllTodos(): Promise<TodoDto[]> {
     const url = baseTodoURL;
 	const result = await callGet<TodoDto[]>(url);
-    return result.data;
-}
-
-export async function getAllTodoUpBranches(status: TodoStatus): Promise<TodoHierachyDto[]> {
-    const url = `${baseTodoURL}/up-branch`;
-	const result = await callGet<TodoHierachyDto[]>(url, {
-        status
-    });
     return result.data;
 }
 

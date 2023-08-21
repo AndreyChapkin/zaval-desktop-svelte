@@ -124,7 +124,7 @@
 		.todo-status-indicator {
 			width: 3 * $normal-size;
 			height: 3 * $normal-size;
-			border-radius: $normal-size;
+			border-radius: 2 * $normal-size;
 			margin-bottom: $small-size;
 			top: -$normal-size;
 			left: -$normal-size;

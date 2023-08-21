@@ -6,11 +6,6 @@ export interface TodoDetailedPageData {
 	isRoot: boolean;
 }
 
-export interface TodoBranchDto {
-	parents: TodoDto[];
-	leaves: TodoDto[];
-}
-
 export interface TodoAndParentBranchIdDto {
     todo: TodoDto;
     parentBranchId: number | null;

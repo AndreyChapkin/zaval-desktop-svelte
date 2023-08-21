@@ -92,65 +92,29 @@
 </ModalWindow>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 
 	.moving-todo-panel {
-		position: absolute;
-		left: 10vw;
-		top: 10vh;
-		width: 80vw;
-		height: 80vh;
-		background-color: $base-color;
-		overflow: hidden;
-		display: grid;
-		grid-template-rows: minmax(100px, 1fr) minmax(100px, 3fr);
+		background-color: $base-dark-color;
+		padding: $large-size;
 
-		@apply rounded-md;
-	}
-
-	.with-parents-layout {
-		grid-template-areas:
-			'header header'
-			'left right';
-		grid-template-columns: minmax(100px, 1fr) minmax(100px, 2fr);
-	}
-
-	.only-children-layout {
-		grid-template-areas:
-			'header'
-			'right';
+		@include bordered($color: $base-color, $size: $border-small-size);
+		@include screen-sized(80, 80);
+		@include column-stretched($wide-size);
 	}
 
 	.moving-todo {
-		grid-area: header;
-		padding: $normal-size;
-
-		@include attractive-component;
-		@include bordered(bottom, $base-pale-color);
+		background-color: $base-light-color;
+		color: $base-contrast-color;
+		@include standard-container;
 	}
 
-	.parents {
-		overflow-y: auto;
-		grid-area: left;
-		padding: $normal-size;
-
-		@include column-stretched;
-		@include scrollable;
-		@include bordered(right, $base-pale-color);
+	.with-parents-layout {
 	}
 
-	.arrow {
-		margin-left: auto;
-		margin-right: auto;
-		text-align: center;
-	}
-
-	.children {
-		overflow-y: auto;
-		grid-area: right;
-		padding: $normal-size;
-
-		@include responsive-grid();
-		@include scrollable;
+	.only-children-layout {
 	}
 </style>

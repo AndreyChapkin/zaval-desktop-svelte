@@ -45,7 +45,6 @@
 
 		.todo-status-label {
 			font-size: x-large;
-			padding-left: $wide-size;
 			color: white;
 			border-bottom-width: 4px;
 			border-image-slice: 1;

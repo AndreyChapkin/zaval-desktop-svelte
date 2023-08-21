@@ -8,6 +8,13 @@
 	gap: $gap;
 }
 
+@mixin row-centered-and-align-center($gap: 0px) {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: $gap;
+}
+
 @mixin row-justifyied($gap: 0px) {
 	@apply flex flex-row justify-between;
 	gap: $gap;

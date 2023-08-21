@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { All_TODO_STATUSES, type TodoStatus } from '$lib/types/todo';
-	import { chooseStatusImgUrl } from '$lib/utils/todo-helpers';
+	import { chooseStatusImgUrl, todoStatusToLabel } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
@@ -22,7 +22,7 @@
 	};
 	const openHandler = (e: MouseEvent) => {
 		const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-		optionsY = rect.bottom + window.pageYOffset;
+		optionsY = rect.bottom + window.scrollY;
 		isOpen = !isOpen;
 	};
 
@@ -54,7 +54,7 @@
 			src={chooseStatusImgUrl(currentStatus)}
 			alt="img"
 		/>
-		<span>{currentStatus.replaceAll('_', ' ')}</span>
+		<span>{todoStatusToLabel(currentStatus)}</span>
 	</div>
 	{#if isOpen}
 		<div
@@ -70,7 +70,7 @@
 						src={chooseStatusImgUrl(status)}
 						alt="img"
 					/>
-					{status.replaceAll('_', ' ')}
+					{todoStatusToLabel(status)}
 				</div>
 			{/each}
 		</div>
@@ -78,7 +78,10 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 	@import '/static/style/todo-variables.scss';
 
 	.todo-status-menu {
@@ -90,17 +93,21 @@
 
 		.option-status,
 		.current-status {
-			background-color: $base-dark-color;
-			padding: $normal-size $normal-size $normal-size $normal-size;
+			cursor: pointer;
+			background-color: $second-light-color;
+			padding: $normal-size $wide-size $normal-size $wide-size;
 			@include row-centered($small-size);
 		}
 
 		.current-status {
-			min-width: 140px;
+			border-radius: $normal-size;
+			/* min-width: 140px; */
 		}
 
 		.options-pane {
 			position: absolute;
+			border-radius: $normal-size;
+			overflow: hidden;
 			@include normal-shadow;
 		}
 

@@ -39,9 +39,26 @@
 	box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+@mixin standard-container {
+	padding: $normal-size;
+	border-radius: $normal-size;
+}
+
 @mixin standard-input {
 	padding: $normal-size;
 	border-radius: $normal-size;
+}
+
+@mixin standard-button {
+	cursor: pointer;
+	background-color: $base-color;
+	color: $base-contrast-color;
+	padding: $normal-size $wide-size $normal-size $wide-size;
+	border-radius: $normal-size;
+
+	&:hover {
+		background-color: $second-light-color;
+	}
 }
 
 @mixin like-normal-button {

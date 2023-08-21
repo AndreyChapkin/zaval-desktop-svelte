@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { createTodo, deleteTodo, updateTodo } from '$lib/api/todo-calls';
 	import type {
-		CreateTodoDto,
 		TodoDto,
 		TodoHierachyDto,
-		TodoStatus,
-		UpdateTodoData
+		TodoStatus
 	} from '$lib/types/todo';
 	import { returnParentId } from '$lib/utils/todo-helpers';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
+	import ModalWindow from '../../../components/ModalWindow.svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
 
 	// data
@@ -23,11 +22,7 @@
 
 	// events and issuers
 	type EventType = {
-		backgroundClick: null;
-		update: UpdateTodoData;
-		create: CreateTodoDto;
 		move: TodoHierachyDto | TodoDto;
-		delete: number;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
@@ -63,26 +58,17 @@
 		}
 	};
 
-	const backgroundClickHandler = (e: MouseEvent) => {
-		if (e.target === e.currentTarget) {
-			dispatch('backgroundClick');
-		}
-	};
 	const createHandler = () => {
-		dispatch('backgroundClick');
 		requestTodoCreate();
 	};
 	const updateHandler = () => {
-		dispatch('backgroundClick');
 		requestTodoUpdate();
 	};
 	const deleteEventIssuer = () => {
-		dispatch('backgroundClick');
 		requestTodoDelete();
 	};
 	const enterKeyHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Enter') {
-			dispatch('backgroundClick');
 			if (isCreateMode) {
 				requestTodoCreate();
 			} else {
@@ -96,37 +82,21 @@
 		editStatus = 'BACKLOG';
 	};
 	const moveHandler = () => {
-		dispatch('backgroundClick');
 		dispatch('move', todoDto!!);
 	};
-	
+
 	const selectStatusHandler = (selectEvent: any) => {
 		const selectedStatus = selectEvent.detail as TodoStatus;
 		editStatus = selectedStatus;
 	};
-	const escapeHandler = (e: KeyboardEvent) => {
-		if (e.code === 'Escape') {
-			dispatch('backgroundClick');
-		}
-	};
-
-	// lifecycle
-	onMount(() => {
-		window.document.body.append(splitContainer);
-		window.document.addEventListener('keyup', escapeHandler);
-		return () => {
-			window.document.removeEventListener('keyup', escapeHandler);
-		};
-	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-	class="todo-menu"
-	on:mousedown={backgroundClickHandler}
-	bind:this={splitContainer}
->
-	<div class="todo-menu-content">
+<ModalWindow on:close>
+	<div
+		class="todo-menu"
+		bind:this={splitContainer}
+	>
 		<div
 			class="edit-pane"
 			on:keyup={enterKeyHandler}
@@ -136,13 +106,13 @@
 				on:select={selectStatusHandler}
 			/>
 			<input
-				class="w-full"
+				class="edit-name"
 				type="text"
 				bind:value={editName}
 			/>
 			<input
+				class="edit-priority"
 				on:keyup={enterKeyHandler}
-				class="w-full"
 				type="text"
 				bind:value={editPriority}
 			/>
@@ -188,42 +158,40 @@
 			{/if}
 		</div>
 	</div>
-</div>
+</ModalWindow>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 
 	$top-padding: 50px;
+
 	.todo-menu {
-		@include modal-window-background;
-		background: linear-gradient(
-			0deg,
-			rgba($color: #000000, $alpha: 1) 0%,
-			rgba($color: #000000, $alpha: 0.6) 100%
-		);
+		background-color: $base-dark-color;
+		padding: $large-size;
 
-		.todo-menu-content {
-			width: 600px;
-			@include bordered($color: $base-dark-color, $size: $border-normal-size);
-			@apply p-4 rounded-md;
-			background-color: $base-pale-color;
+		@include bordered($color: $base-color, $size: $border-small-size);
+		@include screen-sized(80, 80);
+		@include column-stretched($wide-size);
 
-			.edit-pane {
-				@apply mb-1;
-				@include row-stretched;
+		.edit-pane {
+			@include column-stretched($normal-size);
 
-				input {
-					@apply p-1 text-black;
-				}
+			input {
+				@include standard-input;
 			}
-			.action-pane {
-				@apply space-x-1;
-				@include row-centered;
 
-				.todo-menu-action {
-					@include normal-component;
-					@apply p-1;
-				}
+			.edit-priority {
+				width: 3 * $large-size;
+			}
+		}
+		.action-pane {
+			@include row-centered($normal-size);
+
+			.todo-menu-action {
+				@include standard-button;
 			}
 		}
 	}

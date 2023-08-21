@@ -27,7 +27,9 @@
 
 	// handlers
 
-	const backgroundClickHandler = () => (isMenuOpen = false);
+	const backgroundClickHandler = () => {
+		isMenuOpen = false;
+	}
 	const editClickHandler = (e: MouseEvent) => {
 		isMenuOpen = true;
 	};
@@ -78,7 +80,7 @@
 		<TodoMenu
 			todoDto={todo}
 			on:move={moveHandler}
-			on:backgroundClick={backgroundClickHandler}
+			on:close={backgroundClickHandler}
 		/>
 	{/if}
 	{#if isMoveMenuOpen}
@@ -102,12 +104,13 @@
 		color: $base-contrast-color;
 		padding: $normal-size;
 		position: relative;
+		overflow: hidden;
 
 		@include row;
 		border-radius: $normal-size;
 
 		.todo-interaction-panel {
-			padding: $small-size $normal-size $small-size 0px;
+			padding: $normal-size $normal-size $small-size 0px;
 			@include bordered(right, $base-contrast-color, $border-small-size);
 			@include column-centered($normal-size);
 
@@ -118,12 +121,12 @@
 		}
 
 		.todo-status-indicator {
-			width: 2 * $normal-size;
-			height: 2 * $normal-size;
+			width: 3 * $normal-size;
+			height: 3 * $normal-size;
 			border-radius: $normal-size;
 			margin-bottom: $small-size;
-			top: -$normal-size / 4;
-			left: -$normal-size / 4;
+			top: -$normal-size;
+			left: -$normal-size;
 
 			position: absolute;
 		}
@@ -139,19 +142,6 @@
 				color: $base-weak-contrast-color;
 			}
 		}
-	}
-
-	.small-todo {
-		font-size: small;
-		font-weight: bold;
-	}
-
-	.normal-todo {
-		font-size: medium;
-	}
-
-	.large-todo {
-		font-size: large;
 	}
 
 	.done-status {

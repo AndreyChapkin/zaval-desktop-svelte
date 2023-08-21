@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
-	// const
+	// components
+	let modalWindowContainer: HTMLDivElement;
 
 	// data
 
@@ -17,10 +18,26 @@
 			dispatch('close');
 		}
 	};
+
+	const escapeHandler = (e: KeyboardEvent) => {
+		if (e.code === 'Escape') {
+			dispatch('close');
+		}
+	};
+
+	// lifecycle
+	onMount(() => {
+		window.document.body.append(modalWindowContainer);
+		window.document.addEventListener('keyup', escapeHandler);
+		return () => {
+			window.document.removeEventListener('keyup', escapeHandler);
+		};
+	});
 </script>
 
 <div
 	class="modal-window background"
+	bind:this={modalWindowContainer}
 	on:mousedown={closeHandler}
 >
 	<div class="modal-window-body">

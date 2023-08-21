@@ -5,9 +5,6 @@
 
 	// state
 	export let todo: TodoHierachyDto;
-	export let size: 'small' | 'normal' | 'large' = 'normal';
-
-	$: sizeClass = `${size}-todo`;
 
 	// events
 	type EventType = {
@@ -22,7 +19,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`move-todo-card ${sizeClass}`}>
+<div class="move-todo-card">
 	<div class="todo-name">
 		{todo.name}
 	</div>
@@ -41,37 +38,25 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
 	@import '/static/style/todo-variables.scss';
 
 	.move-todo-card {
+		background-color: $base-color;
+		color: $base-contrast-color;
+
 		@include row($wide-size);
-		@include dark-component;
-		@apply p-2;
+		@include standard-container;
 
-		.todo-name {
-			@apply flex-1;
-		}
-	}
-
-	.small-todo {
-		font-size: small;
 		img {
 			@include icon-normal-sized;
 		}
-	}
 
-	.normal-todo {
-		font-size: medium;
-		img {
-			@include icon-large-sized;
-		}
-	}
-
-	.large-todo {
-		font-size: large;
-		img {
-			@include icon-super-large-sized;
+		.todo-name {
+			@apply flex-1;
 		}
 	}
 </style>

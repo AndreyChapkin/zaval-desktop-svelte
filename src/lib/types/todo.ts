@@ -1,13 +1,14 @@
-export interface TodoHierachyDto {
+export interface DetailedTodoDto {
     id: number;
     name: string;
+    description: string;
     priority: number;
     status: TodoStatus;
-    parents: TodoHierachyDto[] | null;
-    children: TodoHierachyDto[] | null;
+    parents: LightTodoDto[] | null;
+    children: LightTodoDto[] | null;
 }
 
-export interface TodoDto {
+export interface LightTodoDto {
     id: number;
     name: string;
     priority: number;
@@ -51,20 +52,12 @@ export type TodoStatus = "DONE" | "BACKLOG" | "WILL_BE_BACK" | "PING_ME" | "NEXT
 
 export const All_TODO_STATUSES: TodoStatus[] = ["DONE", "BACKLOG", "WILL_BE_BACK", "PING_ME", "NEXT_TO_TAKE", "IN_PROGRESS"];
 
-export const ROOT_TODO_HIERARCHY: TodoHierachyDto = {
+export const ROOT_TODO_HIERARCHY: DetailedTodoDto = {
     id: -1000,
     name: "root",
+    description: "",
     priority: 0,
     status: "BACKLOG",
     parents: null,
     children: null,
-};
-
-export const STAB_TODO_HIERARCHY: TodoHierachyDto = {
-    id: -100,
-    name: '',
-    priority: 0,
-    status: "BACKLOG",
-    children: null,
-    parents: null,
 };

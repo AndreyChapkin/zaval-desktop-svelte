@@ -1,4 +1,4 @@
-import { getTodoHierarchy, getTodoHistory } from '$lib/api/todo-calls';
+import { getDetailedTodo, getTodoHistory } from '$lib/api/todo-calls';
 import type { TodoDetailedPageData } from '$lib/types/pages-data';
 
 export const ssr = false;
@@ -10,16 +10,16 @@ export async function load({
 	params: any;
 }): Promise<TodoDetailedPageData | null> {
 	const todoId: number | undefined = params.id;
-	const [todoHierarchyDto, todoHistoryDto] = await Promise.all([
-		getTodoHierarchy(todoId ?? null),
+	const [detailedTodoDto, todoHistoryDto] = await Promise.all([
+		getDetailedTodo(todoId ?? null),
 		getTodoHistory(todoId ?? -1000),
 	]);
-	if (todoHierarchyDto) {
+	if (detailedTodoDto) {
 		return {
-			todoHierachyDto: todoHierarchyDto,
+			detailedTodoDto: detailedTodoDto,
 			todoHistoryRecords: todoHistoryDto.records,
 			// TODO move that logic to backend somehow
-			isRoot: todoHierarchyDto.id < 0,
+			isRoot: detailedTodoDto.id < 0,
 		};
 	} else {
 		return null;

@@ -61,7 +61,7 @@
 		background: linear-gradient(
 			0deg,
 			rgba($color: #000000, $alpha: 1) 0%,
-			rgba($color: #000000, $alpha: 0.6) 100%
+			rgba($color: #000000, $alpha: 0.9) 100%
 		);
 
 		.modal-window-body {

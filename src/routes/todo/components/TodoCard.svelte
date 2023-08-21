@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ROOT_TODO_HIERARCHY, type TodoDto, type TodoHierachyDto } from '$lib/types/todo';
+	import { ROOT_TODO_HIERARCHY, type DetailedTodoDto, type LightTodoDto } from '$lib/types/todo';
 	import { EDIT_ICON_URL, TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
@@ -7,8 +7,7 @@
 	import MovingTodoPanel from '../[[id=digital]]/components/MovingTodoPanel.svelte';
 
 	// state
-	export let todo: TodoHierachyDto | TodoDto;
-	export let parentTodo: TodoHierachyDto | null = null;
+	export let todo: DetailedTodoDto | LightTodoDto;
 	let isMenuOpen = false;
 	let isMoveMenuOpen = false;
 	export let externalClass = '';
@@ -18,9 +17,9 @@
 
 	// events
 	type EventType = {
-		select: TodoHierachyDto | TodoDto;
-		visit: TodoHierachyDto;
-		rightClick: { todo: TodoHierachyDto; x: number; y: number };
+		select: DetailedTodoDto | LightTodoDto;
+		visit: DetailedTodoDto;
+		rightClick: { todo: DetailedTodoDto; x: number; y: number };
 	};
 	const dispatch = createEventDispatcher<EventType>();
 	const cardClickHandler = () => dispatch('select', todo);
@@ -86,7 +85,6 @@
 	{#if isMoveMenuOpen}
 		<MovingTodoPanel
 			movingTodoDto={todo}
-			potentialNewParentDto={parentTodo}
 			on:close={moveMenuCloseHandler}
 		/>
 	{/if}

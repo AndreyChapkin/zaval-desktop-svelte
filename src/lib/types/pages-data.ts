@@ -1,19 +1,19 @@
-import type { TodoDto, TodoHierachyDto as TodoHierarchyDto, TodoStatus } from './todo';
+import type { DetailedTodoDto, LightTodoDto, DetailedTodoDto as TodoHierarchyDto, TodoStatus } from './todo';
 
 export interface TodoDetailedPageData {
-	todoHierachyDto: TodoHierarchyDto;
+	detailedTodoDto: DetailedTodoDto;
 	todoHistoryRecords: string[] | null;
 	isRoot: boolean;
 }
 
 export interface TodoAndParentBranchIdDto {
-    todo: TodoDto;
+    todo: LightTodoDto;
     parentBranchId: number | null;
 }
 
 export interface TodosListDto {
     todos: TodoAndParentBranchIdDto[];
-    parentBranchesMap: Record<number, TodoDto[]>;
+    parentBranchesMap: Record<number, LightTodoDto[]>;
 }
 
 export interface TodosWithStatusPageData {

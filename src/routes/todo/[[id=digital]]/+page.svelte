@@ -3,14 +3,13 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { SaveHistoryDto } from '$lib/types/todo';
-	import { directParent } from '$lib/utils/todo-helpers';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
 
 	// state
 	export let data: TodoDetailedPageData;
-	$: mainTodo = data.todoHierachyDto;
+	$: mainTodo = data.detailedTodoDto;
 	$: parentTodos = (mainTodo.parents ?? []).slice().reverse();
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
@@ -33,10 +32,7 @@
 		<div class="root-todos">
 			{#if mainTodo.children}
 				{#each mainTodo.children as child (child.id)}
-					<TodoCard
-						todo={child}
-						parentTodo={mainTodo}
-					/>
+					<TodoCard todo={child} />
 				{/each}
 			{/if}
 		</div>
@@ -59,13 +55,12 @@
 				>
 					<TodoCard
 						todo={mainTodo}
-						parentTodo={directParent(mainTodo)}
 						isNavigable={false}
 					/>
 				</div>
 				<TodoHistory
 					slot="second"
-					todoId={data.todoHierachyDto.id}
+					todoId={data.detailedTodoDto.id}
 					records={data.todoHistoryRecords ?? []}
 					on:save={historySaveHandler}
 				/>
@@ -81,10 +76,7 @@
 				>
 					{#each parentTodos as todo (todo.id)}
 						<div class="arrow">/\</div>
-						<TodoCard
-							{todo}
-							parentTodo={directParent(todo)}
-						/>
+						<TodoCard {todo} />
 					{/each}
 				</div>
 				<div
@@ -94,10 +86,7 @@
 					{#if mainTodo.children}
 						{#each mainTodo.children as child (child.id)}
 							<div class="arrow">||</div>
-							<TodoCard
-								todo={child}
-								parentTodo={mainTodo}
-							/>
+							<TodoCard todo={child} />
 						{/each}
 					{/if}
 				</div>

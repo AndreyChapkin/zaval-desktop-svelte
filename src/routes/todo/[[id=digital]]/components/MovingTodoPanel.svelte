@@ -1,93 +1,83 @@
 <script lang="ts">
-	import { getTodoHierarchy, moveTodo } from '$lib/api/todo-calls';
-	import { ROOT_TODO_ID } from '$lib/constants/todo/fields';
-	import type { TodoDto, TodoHierachyDto } from '$lib/types/todo';
-	import { onMount } from 'svelte';
+	import { findTodosWithNameFragment, moveTodo } from '$lib/api/todo-calls';
+	import type { CustomSvelteEvent } from '$lib/types/general';
+	import type { DetailedTodoDto, LightTodoDto } from '$lib/types/todo';
+	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
+	import LoadingIndicator from '../../../components/LoadingIndicator.svelte';
 	import ModalWindow from './../../../components/ModalWindow.svelte';
 	import MoveTodoCard from './MoveTodoCard.svelte';
 
-	// constants
-	const withParentsLayoutClass = "with-parents-layout";
-	const onlyChildrenLayoutClass = "only-children-layout";
-
 	// data
-	export let movingTodoDto: TodoHierachyDto | TodoDto;
-	export let potentialNewParentDto: TodoHierachyDto | null;
-	$: showParents = potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID;
-	$: layoutClass = showParents ? withParentsLayoutClass : onlyChildrenLayoutClass;
-	$: parentTodos = potentialNewParentDto?.parents?.reverse() ?? [];
-	$: childrenTodos = potentialNewParentDto?.children?.filter((it) => it.id !== movingTodoDto.id) ?? [];
-	$: isLoading = true;
+	export let movingTodoDto: DetailedTodoDto | LightTodoDto;
+	let searchValue: string;
+	let todos: LightTodoDto[];
+	let isLoading = false;
 
 	// events and issuers
 
 	// calls
-	const getNewPontentialParentHierarchy = async (id: number | null = null) => {
-		isLoading = true;
-		const newParentDto = await getTodoHierarchy(id);
-		potentialNewParentDto = newParentDto;
-		isLoading = false;
-	};
 
 	// handlers
-	const createSelectHandler = (dto: TodoHierachyDto) => async () => {
+	const selectHandler = async (selectEvent: CustomSvelteEvent<LightTodoDto>) => {
 		await moveTodo({
 			todoId: movingTodoDto.id,
-			parentId: dto.id
+			parentId: selectEvent.detail.id
 		});
 		location.href = `/todo/${movingTodoDto.id}`;
 	};
 
-	const createGoToHandler = (dto: TodoHierachyDto) => async () => {
-		getNewPontentialParentHierarchy(dto.id);
+	const toRootHandler = async () => {
+		await moveTodo({
+			todoId: movingTodoDto.id,
+			parentId: null,
+		});
+		location.href = `/todo/${movingTodoDto.id}`;
 	};
 
-	// lifecycle
-	onMount(() => {
-		getNewPontentialParentHierarchy(potentialNewParentDto?.id ?? null);
-	});
+	// reactive functions
+	const searchTodos = decreaseNumberOfCalls((value: string) => {
+		isLoading = true;
+		findTodosWithNameFragment(value).then((data) => {
+			isLoading = false;
+			todos = data;
+		});
+	}, 500);
+
+	$: if (searchValue) {
+		searchTodos(searchValue);
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <ModalWindow on:close>
-	<div class={`moving-todo-panel ${layoutClass}`}>
+	<div class="moving-todo-panel">
 		<div class="moving-todo">
 			{movingTodoDto.name}
 		</div>
-		{#if isLoading}
-			<div>Loading...</div>
-		{:else}
-			{#if potentialNewParentDto && potentialNewParentDto.id !== ROOT_TODO_ID}
-				<div class="parents">
-					<div class="potential-new-parent">
-						<MoveTodoCard
-							todo={potentialNewParentDto}
-							on:select={createSelectHandler(potentialNewParentDto)}
-							on:visit={createGoToHandler(potentialNewParentDto)}
-						/>
-					</div>
-					<div class="upper-parents">
-						{#each parentTodos as parentTodo (parentTodo.id)}
-							<div class="arrow">/\</div>
+		<button class="to-root" on:click={toRootHandler}>To root</button>
+		<div class="delimeter">or</div>
+		<div class="search-panel">
+			<input
+				class="search-input"
+				type="text"
+				bind:value={searchValue}
+				autofocus
+			/>
+			{#if isLoading}
+				<LoadingIndicator />
+			{:else}
+				<div class="found-todo">
+					{#if todos && todos.length > 0}
+						{#each todos as todo}
 							<MoveTodoCard
-								todo={parentTodo}
-								on:select={createSelectHandler(parentTodo)}
-								on:visit={createGoToHandler(parentTodo)}
+								{todo}
+								on:select={selectHandler}
 							/>
 						{/each}
-					</div>
+					{/if}
 				</div>
 			{/if}
-			<div class="children">
-				{#each childrenTodos as childTodo (childTodo.id)}
-					<MoveTodoCard
-						todo={childTodo}
-						on:select={createSelectHandler(childTodo)}
-						on:visit={createGoToHandler(childTodo)}
-					/>
-				{/each}
-			</div>
-		{/if}
+		</div>
 	</div>
 </ModalWindow>
 
@@ -102,19 +92,38 @@
 		padding: $large-size;
 
 		@include bordered($color: $base-color, $size: $border-small-size);
-		@include screen-sized(80, 80);
+		@include screen-sized(70, 80);
 		@include column-stretched($wide-size);
 	}
 
+	.to-root {
+		@include standard-button;
+	}
+
+	.delimeter {
+		text-align: center;
+		color: $base-contrast-color;
+	}
+
+	.search-panel {
+		@include column-stretched($wide-size);
+	}
+
+	.search-input {
+		color: $base-contrast-color;
+		background: $strong-gradient;
+		@include bordered($color: $strong-second-color, $size: $border-small-size);
+		@include standard-input;
+	}
+
 	.moving-todo {
-		background-color: $base-light-color;
+		background-color: $second-light-color;
 		color: $base-contrast-color;
 		@include standard-container;
 	}
 
-	.with-parents-layout {
-	}
-
-	.only-children-layout {
+	.found-todo {
+		@include scrollable;
+		@include responsive-grid(350px);
 	}
 </style>

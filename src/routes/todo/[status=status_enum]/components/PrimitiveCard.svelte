@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { ROOT_TODO_HIERARCHY, type TodoDto, type TodoHierachyDto } from '$lib/types/todo';
+	import { ROOT_TODO_HIERARCHY, type DetailedTodoDto, type LightTodoDto } from '$lib/types/todo';
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { createEventDispatcher } from 'svelte';
 
 	// state
-	export let todo: TodoHierachyDto | TodoDto;
+	export let todo: DetailedTodoDto | LightTodoDto;
 	export let externalClass: string = '';
 
 	// events
 	type EventType = {
-		select: TodoHierachyDto | TodoDto;
+		select: DetailedTodoDto | LightTodoDto;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 

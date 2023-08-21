@@ -1,25 +1,25 @@
 import type { TodosListDto } from "$lib/types/pages-data";
-import type { CreateTodoDto, MoveTodoDto, TodoDto, TodoHierachyDto, TodoHistoryDto, TodoStatus, UpdateTodoDto } from "$lib/types/todo";
+import type { CreateTodoDto, DetailedTodoDto, LightTodoDto, MoveTodoDto, TodoHistoryDto, TodoStatus, UpdateTodoDto } from "$lib/types/todo";
 import { callDelete, callGet, callPatch, callPost } from "$lib/utils/call-helpers";
 import { baseURL } from "./base";
 
 const baseTodoURL = baseURL + "/todo";
 
-export async function createTodo(createTodoDto: CreateTodoDto): Promise<TodoDto> {
+export async function createTodo(createTodoDto: CreateTodoDto): Promise<LightTodoDto> {
     const url = baseTodoURL;
-	const result = await callPost<TodoDto>(url, createTodoDto);
+	const result = await callPost<LightTodoDto>(url, createTodoDto);
     return result.data;
 }
 
-export async function getTodo(todoId: number): Promise<TodoDto> {
+export async function getTodo(todoId: number): Promise<LightTodoDto> {
     const url = `${baseTodoURL}/${todoId}`;
-	const result = await callGet<TodoDto>(url);
+	const result = await callGet<LightTodoDto>(url);
     return result.data;
 }
 
-export async function updateTodo(todoId: number, updateTodoDto: UpdateTodoDto): Promise<TodoDto> {
+export async function updateTodo(todoId: number, updateTodoDto: UpdateTodoDto): Promise<LightTodoDto> {
     const url = `${baseTodoURL}/${todoId}`;
-	const result = await callPatch<TodoDto>(url, updateTodoDto);
+	const result = await callPatch<LightTodoDto>(url, updateTodoDto);
     return result.data;
 }
 
@@ -28,15 +28,15 @@ export async function deleteTodo(todoId: number): Promise<void> {
 	await callDelete<void>(url);
 }
 
-export async function getTodoHierarchy(todoId: number | null): Promise<TodoHierachyDto> {
+export async function getDetailedTodo(todoId: number | null): Promise<DetailedTodoDto> {
     const url = `${baseTodoURL}/detailed/${todoId === null ? '' : todoId}`;
-	const result = await callGet<TodoHierachyDto>(url);
+	const result = await callGet<DetailedTodoDto>(url);
     return result.data;
 }
 
-export async function getAllTodos(): Promise<TodoDto[]> {
+export async function getAllTodos(): Promise<LightTodoDto[]> {
     const url = baseTodoURL;
-	const result = await callGet<TodoDto[]>(url);
+	const result = await callGet<LightTodoDto[]>(url);
     return result.data;
 }
 
@@ -65,9 +65,9 @@ export async function updateTodoHistory(todoId: number, todoHistoryDto: TodoHist
 	return response.data;
 }
 
-export async function findTodosWithNameFragment(nameFragment: string): Promise<TodoDto[]> {
+export async function findTodosWithNameFragment(nameFragment: string): Promise<LightTodoDto[]> {
     const url = `${baseTodoURL}/with-name-fragment`;
-    const response = await callGet<TodoDto[]>(url, {
+    const response = await callGet<LightTodoDto[]>(url, {
         "name-fragment": nameFragment
     });
 	return response.data;

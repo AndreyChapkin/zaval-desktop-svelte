@@ -1,21 +1,19 @@
 <script lang="ts">
-	import type { TodoHierachyDto } from '$lib/types/todo';
+	import type { DetailedTodoDto, LightTodoDto } from '$lib/types/todo';
 	import { CHOOSE_ICON_URL, TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { createEventDispatcher } from 'svelte';
 
 	// state
-	export let todo: TodoHierachyDto;
+	export let todo: LightTodoDto;
 
 	// events
 	type EventType = {
-		select: TodoHierachyDto;
-		visit: TodoHierachyDto;
+		select: LightTodoDto;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
 	const selectHandler = () => dispatch('select', todo);
-	const visitHandler = () => dispatch('visit', todo);
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -26,12 +24,6 @@
 	<button on:click={selectHandler} class="select-todo">
 		<img
 			src={CHOOSE_ICON_URL}
-			alt="composition"
-		/>
-	</button>
-	<button on:click={visitHandler} class="visit-todo">
-		<img
-			src={TODO_COMPLEX_ICON_URL}
 			alt="composition"
 		/>
 	</button>

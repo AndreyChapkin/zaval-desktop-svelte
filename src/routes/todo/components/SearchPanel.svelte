@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { findTodosWithNameFragment } from '$lib/api/todo-calls';
-	import type { TodoDto } from '$lib/types/todo';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
 	import ModalWindow from '../../components/ModalWindow.svelte';
 	import TodoCard from './TodoCard.svelte';
+	import type { LightTodoDto } from '$lib/types/todo';
 
 	// data
 	let searchValue: string;
-	let todos: TodoDto[];
+	let todos: LightTodoDto[];
 	let isLoading = false;
 
 	// events

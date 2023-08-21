@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createTodo, deleteTodo, updateTodo } from '$lib/api/todo-calls';
 	import type {
-		TodoDto,
-		TodoHierachyDto,
+	DetailedTodoDto,
+		LightTodoDto,
 		TodoStatus
 	} from '$lib/types/todo';
 	import { returnParentId } from '$lib/utils/todo-helpers';
@@ -11,7 +11,7 @@
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
 
 	// data
-	export let todoDto: TodoHierachyDto | TodoDto | null;
+	export let todoDto: DetailedTodoDto | LightTodoDto | null;
 	let editName: string = todoDto?.name ?? '';
 	let editStatus: TodoStatus = todoDto?.status ?? 'BACKLOG';
 	let editPriority: number = todoDto?.priority ?? 0;
@@ -22,7 +22,7 @@
 
 	// events and issuers
 	type EventType = {
-		move: TodoHierachyDto | TodoDto;
+		move: DetailedTodoDto | LightTodoDto;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 

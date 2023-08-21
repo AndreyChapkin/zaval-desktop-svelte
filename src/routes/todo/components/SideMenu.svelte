@@ -1,22 +1,21 @@
 <script lang="ts">
 	import { ROOT_MENU_ICON_URL, SEARCH_ICON_URL } from '$lib/utils/assets-references';
-	import { setContext } from 'svelte';
-	import { writable } from 'svelte/store';
 	import SearchPanel from './SearchPanel.svelte';
 	import SideStatusMenu from './SideStatusMenu.svelte';
 
 	// state
-	const isOpen = writable(false);
+	let isSearchOpen = false;
 
 	// events
 
 	// handlers
 	const showSearchHandler = () => {
-		$isOpen = true;
+		isSearchOpen = true;
 	};
-
-	// context and store
-	setContext('is-search-panel-open', { isOpen });
+	
+	const closeSearchHandler = () => {
+		isSearchOpen = false;
+	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -37,8 +36,8 @@
 			on:click={showSearchHandler}
 		/>
 	</div>
-	{#if $isOpen}
-		<SearchPanel />
+	{#if isSearchOpen}
+		<SearchPanel on:close={closeSearchHandler} />
 	{/if}
 </div>
 
@@ -46,10 +45,6 @@
 	@import '/static/style/common/color/index.scss';
 	@import '/static/style/common/size/index.scss';
 	@import '/static/style/common/composition/index.scss';
-	/* @import '/static/style/common/composition/mixins.scss';
-	@import '/static/style/common/composition/mixins.scss'; */
-	/* @import '/static/style/variables-mixins.scss'; */
-	/* @import '/static/style/todo-variables.scss'; */
 
 	.todo-side-menu {
 		background-color: $second-color;

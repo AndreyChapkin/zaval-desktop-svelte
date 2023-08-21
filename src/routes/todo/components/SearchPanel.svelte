@@ -2,22 +2,25 @@
 	import { findTodosWithNameFragment } from '$lib/api/todo-calls';
 	import type { TodoDto } from '$lib/types/todo';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
-	import { getContext } from 'svelte';
-	import ModalWindow from '../../components/ModalWindow.svelte';
+	import { createEventDispatcher } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
+	import ModalWindow from '../../components/ModalWindow.svelte';
 	import TodoCard from './TodoCard.svelte';
 
 	// data
 	let searchValue: string;
 	let todos: TodoDto[];
 	let isLoading = false;
-	const { isOpen } = getContext('is-search-panel-open') as any;
 
 	// events
+	type EventType = {
+		close: null;
+	};
+	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
 	const closeHandler = () => {
-		$isOpen = false;
+		dispatch('close');
 	};
 
 	// reactive functions

@@ -1,17 +1,18 @@
 <script lang="ts">
-	import type { SaveHistoryDto } from '$lib/types/todo';
-	import { CANCEL_ICON_URL, EDIT_ICON_URL, HISTORY_RECORD_SIGN_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { updateTodo } from '$lib/api/todo-calls';
+	import type { DetailedTodoDto } from '$lib/types/todo';
+	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
-	export let todoId: number;
-	export let records: string[];
-	let editRecords = records.join('\n');
+	export let detailedTodoDto: DetailedTodoDto;
+	$: description = detailedTodoDto.description;
+	let editedDescription: string = detailedTodoDto.description;
 	let isEditMode = false;
 
 	// events and issuers
 	type EventType = {
-		save: SaveHistoryDto;
+		update: DetailedTodoDto;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
@@ -20,22 +21,26 @@
 		isEditMode = true;
 	};
 
-	let saveHandler = () => {
-		dispatch('save', {
-			todoId,
-			records: editRecords.split('\n').filter((i) => !!i)
+	let saveHandler = async () => {
+		await updateTodo(detailedTodoDto.id, {
+			description: editedDescription,
 		});
+		dispatch('update', {
+			...detailedTodoDto,
+			description: editedDescription,
+		})
 		isEditMode = false;
 	};
 
 	let cancelHandler = () => {
+		editedDescription = description;
 		isEditMode = false;
 	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="todo-history">
-	<div class={`todo-history-menu ${isEditMode ? "edit-menu" : ""}`}>
+<div class="todo-description">
+	<div class={`todo-description-menu ${isEditMode ? 'edit-menu' : ''}`}>
 		{#if isEditMode}
 			<button on:click={saveHandler}>
 				<img
@@ -62,31 +67,22 @@
 		<textarea
 			cols="30"
 			rows="10"
-			bind:value={editRecords}
+			bind:value={editedDescription}
 		/>
 	{:else}
-		<div class="todo-history-body">
-			{#each records as record}
-				<div class="todo-history-item">
-					<img
-						src={HISTORY_RECORD_SIGN_URL}
-						alt="status"
-					/>
-					{record}
-				</div>
-			{/each}
+		<div class="todo-description-body">
+			{description}
 		</div>
 	{/if}
 </div>
 
 <style lang="scss">
-	/* @import '/static/style/variables-mixins.scss'; */
 	@import '/static/style/common/color/';
 	@import '/static/style/common/size/';
 	@import '/static/style/common/composition/';
 	@import '/static/style/common/facade/';
 
-	.todo-history {
+	.todo-description {
 		@include column;
 
 		textarea {
@@ -99,11 +95,11 @@
 			@include styled-scrollbar;
 		}
 
-		.todo-history-menu {
+		.todo-description-menu {
 			background-color: $base-color;
 			padding: $small-size;
 
-			@include row-centered($normal-size);			
+			@include row-centered($normal-size);
 
 			img {
 				@include icon-normal-sized;
@@ -115,23 +111,12 @@
 			@include bordered(bottom, $strong-second-color, $border-small-size);
 		}
 
-		.todo-history-body {
+		.todo-description-body {
 			flex: 1;
 			overflow: auto;
 			padding: $normal-size;
-			@include styled-scrollbar;
-		}
-
-		.todo-history-item {
-			margin-bottom: $wide-size;
 			color: $base-contrast-color;
-			padding-bottom: $small-size;
-			@include row-centered($normal-size);
-			@include bordered(bottom, $base-light-color, $border-small-size);
-
-			img {
-				@include icon-normal-sized;
-			}
+			@include styled-scrollbar;
 		}
 	}
 </style>

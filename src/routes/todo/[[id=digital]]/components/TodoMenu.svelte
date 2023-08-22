@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { createTodo, deleteTodo, updateTodo } from '$lib/api/todo-calls';
-	import type {
-	DetailedTodoDto,
-		LightTodoDto,
-		TodoStatus
-	} from '$lib/types/todo';
+	import type { DetailedTodoDto, LightTodoDto, TodoStatus } from '$lib/types/todo';
 	import { returnParentId } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import ModalWindow from '../../../components/ModalWindow.svelte';
@@ -30,9 +26,11 @@
 	const requestTodoUpdate = async () => {
 		if (todoDto) {
 			await updateTodo(todoDto.id, {
-				name: editName,
-				priority: editPriority,
-				status: editStatus
+				general: {
+					name: editName,
+					priority: editPriority,
+					status: editStatus
+				}
 			});
 		}
 		// TODO: make slighter

@@ -2,19 +2,24 @@
 	import { updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type { SaveHistoryDto } from '$lib/types/todo';
+	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
+	import TodoDescription from './components/TodoDescription.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
 
 	// state
 	export let data: TodoDetailedPageData;
-	$: mainTodo = data.detailedTodoDto;
-	$: parentTodos = (mainTodo.parents ?? []).slice().reverse();
+	$: mainDetailedTodoDto = data.detailedTodoDto;
+	$: parentTodos = (mainDetailedTodoDto.parents ?? []).slice().reverse();
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 
 	// handlers
+	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
+		const updatedDetailedTodoDto = event.detail;
+		mainDetailedTodoDto = updatedDetailedTodoDto;
+	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {
 		const saveHistoryDto = saveHistoryEvent.detail;
@@ -30,8 +35,8 @@
 <div class="todo-details">
 	{#if data.isRoot}
 		<div class="root-todos">
-			{#if mainTodo.children}
-				{#each mainTodo.children as child (child.id)}
+			{#if mainDetailedTodoDto.children}
+				{#each mainDetailedTodoDto.children as child (child.id)}
 					<TodoCard todo={child} />
 				{/each}
 			{/if}
@@ -54,12 +59,17 @@
 					slot="first"
 				>
 					<TodoCard
-						todo={mainTodo}
+						todo={mainDetailedTodoDto}
 						isNavigable={false}
 					/>
 				</div>
-				<TodoHistory
+				<TodoDescription
+					detailedTodoDto={mainDetailedTodoDto}
 					slot="second"
+					on:update={todoDescriptionUpdateHandler}
+				/>
+				<TodoHistory
+					slot="third"
 					todoId={data.detailedTodoDto.id}
 					records={data.todoHistoryRecords ?? []}
 					on:save={historySaveHandler}
@@ -83,8 +93,8 @@
 					class="children-todos"
 					slot="second"
 				>
-					{#if mainTodo.children}
-						{#each mainTodo.children as child (child.id)}
+					{#if mainDetailedTodoDto.children}
+						{#each mainDetailedTodoDto.children as child (child.id)}
 							<div class="arrow">||</div>
 							<TodoCard todo={child} />
 						{/each}

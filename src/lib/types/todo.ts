@@ -29,13 +29,18 @@ export interface CreateTodoDto {
 
 export interface UpdateTodoData {
     id: number;
-    updatedTodoDto: UpdateTodoDto;
+    updateTodoDto: UpdateTodoDto;
 }
 
 export interface UpdateTodoDto {
-    name: string;
-    priority: number;
-    status: TodoStatus;
+    general?: UpdateTodoGeneralDto,
+    description?: string
+}
+
+export interface UpdateTodoGeneralDto {
+    name: string,
+    status: TodoStatus,
+    priority: number,
 }
 
 export interface MoveTodoDto {

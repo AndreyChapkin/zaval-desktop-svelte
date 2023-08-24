@@ -2,12 +2,14 @@
 	import { updateTodo } from '$lib/api/todo-calls';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { findSelectedElement, parseDescription, serializeDescription } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
+	import RenderedFragment from './RenderedFragment.svelte';
 
 	// data
 	export let detailedTodoDto: DetailedTodoDto;
-	$: description = detailedTodoDto.description;
-	let editedDescription: string = detailedTodoDto.description;
+	$: descriptionFragments = parseDescription(detailedTodoDto.description);
+	let descriptionContainer: HTMLDivElement;
 	let isEditMode = false;
 
 	// events and issuers
@@ -22,18 +24,18 @@
 	};
 
 	let saveHandler = async () => {
+		const editedDescription = serializeDescription(descriptionContainer);
 		await updateTodo(detailedTodoDto.id, {
-			description: editedDescription,
+			description: editedDescription
 		});
 		dispatch('update', {
 			...detailedTodoDto,
-			description: editedDescription,
-		})
+			description: editedDescription
+		});
 		isEditMode = false;
 	};
 
 	let cancelHandler = () => {
-		editedDescription = description;
 		isEditMode = false;
 	};
 </script>
@@ -63,17 +65,33 @@
 			</button>
 		{/if}
 	</div>
-	{#if isEditMode}
-		<textarea
-			cols="30"
-			rows="10"
-			bind:value={editedDescription}
-		/>
-	{:else}
-		<div class="todo-description-body">
-			{description}
-		</div>
-	{/if}
+	<div
+		class="todo-description-body"
+		bind:this={descriptionContainer}
+		contenteditable={isEditMode}
+		on:keydown={(e) => {
+			if (e.code === "Enter") {
+				// e.preventDefault();
+			}
+			if (e.code === 'Digit8' && e.ctrlKey) {
+				descriptionFragments = [...descriptionFragments, {
+					richType: 'paragraph',
+					children: [
+						"example text\nanother string ",
+						{richType: 'strong', children: ["pepper"]},
+						" example text\nanother string"
+					],
+				}];
+			}
+			if (e.code === 'Digit7' && e.ctrlKey) {
+				findSelectedElement();
+			}
+		}}
+	>
+		{#each descriptionFragments as fragment}
+			<RenderedFragment {fragment} />
+		{/each}
+	</div>
 </div>
 
 <style lang="scss">
@@ -115,8 +133,14 @@
 			flex: 1;
 			overflow: auto;
 			padding: $normal-size;
+			white-space: pre-wrap;
 			color: $base-contrast-color;
 			@include styled-scrollbar;
+
+			.styledFragment {
+				color: pink;
+				display: block;
+			}
 		}
 	}
 </style>

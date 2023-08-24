@@ -1,0 +1,28 @@
+<script lang="ts">
+	import { getRichTag, getRichTagClass, type DescriptionFragment } from '$lib/utils/todo-helpers';
+
+	// data
+	export let fragment: DescriptionFragment;
+</script>
+
+<svelte:element
+	this={getRichTag(fragment.richType)}
+	class={getRichTagClass(fragment.richType) ?? ''}
+>
+	{#each fragment.children as child}
+		{#if typeof child === 'string'}
+			{child}
+		{:else}
+			<svelte:self fragment={child} />
+		{/if}
+	{/each}
+</svelte:element>
+
+<style lang="scss">
+	@import '/static/style/common/color/';
+	@import '/static/style/common/size/';
+	@import '/static/style/common/composition/';
+	@import '/static/style/common/facade/';
+
+	
+</style>

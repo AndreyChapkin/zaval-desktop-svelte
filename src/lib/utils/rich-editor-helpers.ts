@@ -96,6 +96,21 @@ function serializeElement(
 						richType: childType,
 						children: []
 					};
+					// serialize attributes if any
+					const allowedAttributes = RICH_ATTRIBUTES[childType];
+					if (allowedAttributes) {
+						const attributes: Record<string, string> = {};
+						for (let attr of allowedAttributes) {
+							const realAttributeValue = htmlChildNode.getAttribute(attr);
+							if (realAttributeValue) {
+								attributes[attr] = realAttributeValue;
+							}
+						}
+						// if any attribute
+						if (Object.keys(attributes).length > 0) {
+							childBlankFragment.attributes = attributes;
+						}
+					}
 					parentFragment.children.push(childBlankFragment);
 					nodesToProcess.push([htmlChildNode, childBlankFragment]);
 				}

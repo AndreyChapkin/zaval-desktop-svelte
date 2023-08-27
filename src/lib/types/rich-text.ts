@@ -44,6 +44,6 @@ export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 
 export interface DescriptionFragment {
 	richType: RichTypes;
-	attributes: Record<string, string> | null;
+	attributes?: Record<string, string> | null;
 	children: (string | DescriptionFragment)[];
 }

@@ -86,6 +86,37 @@ function serializeElement(
 	return null;
 }
 
+export function moveElement(element: HTMLElement, position: NewPositionType) {
+	switch (position) {
+		case 'before':
+			let previousElement = element.previousElementSibling;
+			// while (previousElement && !(previousElement instanceof HTMLElement)) {
+			// 	previousElement = element.previousSibling;
+			// }
+			previousElement?.before(element);
+			break;
+		case 'after':
+			let nextElement = element.nextElementSibling;
+			// while (nextElement && !(nextElement instanceof HTMLElement)) {
+			// 	nextElement = element.nextSibling;
+			// }
+			nextElement?.after(element);
+			break;
+	}
+}
+
+export function addNewElementInsteadOf(
+	newElementType: RichTypes,
+	anchorElement: HTMLElement,
+) {
+	const newElement = createNewElement(newElementType);
+	if (!newElement) {
+		return;
+	}
+	anchorElement.replaceWith(newElement);
+	selectTextInElement(newElement);
+}
+
 export function addNewElement(
 	newElementType: RichTypes,
 	anchorElement: HTMLElement,
@@ -95,10 +126,6 @@ export function addNewElement(
 	if (!newElement) {
 		return;
 	}
-	console.log('@@@ newElementType = ' + newElementType);
-	console.log('@@@ anchorElement');
-	console.log(anchorElement);
-	console.log('@@@ position = ' + position);
 	switch (position) {
 		case 'before':
 			anchorElement.before(newElement);
@@ -113,6 +140,12 @@ export function addNewElement(
 	}
 	selectTextInElement(newElement);
 }
+
+// export function addPlaceholderElement(anchorElement: HTMLElement): HTMLElement {
+// 	const placeholderElement = createPlaceholderElement();
+// 	anchorElement.after(placeholderElement);
+// 	return placeholderElement;
+// }
 
 function selectTextInElement(
 	element: HTMLElement,
@@ -155,6 +188,13 @@ function createNewElement(richType: RichTypes): HTMLElement | null {
 	return null;
 }
 
+export function createPlaceholderElement(): HTMLElement {
+	const newElement = document.createElement('div');
+	newElement.classList.add('rich-placeholder');
+	newElement.innerText = 'placeholder';
+	return newElement;
+}
+
 export function defineElementType(element: HTMLElement): RichTypes | null {
 	if (element) {
 		return TAGS_TO_RICH_TYPES_MAP[element.tagName.toLowerCase()] ?? null;
@@ -190,11 +230,31 @@ export function chooseNewPosition(event: KeyboardEvent): NewPositionType | null 
 	return null;
 }
 
+export function checkIfSaveKeyCombination(event: KeyboardEvent): boolean {
+	if (event.code === 'KeyS' && event.altKey) {
+		return true;
+	}
+	return false;
+}
+
+export function checkIfAdditionModeCombination(event: KeyboardEvent): boolean {
+	if (event.code === 'KeyA' && event.altKey) {
+		return true;
+	}
+	return false;
+}
+
+export function checkIfEscapeModesCombination(event: KeyboardEvent): boolean {
+	if (event.code === 'Escape') {
+		return true;
+	}
+	return false;
+}
+
 export function changeDefaultEnterBehaviour(event: KeyboardEvent) {
 	if (event.code === 'Enter' && !event.shiftKey) {
 		event.preventDefault();
 		const textNode = findSelectedText();
-		console.log('@@@ text = ' + textNode?.textContent);
 		let selection = window.getSelection();
 		if (selection && textNode) {
 			const range = selection.getRangeAt(0);

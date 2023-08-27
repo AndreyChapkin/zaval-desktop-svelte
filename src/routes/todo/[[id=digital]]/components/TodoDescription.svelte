@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
-	import type { NewPositionType } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
-		addNewElement,
+		addNewElementInsteadOf,
+		changeDefaultEnterBehaviour,
+		checkIfAdditionModeCombination,
+		checkIfEscapeModesCombination,
+		checkIfSaveKeyCombination,
 		chooseNewElementType,
 		chooseNewPosition,
-		adjustPosition,
+		createPlaceholderElement,
 		findSelectedElement,
+		moveElement,
 		parseDescription,
-		serializeDescription,
-
-		changeDefaultEnterBehaviour
-
+		serializeDescription
 	} from '$lib/utils/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RenderedFragment from './RenderedFragment.svelte';
@@ -22,8 +23,8 @@
 	export let detailedTodoDto: DetailedTodoDto;
 	$: descriptionFragments = parseDescription(detailedTodoDto.description);
 	let descriptionContainer: HTMLDivElement;
-	let isEditMode = false;
-	let savedNewElementPosition: NewPositionType | null = null;
+	let editorMode: 'edit' | 'addition' | 'read' = 'read';
+	let placeholderElement: HTMLElement | null = null;
 	let rerenderKey = Date.now();
 
 	// events and issuers
@@ -34,7 +35,7 @@
 
 	// handlers
 	let editHandler = () => {
-		isEditMode = true;
+		editorMode = 'edit';
 	};
 
 	let saveHandler = async () => {
@@ -46,42 +47,70 @@
 			...detailedTodoDto,
 			description: editedDescription
 		});
-		isEditMode = false;
+		editorMode = 'read';
 	};
 
 	let cancelHandler = () => {
-		isEditMode = false;
+		editorMode = 'read';
 		rerenderKey = Date.now();
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
-		changeDefaultEnterBehaviour(event);
-		// position choosing branch
-		const newPosition = chooseNewPosition(event);
-		if (newPosition) {
-			savedNewElementPosition = newPosition;
+		if (checkIfSaveKeyCombination(event)) {
+			saveHandler();
 			return;
 		}
-		// element choosing branch
-		const newElementType = chooseNewElementType(event);
-		if (newElementType) {
+		if (editorMode === 'addition' && placeholderElement) {
+			const newPosition = chooseNewPosition(event);
+			if (newPosition) {
+				moveElement(placeholderElement, newPosition);
+				return;
+			}
+			const newElementType = chooseNewElementType(event);
+			if (newElementType) {
+				addNewElementInsteadOf(newElementType, placeholderElement);
+				editorMode = 'edit';
+			}
+			return;
+		}
+		if (checkIfAdditionModeCombination(event)) {
+			editorMode = 'addition';
 			const anchorElement = findSelectedElement();
 			if (anchorElement) {
-				let resultPosition: NewPositionType = 'append';
-				if (anchorElement !== descriptionContainer) {
-					resultPosition = adjustPosition(savedNewElementPosition, newElementType);
+				placeholderElement = createPlaceholderElement();
+				if (anchorElement === descriptionContainer) {
+					descriptionContainer.append(placeholderElement);
+				} else {
+					anchorElement.after(placeholderElement);
 				}
-				addNewElement(newElementType, anchorElement, resultPosition);
-				savedNewElementPosition = null;
 			}
+			return;
 		}
+		if (checkIfEscapeModesCombination(event)) {
+			editorMode = 'edit';
+			return;
+		}
+		changeDefaultEnterBehaviour(event);
+		// element choosing branch
+		// const newElementType = chooseNewElementType(event);
+		// if (newElementType) {
+		// 	const anchorElement = findSelectedElement();
+		// 	if (anchorElement) {
+		// 		let resultPosition: NewPositionType = 'append';
+		// 		if (anchorElement !== descriptionContainer) {
+		// 			resultPosition = adjustPosition(savedNewElementPosition, newElementType);
+		// 		}
+		// 		addNewElement(newElementType, anchorElement, resultPosition);
+		// 		savedNewElementPosition = null;
+		// 	}
+		// }
 	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="todo-description">
-	<div class={`todo-description-menu ${isEditMode ? 'edit-menu' : ''}`}>
-		{#if isEditMode}
+	<div class={`todo-description-menu ${editorMode !== 'read' ? 'edit-menu' : ''}`}>
+		{#if editorMode !== 'read'}
 			<button on:click={saveHandler}>
 				<img
 					src={SAVE_ICON_URL}
@@ -94,6 +123,13 @@
 					alt="status"
 				/>
 			</button>
+			{#if editorMode === 'addition'}
+				<span>Alt+Up</span>
+				<span>Alt+Down</span>
+			{:else}
+				<span>Alt+:</span>
+				<span>1->Title</span>
+			{/if}
 		{:else}
 			<button on:click={editHandler}>
 				<img
@@ -107,7 +143,7 @@
 		<div
 			class="todo-description-body"
 			bind:this={descriptionContainer}
-			contenteditable={isEditMode}
+			contenteditable={editorMode !== 'read'}
 			on:keydown={keydownHandler}
 		>
 			{#each descriptionFragments as fragment}
@@ -139,6 +175,7 @@
 		.todo-description-menu {
 			background-color: $base-color;
 			padding: $small-size;
+			color: $base-contrast-color;
 
 			@include row-centered($normal-size);
 
@@ -173,6 +210,10 @@
 		}
 		:global(.rich-strong) {
 			color: rgb(255, 153, 0);
+		}
+		:global(.rich-placeholder) {
+			border-width: $border-small-size;
+			border-color: $strong-second-color;
 		}
 	}
 </style>

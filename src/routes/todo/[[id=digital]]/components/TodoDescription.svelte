@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
+	import type { EditorModes } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
-		addNewElementInsteadOf,
+		addNewElementInsteadOfPlaceholder,
 		changeDefaultEnterBehaviour,
-		checkIfAdditionModeCombination,
-		checkIfEscapeModesCombination,
-		checkIfSaveKeyCombination,
+		checkIfChangeMode,
+		checkIfEscapeModes,
+		checkIfSave,
 		chooseNewElementType,
 		chooseNewPosition,
-		createPlaceholderElement,
-		findSelectedElement,
+		createPlaceHolderAfterSelectedElement,
+		createPlaceHolderInSelectedPosition,
 		moveElement,
 		parseDescription,
 		serializeDescription
@@ -23,7 +24,7 @@
 	export let detailedTodoDto: DetailedTodoDto;
 	$: descriptionFragments = parseDescription(detailedTodoDto.description);
 	let descriptionContainer: HTMLDivElement;
-	let editorMode: 'edit' | 'addition' | 'read' = 'read';
+	let editorMode: EditorModes = 'read';
 	let placeholderElement: HTMLElement | null = null;
 	let rerenderKey = Date.now();
 
@@ -56,54 +57,49 @@
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
-		if (checkIfSaveKeyCombination(event)) {
+		if (checkIfSave(event)) {
 			saveHandler();
 			return;
 		}
-		if (editorMode === 'addition' && placeholderElement) {
-			const newPosition = chooseNewPosition(event);
-			if (newPosition) {
-				moveElement(placeholderElement, newPosition);
+		if (checkIfEscapeModes(event)) {
+			if (editorMode === 'addition' || editorMode === 'insertion') {
+				editorMode = 'edit';
+				placeholderElement?.remove();
+				placeholderElement = null;
+			} else if (editorMode === 'edit') {
+				cancelHandler();
+			}
+			return;
+		}
+		if (editorMode === 'addition' || editorMode === 'insertion') {
+			if (placeholderElement) {
+				if (editorMode === 'addition') {
+					const newPosition = chooseNewPosition(event);
+					if (newPosition) {
+						moveElement(placeholderElement, newPosition);
+						return;
+					}
+				}
+				const newElementType = chooseNewElementType(event);
+				if (newElementType) {
+					addNewElementInsteadOfPlaceholder(newElementType, placeholderElement, editorMode);
+					editorMode = 'edit';
+				}
 				return;
 			}
-			const newElementType = chooseNewElementType(event);
-			if (newElementType) {
-				addNewElementInsteadOf(newElementType, placeholderElement);
-				editorMode = 'edit';
-			}
-			return;
 		}
-		if (checkIfAdditionModeCombination(event)) {
-			editorMode = 'addition';
-			const anchorElement = findSelectedElement();
-			if (anchorElement) {
-				placeholderElement = createPlaceholderElement();
-				if (anchorElement === descriptionContainer) {
-					descriptionContainer.append(placeholderElement);
-				} else {
-					anchorElement.after(placeholderElement);
-				}
+		const newMode = checkIfChangeMode(event);
+		if (newMode) {
+			editorMode = newMode;
+			if (newMode === 'addition') {
+				placeholderElement = createPlaceHolderAfterSelectedElement(descriptionContainer);
 			}
-			return;
-		}
-		if (checkIfEscapeModesCombination(event)) {
-			editorMode = 'edit';
+			if (newMode === 'insertion') {
+				placeholderElement = createPlaceHolderInSelectedPosition(descriptionContainer);
+			}
 			return;
 		}
 		changeDefaultEnterBehaviour(event);
-		// element choosing branch
-		// const newElementType = chooseNewElementType(event);
-		// if (newElementType) {
-		// 	const anchorElement = findSelectedElement();
-		// 	if (anchorElement) {
-		// 		let resultPosition: NewPositionType = 'append';
-		// 		if (anchorElement !== descriptionContainer) {
-		// 			resultPosition = adjustPosition(savedNewElementPosition, newElementType);
-		// 		}
-		// 		addNewElement(newElementType, anchorElement, resultPosition);
-		// 		savedNewElementPosition = null;
-		// 	}
-		// }
 	};
 </script>
 

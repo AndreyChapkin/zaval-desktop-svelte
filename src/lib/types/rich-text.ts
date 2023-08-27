@@ -6,6 +6,10 @@ export type RichClasses = (typeof RICH_CLASSES)[number];
 
 export type NewPositionType = 'before' | 'after' | 'in place' | 'append';
 
+export type EditorModes = 'edit' | 'addition' | 'insertion' | 'read';
+
+export type HierarchicalPositionTypes = 'independent' | 'dependent';
+
 export const RICH_TYPES_TO_TAGS_MAP: Record<RichTypes, string> = {
 	title: 'h1',
 	paragraph: 'p',
@@ -18,6 +22,12 @@ export const TAGS_TO_RICH_TYPES_MAP: Record<string, RichTypes> = Object.entries(
 	acc[cur[1]] = cur[0];
 	return acc;
 }, {} as Record<string, string>) as Record<string, RichTypes>;
+
+export const RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP: Record<RichTypes, HierarchicalPositionTypes> = {
+	'title': 'independent',
+	'paragraph': 'independent',
+	'strong': 'dependent'
+};
 
 export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 	'title': 'rich-title',

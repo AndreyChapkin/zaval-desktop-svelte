@@ -3,8 +3,11 @@ import {
 	RICH_TYPES_TO_TAGS_MAP,
 	TAGS_TO_RICH_TYPES_MAP,
 	type DescriptionFragment,
+	type EditorModes,
 	type NewPositionType,
-	type RichTypes
+	type RichTypes,
+	RICH_TYPES,
+	RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP
 } from '$lib/types/rich-text';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
@@ -38,7 +41,28 @@ export function serializeDescription(descriptionElement: HTMLElement): string {
 		const [element, fragment] = nodesToProcess.pop() as [HTMLElement, DescriptionFragment];
 		serializeElement(element, fragment, nodesToProcess);
 	}
-	return JSON.stringify(fragments);
+	const noEmptyFragments = removeEmptyFragments(fragments);
+	return JSON.stringify(noEmptyFragments);
+}
+
+function removeEmptyFragments(fragments: DescriptionFragment[]): DescriptionFragment[] {
+	const result = fragments.filter((f) => f.children.length > 0);
+	const fragmentsToProcess: DescriptionFragment[] = [...result];
+	while (fragmentsToProcess.length > 0) {
+		const curFragment = fragmentsToProcess.pop()!!;
+		// Preserve all text nodes and fragment nodes with children. Plan to check fragment nodes too.
+		curFragment.children = curFragment.children.filter((c) => {
+			if (typeof c === 'string') {
+				return true;
+			}
+			if (c.children.length > 0) {
+				fragmentsToProcess.push(c);
+				return true;
+			}
+			return false;
+		});
+	}
+	return result;
 }
 
 export function parseDescription(description: string): DescriptionFragment[] {
@@ -67,17 +91,28 @@ function serializeElement(
 				const htmlChildNode = childNode as HTMLElement;
 				const childType = asCorrectRichType(htmlChildNode.tagName.toLowerCase());
 				if (childType) {
-					const childFragment: DescriptionFragment = {
+					const childBlankFragment: DescriptionFragment = {
 						richType: childType,
 						children: []
 					};
-					parentFragment.children.push(childFragment);
-					nodesToProcess.push([htmlChildNode, childFragment]);
+					parentFragment.children.push(childBlankFragment);
+					nodesToProcess.push([htmlChildNode, childBlankFragment]);
 				}
 			} else if (childNode instanceof Text) {
 				const text = (childNode as Text).textContent;
 				if (text) {
-					parentFragment.children.push(text);
+					const prevChild =
+						parentFragment.children.length > 0
+							? parentFragment.children[parentFragment.children.length - 1]
+							: null;
+					if (typeof prevChild === 'string') {
+						// Merge sibling text nodes
+						const mergedString = prevChild + text;
+						parentFragment.children[parentFragment.children.length - 1] = mergedString;
+					} else {
+						// Or just add new child
+						parentFragment.children.push(text);
+					}
 				}
 			}
 		}
@@ -105,16 +140,76 @@ export function moveElement(element: HTMLElement, position: NewPositionType) {
 	}
 }
 
-export function addNewElementInsteadOf(
+export function addNewElementInsteadOfPlaceholder(
 	newElementType: RichTypes,
-	anchorElement: HTMLElement,
+	placeholderElement: HTMLElement,
+	editorMode: EditorModes
 ) {
-	const newElement = createNewElement(newElementType);
-	if (!newElement) {
-		return;
+	let allowedElements: RichTypes[] = [];
+	if (editorMode === 'addition') {
+		allowedElements = RICH_TYPES.filter(
+			(t) => RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[t] === 'independent'
+		);
+	} else if (editorMode === 'insertion') {
+		allowedElements = [...RICH_TYPES];
 	}
-	anchorElement.replaceWith(newElement);
-	selectTextInElement(newElement);
+	if (allowedElements.indexOf(newElementType) > -1) {
+		const newElement = createNewElement(newElementType);
+		if (newElement) {
+			const newElementHierarchyType = RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[newElementType];
+			if (editorMode === 'insertion') {
+				if (newElementHierarchyType === 'independent') {
+					splitAndReplaceParentOfElementWithItself(placeholderElement);
+				}
+			}
+			newElement.textContent = placeholderElement.textContent;
+			placeholderElement.replaceWith(newElement);
+			// create space around inline element
+			if (editorMode === 'insertion') {
+				if (newElementHierarchyType === 'dependent') {
+					const previousText = newElement.previousSibling;
+					const nextText = newElement.nextSibling;
+					if (previousText) {
+						previousText.textContent = previousText.textContent + ' ';
+					}
+					if (nextText) {
+						nextText.textContent = nextText.textContent + ' ';
+					}
+				}
+			}
+			selectTextInElement(newElement);
+		}
+	}
+}
+
+function splitAndReplaceParentOfElementWithItself(element: HTMLElement) {
+	const parentType = element.parentElement && defineElementType(element.parentElement);
+	if (parentType) {
+		const firstHalfParentElement = createNewElement(parentType);
+		const secondHalfParentElement = createNewElement(parentType);
+		if (firstHalfParentElement && secondHalfParentElement) {
+			firstHalfParentElement.textContent = '';
+			secondHalfParentElement.textContent = '';
+			let toFirstHalf = true;
+			console.log('@@@ element');
+			console.log(element);
+			for (let child of element.parentElement!!.childNodes) {
+				console.log('@@@ toFirstHalf = ' + toFirstHalf);
+				console.log('@@@ child');
+				console.log(child);
+				if (child === element) {
+					toFirstHalf = false;
+					continue;
+				}
+				if (toFirstHalf) {
+					firstHalfParentElement.append(child);
+				} else {
+					secondHalfParentElement.append(child);
+				}
+			}
+			element.parentElement.replaceWith(firstHalfParentElement, element, secondHalfParentElement);
+		}
+	}
 }
 
 export function addNewElement(
@@ -195,6 +290,59 @@ export function createPlaceholderElement(): HTMLElement {
 	return newElement;
 }
 
+export function createInlinePlaceholderElement(): HTMLElement {
+	const newElement = document.createElement('span');
+	newElement.classList.add('rich-placeholder');
+	newElement.innerText = 'placeholder';
+	return newElement;
+}
+
+export function createPlaceHolderAfterSelectedElement(
+	boundingElement: HTMLElement
+): HTMLElement | null {
+	const anchorElement = findSelectedElement();
+	if (anchorElement) {
+		const placeholderElement = createPlaceholderElement();
+		if (anchorElement === boundingElement) {
+			boundingElement.append(placeholderElement);
+		} else {
+			anchorElement.after(placeholderElement);
+		}
+		return placeholderElement;
+	}
+	return null;
+}
+
+export function createPlaceHolderInSelectedPosition(
+	boundingElement: HTMLElement
+): HTMLElement | null {
+	const selectedElement = findSelectedElement();
+	const textNode = findSelectedText();
+	let selection = window.getSelection();
+	if (selectedElement && selection && textNode) {
+		if (selectedElement !== boundingElement) {
+			const range = selection.getRangeAt(0);
+			if (range) {
+				const fullText = textNode.textContent ?? '';
+				const firstTextPart = fullText.substring(0, range.startOffset);
+				const placeholderElementText = fullText.substring(range.startOffset, range.endOffset);
+				const secondTextPart = fullText.substring(range.endOffset);
+				const selectedType = defineElementType(selectedElement);
+				if (selectedType) {
+					const placeholderElement = createInlinePlaceholderElement();
+					placeholderElement.textContent = placeholderElementText || 'placeholder';
+					const replacingElements = [firstTextPart, placeholderElement, secondTextPart].filter(
+						(el) => !!el
+					);
+					textNode.replaceWith(...replacingElements);
+					return placeholderElement;
+				}
+			}
+		}
+	}
+	return null;
+}
+
 export function defineElementType(element: HTMLElement): RichTypes | null {
 	if (element) {
 		return TAGS_TO_RICH_TYPES_MAP[element.tagName.toLowerCase()] ?? null;
@@ -230,21 +378,28 @@ export function chooseNewPosition(event: KeyboardEvent): NewPositionType | null 
 	return null;
 }
 
-export function checkIfSaveKeyCombination(event: KeyboardEvent): boolean {
+export function checkIfSave(event: KeyboardEvent): boolean {
 	if (event.code === 'KeyS' && event.altKey) {
 		return true;
 	}
 	return false;
 }
 
-export function checkIfAdditionModeCombination(event: KeyboardEvent): boolean {
-	if (event.code === 'KeyA' && event.altKey) {
-		return true;
+export function checkIfChangeMode(
+	event: KeyboardEvent
+): Extract<EditorModes, 'addition' | 'insertion'> | null {
+	if (event.altKey) {
+		if (event.code === 'KeyA') {
+			return 'addition';
+		}
+		if (event.code === 'KeyI') {
+			return 'insertion';
+		}
 	}
-	return false;
+	return null;
 }
 
-export function checkIfEscapeModesCombination(event: KeyboardEvent): boolean {
+export function checkIfEscapeModes(event: KeyboardEvent): boolean {
 	if (event.code === 'Escape') {
 		return true;
 	}
@@ -294,42 +449,6 @@ export function findSelectedElement(): HTMLElement | null {
 			container = curNode ?? null;
 		}
 		return container;
-	}
-	return null;
-}
-
-export function adjustPosition(
-	position: NewPositionType | null,
-	newElementType: RichTypes
-): NewPositionType {
-	if (!position) {
-		if (newElementType === 'paragraph') {
-			return 'after';
-		}
-		if (newElementType === 'title') {
-			return 'before';
-		}
-		return 'in place';
-	} else {
-		return position;
-	}
-}
-
-export function findNearestElementWithType(
-	childElement: HTMLElement,
-	tagretType: RichTypes,
-	boundingElement: HTMLElement
-): HTMLElement | null {
-	let curNode: Node | null = childElement;
-	while (curNode && curNode !== boundingElement) {
-		if (curNode instanceof HTMLElement) {
-			const curElement = curNode as HTMLElement;
-			const curElementType = defineElementType(curElement);
-			if (curElementType === tagretType) {
-				return curElement;
-			}
-		}
-		curNode = curNode.parentNode;
 	}
 	return null;
 }

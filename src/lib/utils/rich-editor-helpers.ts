@@ -125,16 +125,10 @@ export function moveElement(element: HTMLElement, position: NewPositionType) {
 	switch (position) {
 		case 'before':
 			let previousElement = element.previousElementSibling;
-			// while (previousElement && !(previousElement instanceof HTMLElement)) {
-			// 	previousElement = element.previousSibling;
-			// }
 			previousElement?.before(element);
 			break;
 		case 'after':
 			let nextElement = element.nextElementSibling;
-			// while (nextElement && !(nextElement instanceof HTMLElement)) {
-			// 	nextElement = element.nextSibling;
-			// }
 			nextElement?.after(element);
 			break;
 	}
@@ -164,19 +158,6 @@ export function addNewElementInsteadOfPlaceholder(
 			}
 			newElement.textContent = placeholderElement.textContent;
 			placeholderElement.replaceWith(newElement);
-			// create space around inline element
-			if (editorMode === 'insertion') {
-				if (newElementHierarchyType === 'dependent') {
-					const previousText = newElement.previousSibling;
-					const nextText = newElement.nextSibling;
-					if (previousText) {
-						previousText.textContent = previousText.textContent + ' ';
-					}
-					if (nextText) {
-						nextText.textContent = nextText.textContent + ' ';
-					}
-				}
-			}
 			selectTextInElement(newElement);
 		}
 	}
@@ -191,22 +172,21 @@ function splitAndReplaceParentOfElementWithItself(element: HTMLElement) {
 			firstHalfParentElement.textContent = '';
 			secondHalfParentElement.textContent = '';
 			let toFirstHalf = true;
-			console.log('@@@ element');
-			console.log(element);
+			let childrenOfFirst: Node[] = [];
+			let childrenOfSecond: Node[] = [];
 			for (let child of element.parentElement!!.childNodes) {
-				console.log('@@@ toFirstHalf = ' + toFirstHalf);
-				console.log('@@@ child');
-				console.log(child);
 				if (child === element) {
 					toFirstHalf = false;
 					continue;
 				}
 				if (toFirstHalf) {
-					firstHalfParentElement.append(child);
+					childrenOfFirst.push(child);
 				} else {
-					secondHalfParentElement.append(child);
+					childrenOfSecond.push(child);
 				}
 			}
+			firstHalfParentElement.append(...childrenOfFirst);
+			secondHalfParentElement.append(...childrenOfSecond);
 			element.parentElement.replaceWith(firstHalfParentElement, element, secondHalfParentElement);
 		}
 	}
@@ -416,7 +396,7 @@ export function changeDefaultEnterBehaviour(event: KeyboardEvent) {
 			if (range) {
 				const textOffset = range.startOffset;
 				const prevText = textNode.textContent ?? '';
-				const newText = prevText.substring(0, textOffset) + '\n' + prevText.substring(textOffset);
+				const newText = prevText.substring(0, textOffset) + '\r\n' + prevText.substring(textOffset);
 				textNode.textContent = newText;
 				selectText(textNode, textOffset + 1, textOffset + 1);
 			}

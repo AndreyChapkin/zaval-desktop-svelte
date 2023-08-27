@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setAttributes } from "$lib/actions/set-attributes";
 	import type { DescriptionFragment } from "$lib/types/rich-text";
 	import { getRichTag, getRichTagClass } from "$lib/utils/rich-editor-helpers";
 
@@ -10,6 +11,7 @@
 <svelte:element
 	this={getRichTag(fragment.richType)}
 	class={getRichTagClass(fragment.richType) ?? ''}
+	use:setAttributes={fragment.attributes}
 >
 	{#each fragment.children as child}
 		{#if typeof child === 'string'}

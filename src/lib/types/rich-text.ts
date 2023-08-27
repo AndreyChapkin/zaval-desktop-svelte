@@ -1,8 +1,12 @@
-export const RICH_TYPES = ['title', 'paragraph', 'strong'] as const;
+export const RICH_TYPES = ['title', 'paragraph', 'strong', 'link'] as const;
 export type RichTypes = (typeof RICH_TYPES)[number];
 
-export const RICH_CLASSES = ['rich-title', 'rich-paragraph', 'rich-strong'] as const;
+export const RICH_CLASSES = ['rich-title', 'rich-paragraph', 'rich-strong', 'rich-link'] as const;
 export type RichClasses = (typeof RICH_CLASSES)[number];
+
+export const RICH_ATTRIBUTES: Partial<Record<RichTypes, string[]>> = {
+	'link': ['href'],
+};
 
 export type NewPositionType = 'before' | 'after' | 'in place' | 'append';
 
@@ -13,7 +17,8 @@ export type HierarchicalPositionTypes = 'independent' | 'dependent';
 export const RICH_TYPES_TO_TAGS_MAP: Record<RichTypes, string> = {
 	title: 'h1',
 	paragraph: 'p',
-	strong: 'strong'
+	strong: 'strong',
+	link: 'a',
 } as const;
 
 export const TAGS_TO_RICH_TYPES_MAP: Record<string, RichTypes> = Object.entries(
@@ -26,16 +31,19 @@ export const TAGS_TO_RICH_TYPES_MAP: Record<string, RichTypes> = Object.entries(
 export const RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP: Record<RichTypes, HierarchicalPositionTypes> = {
 	'title': 'independent',
 	'paragraph': 'independent',
-	'strong': 'dependent'
+	'strong': 'dependent',
+	'link': 'dependent',
 };
 
 export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 	'title': 'rich-title',
 	'paragraph': 'rich-paragraph',
-	'strong': 'rich-strong'
+	'strong': 'rich-strong',
+	'link': 'rich-link',
 };
 
 export interface DescriptionFragment {
 	richType: RichTypes;
+	attributes: Record<string, string> | null;
 	children: (string | DescriptionFragment)[];
 }

@@ -207,6 +207,9 @@
 		:global(.rich-strong) {
 			color: rgb(255, 153, 0);
 		}
+		:global(.rich-link) {
+			color: rgb(76, 224, 211);
+		}
 		:global(.rich-placeholder) {
 			border-width: $border-small-size;
 			border-color: $strong-second-color;

@@ -7,7 +7,8 @@ import {
 	type NewPositionType,
 	type RichTypes,
 	RICH_TYPES,
-	RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP
+	RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP,
+	RICH_ATTRIBUTES
 } from '$lib/types/rich-text';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
@@ -251,13 +252,26 @@ function selectText(
 	window.getSelection()?.addRange(range);
 }
 
-function createNewElement(richType: RichTypes): HTMLElement | null {
+function createNewElement(
+	richType: RichTypes,
+	text: string | null = null,
+	attributes: Record<string, string> | null = null
+): HTMLElement | null {
 	const tagName = RICH_TYPES_TO_TAGS_MAP[richType];
 	const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP[richType];
 	if (tagName && richClass) {
 		const newElement = document.createElement(tagName);
 		newElement.classList.add(richClass);
-		newElement.innerText = 'placeholder';
+		newElement.innerText = text === null ? 'placeholder' : text;
+		const allowedAttributes = RICH_ATTRIBUTES[richType];
+		if (attributes && allowedAttributes) {
+			const resultAttributes = Object.entries(attributes).filter(
+				([key, value]) => allowedAttributes?.indexOf(key) > -1
+			);
+			for (let [resKey, resAttribute] of resultAttributes) {
+				newElement.setAttribute(resKey, resAttribute);
+			}
+		}
 		return newElement;
 	}
 	return null;
@@ -339,6 +353,8 @@ export function chooseNewElementType(event: KeyboardEvent): RichTypes | null {
 				return 'paragraph';
 			case 'Digit3':
 				return 'strong';
+			case 'Digit4':
+				return 'link';
 		}
 	}
 	return null;

@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { getRichTag, getRichTagClass, type DescriptionFragment } from '$lib/utils/todo-helpers';
+	import type { DescriptionFragment } from "$lib/types/rich-text";
+	import { getRichTag, getRichTagClass } from "$lib/utils/rich-editor-helpers";
+
 
 	// data
 	export let fragment: DescriptionFragment;

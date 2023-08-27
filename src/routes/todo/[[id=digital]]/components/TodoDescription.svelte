@@ -1,8 +1,20 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
+	import type { NewPositionType } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
-	import { findSelectedElement, parseDescription, serializeDescription } from '$lib/utils/todo-helpers';
+	import {
+		addNewElement,
+		chooseNewElementType,
+		chooseNewPosition,
+		adjustPosition,
+		findSelectedElement,
+		parseDescription,
+		serializeDescription,
+
+		changeDefaultEnterBehaviour
+
+	} from '$lib/utils/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RenderedFragment from './RenderedFragment.svelte';
 
@@ -11,6 +23,8 @@
 	$: descriptionFragments = parseDescription(detailedTodoDto.description);
 	let descriptionContainer: HTMLDivElement;
 	let isEditMode = false;
+	let savedNewElementPosition: NewPositionType | null = null;
+	let rerenderKey = Date.now();
 
 	// events and issuers
 	type EventType = {
@@ -37,6 +51,30 @@
 
 	let cancelHandler = () => {
 		isEditMode = false;
+		rerenderKey = Date.now();
+	};
+
+	const keydownHandler = (event: KeyboardEvent) => {
+		changeDefaultEnterBehaviour(event);
+		// position choosing branch
+		const newPosition = chooseNewPosition(event);
+		if (newPosition) {
+			savedNewElementPosition = newPosition;
+			return;
+		}
+		// element choosing branch
+		const newElementType = chooseNewElementType(event);
+		if (newElementType) {
+			const anchorElement = findSelectedElement();
+			if (anchorElement) {
+				let resultPosition: NewPositionType = 'append';
+				if (anchorElement !== descriptionContainer) {
+					resultPosition = adjustPosition(savedNewElementPosition, newElementType);
+				}
+				addNewElement(newElementType, anchorElement, resultPosition);
+				savedNewElementPosition = null;
+			}
+		}
 	};
 </script>
 
@@ -65,33 +103,18 @@
 			</button>
 		{/if}
 	</div>
-	<div
-		class="todo-description-body"
-		bind:this={descriptionContainer}
-		contenteditable={isEditMode}
-		on:keydown={(e) => {
-			if (e.code === "Enter") {
-				// e.preventDefault();
-			}
-			if (e.code === 'Digit8' && e.ctrlKey) {
-				descriptionFragments = [...descriptionFragments, {
-					richType: 'paragraph',
-					children: [
-						"example text\nanother string ",
-						{richType: 'strong', children: ["pepper"]},
-						" example text\nanother string"
-					],
-				}];
-			}
-			if (e.code === 'Digit7' && e.ctrlKey) {
-				findSelectedElement();
-			}
-		}}
-	>
-		{#each descriptionFragments as fragment}
-			<RenderedFragment {fragment} />
-		{/each}
-	</div>
+	{#key rerenderKey}
+		<div
+			class="todo-description-body"
+			bind:this={descriptionContainer}
+			contenteditable={isEditMode}
+			on:keydown={keydownHandler}
+		>
+			{#each descriptionFragments as fragment}
+				<RenderedFragment {fragment} />
+			{/each}
+		</div>
+	{/key}
 </div>
 
 <style lang="scss">
@@ -133,14 +156,23 @@
 			flex: 1;
 			overflow: auto;
 			padding: $normal-size;
+			outline: none;
 			white-space: pre-wrap;
-			color: $base-contrast-color;
 			@include styled-scrollbar;
+		}
 
-			.styledFragment {
-				color: pink;
-				display: block;
-			}
+		:global(.rich-title) {
+			color: rgb(227, 97, 97);
+			font-size: large;
+			font-weight: bold;
+			margin-bottom: $normal-size;
+		}
+		:global(.rich-paragraph) {
+			color: $base-contrast-color;
+			margin-bottom: $normal-size;
+		}
+		:global(.rich-strong) {
+			color: rgb(255, 153, 0);
 		}
 	}
 </style>

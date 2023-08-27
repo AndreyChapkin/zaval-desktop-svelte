@@ -17,8 +17,9 @@
 
 	// handlers
 	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
-		const updatedDetailedTodoDto = event.detail;
-		mainDetailedTodoDto = updatedDetailedTodoDto;
+		// const updatedDetailedTodoDto = event.detail;
+		// mainDetailedTodoDto = updatedDetailedTodoDto;
+		window.location.reload();
 	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {

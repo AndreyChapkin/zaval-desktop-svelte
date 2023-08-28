@@ -44,13 +44,13 @@
 		</div>
 	{:else}
 		<SplitPane
-			type="vertical"
+			type="horizontal"
 			contextName="TodoWithIdPage-0"
 			{shownItems}
 			class="container-split"
 		>
 			<SplitPane
-				type="horizontal"
+				type="vertical"
 				contextName="TodoWithIdPage-1"
 				slot="first"
 				class="main-split"
@@ -64,26 +64,9 @@
 						isNavigable={false}
 					/>
 				</div>
-				<TodoDescription
-					detailedTodoDto={mainDetailedTodoDto}
-					slot="second"
-					on:update={todoDescriptionUpdateHandler}
-				/>
-				<TodoHistory
-					slot="third"
-					todoId={data.detailedTodoDto.id}
-					records={data.todoHistoryRecords ?? []}
-					on:save={historySaveHandler}
-				/>
-			</SplitPane>
-			<SplitPane
-				type="horizontal"
-				contextName="TodoWithIdPage-2"
-				slot="second"
-				class="secondary-split"
-				><div
+				<div
 					class="parent-todos"
-					slot="first"
+					slot="second"
 				>
 					{#each parentTodos as todo (todo.id)}
 						<div class="arrow">/\</div>
@@ -92,7 +75,7 @@
 				</div>
 				<div
 					class="children-todos"
-					slot="second"
+					slot="third"
 				>
 					{#if mainDetailedTodoDto.children}
 						{#each mainDetailedTodoDto.children as child (child.id)}
@@ -102,12 +85,30 @@
 					{/if}
 				</div>
 			</SplitPane>
+			<SplitPane
+				type="vertical"
+				contextName="TodoWithIdPage-0"
+				{shownItems}
+				class="info-split"
+				slot="second"
+			>
+				<TodoDescription
+					detailedTodoDto={mainDetailedTodoDto}
+					slot="first"
+					on:update={todoDescriptionUpdateHandler}
+				/>
+				<TodoHistory
+					slot="second"
+					todoId={data.detailedTodoDto.id}
+					records={data.todoHistoryRecords ?? []}
+					on:save={historySaveHandler}
+				/>
+			</SplitPane>
 		</SplitPane>
 	{/if}
 </div>
 
 <style lang="scss">
-	/* @import '/static/style/variables-mixins.scss'; */
 	@import '/static/style/common/color/';
 	@import '/static/style/common/size/';
 	@import '/static/style/common/composition/';
@@ -124,23 +125,17 @@
 
 		:global(.container-split) {
 			:global(.split-separator) {
-				background-color: $base-dark-color;
+				background-color: $base-color;
 			}
 		}
 
 		:global(.container-split > .split-area:first-child) {
 			position: relative;
 			z-index: 1;
-			box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.3);
+			/* box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.3); */
 		}
 
 		:global(.main-split) {
-			:global(.split-separator) {
-				background-color: $base-color;
-			}
-		}
-
-		:global(.secondary-split) {
 			:global(.split-separator) {
 				background-color: $base-color;
 			}

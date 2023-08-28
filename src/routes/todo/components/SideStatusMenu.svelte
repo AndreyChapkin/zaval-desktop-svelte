@@ -28,8 +28,8 @@
 	};
 	const openHandler = (e: MouseEvent) => {
 		const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-		optionsX = rect.right + window.pageXOffset;
-		optionsY = rect.top + window.pageYOffset;
+		optionsX = rect.right + window.scrollX;
+		optionsY = rect.top + window.scrollY;
 		isOpen = !isOpen;
 	};
 

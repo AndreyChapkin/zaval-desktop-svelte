@@ -153,7 +153,8 @@ export function moveElement(element: HTMLElement, position: NewPositionType) {
 export function addNewElementInsteadOfPlaceholder(
 	newElementType: RichTypes,
 	placeholderElement: HTMLElement,
-	editorMode: EditorModes
+	editorMode: EditorModes,
+	attributes: Record<string, string> | null = null,
 ) {
 	let allowedElements: RichTypes[] = [];
 	if (editorMode === 'addition') {
@@ -164,7 +165,7 @@ export function addNewElementInsteadOfPlaceholder(
 		allowedElements = [...RICH_TYPES];
 	}
 	if (allowedElements.indexOf(newElementType) > -1) {
-		const newElement = createNewElement(newElementType);
+		const newElement = createNewElement(newElementType, null, attributes);
 		if (newElement) {
 			const newElementHierarchyType = RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[newElementType];
 			if (editorMode === 'insertion') {

@@ -61,6 +61,12 @@
 	}
 }
 
+@mixin standard-basis {
+	background-color: $base-color;
+	border-radius: $normal-size;
+	padding: $normal-size;
+}
+
 @mixin like-normal-button {
 	cursor: pointer;
 

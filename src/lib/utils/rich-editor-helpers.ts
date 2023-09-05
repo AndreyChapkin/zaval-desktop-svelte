@@ -233,12 +233,6 @@ export function addNewElement(
 	selectTextInElement(newElement);
 }
 
-// export function addPlaceholderElement(anchorElement: HTMLElement): HTMLElement {
-// 	const placeholderElement = createPlaceholderElement();
-// 	anchorElement.after(placeholderElement);
-// 	return placeholderElement;
-// }
-
 function selectTextInElement(
 	element: HTMLElement,
 	startOffset: number | null = null,
@@ -351,6 +345,14 @@ export function createPlaceHolderInSelectedPosition(
 		}
 	}
 	return null;
+}
+
+export function createDefaultContentInContainer(containerElement: HTMLElement) {
+	const paragraphElement = createNewElement("paragraph")!!;
+	const garbageChildren = [...containerElement.childNodes];
+	garbageChildren.forEach(child => child.remove());
+	containerElement.append(paragraphElement);
+	selectTextInElement(paragraphElement);
 }
 
 export function defineElementType(element: HTMLElement): RichTypes | null {

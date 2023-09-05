@@ -11,6 +11,7 @@
 		checkIfSave,
 		chooseNewElementType,
 		chooseNewPosition,
+		createDefaultContentInContainer,
 		createPlaceHolderAfterSelectedElement,
 		createPlaceHolderInSelectedPosition,
 		findSelectedElement,
@@ -41,6 +42,12 @@
 		defineAssistancePosition();
 	} else {
 		assistancePositionStyle = null;
+	}
+
+	// initial description edition - create some paragraph to edit
+	$: if (editorMode === 'edit' && descriptionFragments.length < 1) {
+		createDefaultContentInContainer(descriptionContainer);
+		descriptionContainer.focus();
 	}
 
 	// events and issuers
@@ -88,6 +95,12 @@
 				editorMode = 'edit';
 			}
 			event.stopPropagation();
+		}
+	};
+
+	const defaultEditorContentHandler = () => {
+		if (descriptionFragments.length < 1) {
+			;
 		}
 	};
 
@@ -179,9 +192,13 @@
 			{#if editorMode === 'addition'}
 				<span>Alt+Up</span>
 				<span>Alt+Down</span>
-			{:else}
 				<span>Alt+:</span>
 				<span>1->Title</span>
+				<span>2->Paragraph</span>
+			{:else if editorMode === 'insertion'}
+				<span>Alt+:</span>
+				<span>3->Strong</span>
+				<span>4->Link</span>
 			{/if}
 		{:else}
 			<button on:click={editHandler}>

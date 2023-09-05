@@ -8,7 +8,7 @@ export const RICH_ATTRIBUTES: Partial<Record<RichTypes, string[]>> = {
 	'link': ['href'],
 };
 
-export type NewPositionType = 'before' | 'after' | 'in place' | 'append';
+export type NewPositionType = 'before' | 'after';
 
 export type EditorModes = 'edit' | 'addition' | 'insertion' | 'read';
 

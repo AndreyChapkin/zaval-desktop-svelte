@@ -98,12 +98,6 @@
 		}
 	};
 
-	const defaultEditorContentHandler = () => {
-		if (descriptionFragments.length < 1) {
-			;
-		}
-	};
-
 	const keydownHandler = (event: KeyboardEvent) => {
 		if (checkIfSave(event)) {
 			saveHandler();
@@ -124,14 +118,12 @@
 		}
 		if (editorMode === 'addition' || editorMode === 'insertion') {
 			if (placeholderElement) {
-				if (editorMode === 'addition') {
-					const newPosition = chooseNewPosition(event);
-					if (newPosition) {
-						moveElement(placeholderElement, newPosition);
-						return;
-					}
+				const newPosition = chooseNewPosition(event, editorMode);
+				if (newPosition) {
+					moveElement(placeholderElement, newPosition);
+					return;
 				}
-				const newElementType = chooseNewElementType(event);
+				const newElementType = chooseNewElementType(event, editorMode);
 				if (newElementType) {
 					if (newElementType === 'link') {
 						savedNewElementType = newElementType;
@@ -150,7 +142,7 @@
 				placeholderElement = createPlaceHolderAfterSelectedElement(descriptionContainer);
 			}
 			if (newMode === 'insertion') {
-				const selectedElement = findSelectedElement();
+				const selectedElement = findSelectedElement(descriptionContainer);
 				if (selectedElement === descriptionContainer) {
 					return;
 				}
@@ -189,16 +181,17 @@
 					alt="status"
 				/>
 			</button>
-			{#if editorMode === 'addition'}
-				<span>Alt+Up</span>
-				<span>Alt+Down</span>
-				<span>Alt+:</span>
-				<span>1->Title</span>
-				<span>2->Paragraph</span>
+			{#if editorMode === 'edit'}
+				<span class="control-prompt">Alt+A -> ADD</span>
+				<span class="control-prompt">Alt+I -> INSERT</span>
+			{:else if editorMode === 'addition'}
+				<span class="control-prompt">Alt+Up -> Move Up</span>
+				<span class="control-prompt">Alt+Down -> Move Down</span>
+				<span class="control-prompt">Alt+1 -> Title</span>
+				<span class="control-prompt">Alt+2 -> Paragraph</span>
 			{:else if editorMode === 'insertion'}
-				<span>Alt+:</span>
-				<span>3->Strong</span>
-				<span>4->Link</span>
+				<span class="control-prompt">Alt+1 -> Strong</span>
+				<span class="control-prompt">Alt+2 -> Link</span>
 			{/if}
 		{:else}
 			<button on:click={editHandler}>
@@ -274,6 +267,13 @@
 		.edit-menu {
 			background: $strong-gradient;
 			@include bordered(bottom, $strong-second-color, $border-small-size);
+
+			.control-prompt {
+				font-size: smaller;
+				border-radius: $small-size;
+				padding: 0 $border-normal-size 0 $border-normal-size;
+				@include bordered(all, $base-contrast-color, $border-small-size);
+			}
 		}
 
 		.todo-description-body {

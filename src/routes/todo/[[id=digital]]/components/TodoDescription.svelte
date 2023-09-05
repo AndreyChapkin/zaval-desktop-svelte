@@ -15,6 +15,7 @@
 		createPlaceHolderAfterSelectedElement,
 		createPlaceHolderInSelectedPosition,
 		findSelectedElement,
+		isEditorEmpty,
 		moveElement,
 		parseDescription,
 		serializeDescription
@@ -45,9 +46,11 @@
 	}
 
 	// initial description edition - create some paragraph to edit
-	$: if (editorMode === 'edit' && descriptionFragments.length < 1) {
-		createDefaultContentInContainer(descriptionContainer);
-		descriptionContainer.focus();
+	$: if (editorMode === 'edit') {
+		if (isEditorEmpty(descriptionContainer)) {
+			createDefaultContentInContainer(descriptionContainer);
+			descriptionContainer.focus();
+		}
 	}
 
 	// events and issuers

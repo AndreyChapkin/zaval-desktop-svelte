@@ -164,53 +164,22 @@ export function addNewElementInsteadOfPlaceholder(
 			(t) => RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[t] === 'independent'
 		);
 	} else if (editorMode === 'insertion') {
-		allowedElements = [...RICH_TYPES];
+		allowedElements = RICH_TYPES.filter(
+			(t) => RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[t] === 'dependent'
+		);
 	}
 	if (allowedElements.indexOf(newElementType) > -1) {
 		const newElement = createNewElement(newElementType, null, attributes);
 		if (newElement) {
-			const newElementHierarchyType = RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[newElementType];
-			if (editorMode === 'insertion') {
-				if (newElementHierarchyType === 'independent') {
-					splitAndReplaceParentOfElementWithItself(placeholderElement);
+			let defaultText = placeholderElement.textContent;
+			if (newElementType === 'link') {
+				if (defaultText === 'placeholder' && attributes && attributes['href']) {
+					defaultText = attributes['href'];
 				}
 			}
-			const defaultText =
-				newElementType === 'link' && attributes
-					? attributes['href']
-					: placeholderElement.textContent;
 			newElement.textContent = defaultText;
 			placeholderElement.replaceWith(newElement);
 			selectTextInElement(newElement);
-		}
-	}
-}
-
-function splitAndReplaceParentOfElementWithItself(element: HTMLElement) {
-	const parentType = element.parentElement && defineElementType(element.parentElement);
-	if (parentType) {
-		const firstHalfParentElement = createNewElement(parentType);
-		const secondHalfParentElement = createNewElement(parentType);
-		if (firstHalfParentElement && secondHalfParentElement) {
-			firstHalfParentElement.textContent = '';
-			secondHalfParentElement.textContent = '';
-			let toFirstHalf = true;
-			let childrenOfFirst: Node[] = [];
-			let childrenOfSecond: Node[] = [];
-			for (let child of element.parentElement!!.childNodes) {
-				if (child === element) {
-					toFirstHalf = false;
-					continue;
-				}
-				if (toFirstHalf) {
-					childrenOfFirst.push(child);
-				} else {
-					childrenOfSecond.push(child);
-				}
-			}
-			firstHalfParentElement.append(...childrenOfFirst);
-			secondHalfParentElement.append(...childrenOfSecond);
-			element.parentElement.replaceWith(firstHalfParentElement, element, secondHalfParentElement);
 		}
 	}
 }
@@ -453,6 +422,18 @@ export function findSelectedText(): Text | null {
 		}
 	}
 	return null;
+}
+
+// TODO: refactor
+export function isEditorEmpty(
+	containerElement: HTMLElement
+): boolean {
+	for (let child of containerElement.childNodes) {
+		if ((child instanceof HTMLElement) && defineElementRichType(child)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // TODO: refactor

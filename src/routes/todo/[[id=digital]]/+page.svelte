@@ -91,7 +91,7 @@
 			</SplitPane>
 			<SplitPane
 				type="vertical"
-				contextName="TodoWithIdPage-0"
+				contextName="TodoWithIdPage-2"
 				{shownItems}
 				class="info-split"
 				slot="second"

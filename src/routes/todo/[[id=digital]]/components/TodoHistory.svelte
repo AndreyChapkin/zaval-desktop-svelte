@@ -99,7 +99,6 @@
 </div>
 
 <style lang="scss">
-	/* @import '/static/style/variables-mixins.scss'; */
 	@import '/static/style/common/color/';
 	@import '/static/style/common/size/';
 	@import '/static/style/common/composition/';
@@ -131,7 +130,6 @@
 
 		.edit-menu {
 			background: $strong-gradient;
-			@include bordered(bottom, $strong-second-color, $border-small-size);
 		}
 
 		.todo-history-body {

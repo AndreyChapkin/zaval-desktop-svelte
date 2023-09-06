@@ -186,16 +186,23 @@
 			</button>
 			{#if editorMode === 'edit'}
 				<span class="control-prompt"><b>ADD</b> Alt+A</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>INSERT</b> Alt+I</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>SAVE</b> Alt+S</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>CANCEL</b> Esc</span>
 			{:else if editorMode === 'addition'}
 				<span class="control-prompt"><b>Title</b> Alt+1</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>Paragraph</b> Alt+2</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>Move Up</b> Alt+Up</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>Move Down</b> Alt+Down</span>
 			{:else if editorMode === 'insertion'}
 				<span class="control-prompt"><b>Strong</b> Alt+1</span>
+				<div class="prompt-separator"></div>
 				<span class="control-prompt"><b>Link</b> Alt+2</span>
 			{/if}
 		{:else}
@@ -271,17 +278,21 @@
 
 		.edit-menu {
 			background: $strong-gradient;
-			@include bordered(bottom, $strong-second-color, $border-small-size);
 
 			.control-prompt {
 				color: $base-weak-contrast-color;
 				font-size: smaller;
-				padding-left: $normal-size;
-				@include bordered(left, $strong-second-color, $border-small-size);
 				
 				b {
 					color: $base-contrast-color;
 				}
+			}
+
+			.prompt-separator {
+				width: $border-normal-size;
+				height: $border-normal-size;
+				border-radius: $border-normal-size;
+				background-color: $strong-second-color;
 			}
 		}
 

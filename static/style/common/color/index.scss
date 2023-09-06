@@ -18,7 +18,7 @@ $strong-second-weak-color: rgb(220, 155, 81);
 
 $strong-gradient: linear-gradient(215deg, $strong-light-color 0%, adjust-hue($strong-color, -30deg) 50%, $strong-color 100%);
 
-$base-contrast-color: #fff3fe;
-$base-weak-contrast-color: #c4bbc3;
+$base-contrast-color: white;
+$base-weak-contrast-color: darken($base-contrast-color, 10%);
 
 $second-contrast-color: #ce87b9;

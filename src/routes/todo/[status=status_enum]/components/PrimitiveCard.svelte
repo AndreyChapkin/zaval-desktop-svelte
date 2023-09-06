@@ -49,8 +49,6 @@
 	@import '/static/style/common/color/';
 
 	.primitive-card {
-		min-width: 150px;
-		max-width: 350px;
 		padding: $normal-size;
 		background-color: $base-color;
 		color: $base-contrast-color;

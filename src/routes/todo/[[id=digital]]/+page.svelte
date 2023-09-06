@@ -3,7 +3,9 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
+	import { ARROW_URL } from '$lib/utils/assets-references';
 	import SplitPane from '../../components/SplitPane.svelte';
+	import PrimitiveCard from '../[status=status_enum]/components/PrimitiveCard.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoDescription from './components/TodoDescription.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
@@ -17,8 +19,6 @@
 
 	// handlers
 	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
-		// const updatedDetailedTodoDto = event.detail;
-		// mainDetailedTodoDto = updatedDetailedTodoDto;
 		window.location.reload();
 	};
 
@@ -68,9 +68,14 @@
 					class="parent-todos"
 					slot="second"
 				>
-					{#each parentTodos as todo (todo.id)}
-						<div class="arrow">/\</div>
-						<TodoCard {todo} />
+					{#each parentTodos as todo, i (todo.id)}
+						{#if i > 0}
+							<img
+								src={ARROW_URL}
+								alt="status"
+							/>
+						{/if}
+						<PrimitiveCard {todo} />
 					{/each}
 				</div>
 				<div
@@ -79,8 +84,7 @@
 				>
 					{#if mainDetailedTodoDto.children}
 						{#each mainDetailedTodoDto.children as child (child.id)}
-							<div class="arrow">||</div>
-							<TodoCard todo={child} />
+							<PrimitiveCard todo={child} />
 						{/each}
 					{/if}
 				</div>
@@ -117,10 +121,28 @@
 	.todo-details {
 		height: 100vh;
 
-		.main-todo,
-		.parent-todos,
-		.children-todos {
+		.main-todo {
 			padding: $wide-size;
+		}
+
+		.parent-todos, .children-todos {
+			padding: $wide-size;
+			@include column-stretched;
+
+			img {
+				@include icon-small-sized;
+				margin: $normal-size;
+			}
+		}
+
+		:global(.children-todos .primitive-card) {
+			margin-bottom: $wide-size;
+		}
+
+		.panel-label {
+			font-size: small;
+			padding: $normal-size 0;
+			color: $base-weak-contrast-color;
 		}
 
 		:global(.container-split) {
@@ -129,10 +151,19 @@
 			}
 		}
 
-		:global(.container-split > .split-area:first-child) {
+		:global(.main-split > .split-separator:nth-child(2)) {
 			position: relative;
 			z-index: 1;
-			/* box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.3); */
+		}
+
+		:global(.main-split .split-area) {
+			margin: $normal-size 0;
+		}
+
+		:global(.main-split > .split-separator:nth-child(4)) {
+			position: relative;
+			z-index: 1;
+			box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.9);
 		}
 
 		:global(.main-split) {
@@ -153,16 +184,6 @@
 		.root-todos {
 			padding: $wide-size;
 			@include responsive-grid(300px, $x-gap: $large-size, $y-gap: $wide-size);
-		}
-
-		.parent-todos {
-			@include column;
-			@include styled-scrollbar;
-		}
-
-		.children-todos {
-			padding: $wide-size;
-			@include column;
 		}
 	}
 </style>

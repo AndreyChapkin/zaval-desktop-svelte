@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { SaveHistoryDto } from '$lib/types/todo';
-	import { CANCEL_ICON_URL, EDIT_ICON_URL, HISTORY_RECORD_SIGN_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import {
+		CANCEL_ICON_URL,
+		EDIT_ICON_URL,
+		HISTORY_RECORD_SIGN_URL,
+		SAVE_ICON_URL
+	} from '$lib/utils/assets-references';
 	import { createEventDispatcher } from 'svelte';
 
 	// data
@@ -8,6 +13,7 @@
 	export let records: string[];
 	let editRecords = records.join('\n');
 	let isEditMode = false;
+	let textAreaElement: HTMLTextAreaElement;
 
 	// events and issuers
 	type EventType = {
@@ -18,6 +24,17 @@
 	// handlers
 	let editHandler = () => {
 		isEditMode = true;
+	};
+
+	const keyUpHandler = (e: KeyboardEvent) => {
+		if (e.code === 'Enter') {
+			const curDate = new Date();
+			const formattedDateStr = curDate.toLocaleDateString();//`${curDate.getFullYear()}.${curDate.getMonth()}.${curDate.getDay()}`;
+			textAreaElement.value =
+				textAreaElement.value.substring(0, textAreaElement.selectionStart + 1) +
+				formattedDateStr + " "
+				textAreaElement.value.substring(textAreaElement.selectionEnd, textAreaElement.value.length);
+		}
 	};
 
 	let saveHandler = () => {
@@ -35,7 +52,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="todo-history">
-	<div class={`todo-history-menu ${isEditMode ? "edit-menu" : ""}`}>
+	<div class={`todo-history-menu ${isEditMode ? 'edit-menu' : ''}`}>
 		{#if isEditMode}
 			<button on:click={saveHandler}>
 				<img
@@ -62,7 +79,9 @@
 		<textarea
 			cols="30"
 			rows="10"
+			bind:this={textAreaElement}
 			bind:value={editRecords}
+			on:keyup={keyUpHandler}
 		/>
 	{:else}
 		<div class="todo-history-body">
@@ -103,7 +122,7 @@
 			background-color: $base-color;
 			padding: $small-size;
 
-			@include row-centered($normal-size);			
+			@include row-centered($normal-size);
 
 			img {
 				@include icon-normal-sized;

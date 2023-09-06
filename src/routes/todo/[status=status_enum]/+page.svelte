@@ -76,6 +76,11 @@
 			@include column($large-size);
 		}
 
+		:global(.primitive-card) {
+			min-width: 150px;
+			max-width: 350px;
+		}
+
 		:global(.main-todo) {
 			min-width: 450px !important;
 			max-width: 500px;

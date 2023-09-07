@@ -135,6 +135,14 @@
 			}
 		}
 
+		:global(.primitive-card) {
+			background-color: $base-light-color;
+		}
+
+		.children-todos {
+			background-color: $base-darker-color;
+		}
+
 		:global(.children-todos .primitive-card) {
 			margin-bottom: $wide-size;
 		}
@@ -154,16 +162,6 @@
 		:global(.main-split > .split-separator:nth-child(2)) {
 			position: relative;
 			z-index: 1;
-		}
-
-		:global(.main-split .split-area) {
-			margin: $normal-size 0;
-		}
-
-		:global(.main-split > .split-separator:nth-child(4)) {
-			position: relative;
-			z-index: 1;
-			box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.9);
 		}
 
 		:global(.main-split) {

@@ -186,23 +186,23 @@
 			</button>
 			{#if editorMode === 'edit'}
 				<span class="control-prompt"><b>ADD</b> Alt+A</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>INSERT</b> Alt+I</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>SAVE</b> Alt+S</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>CANCEL</b> Esc</span>
 			{:else if editorMode === 'addition'}
 				<span class="control-prompt"><b>Title</b> Alt+1</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Paragraph</b> Alt+2</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Move Up</b> Alt+Up</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Move Down</b> Alt+Down</span>
 			{:else if editorMode === 'insertion'}
 				<span class="control-prompt"><b>Strong</b> Alt+1</span>
-				<div class="prompt-separator"></div>
+				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Link</b> Alt+2</span>
 			{/if}
 		{:else}
@@ -251,18 +251,20 @@
 	@import '/static/style/common/composition/';
 	@import '/static/style/common/facade/';
 
+	@font-face {
+		font-family: Nunito;
+		font-weight: normal;
+		src: url('$lib/assets/fonts/Nunito-Regular.ttf');
+	}
+
+	@font-face {
+		font-family: Nunito;
+		font-weight: bold;
+		src: url('$lib/assets/fonts/Nunito-Black.ttf');
+	}
+
 	.todo-description {
 		@include column;
-
-		textarea {
-			padding: $normal-size;
-			color: $base-contrast-color;
-			background-color: transparent;
-			resize: none;
-			outline: none;
-			flex: 1;
-			@include styled-scrollbar;
-		}
 
 		.todo-description-menu {
 			background-color: $base-color;
@@ -282,7 +284,7 @@
 			.control-prompt {
 				color: $base-weak-contrast-color;
 				font-size: smaller;
-				
+
 				b {
 					color: $base-contrast-color;
 				}
@@ -324,13 +326,13 @@
 			color: rgb(182, 93, 126);
 			font-size: large;
 			font-weight: bold;
-			font-family: Verdana, sans-serif;
+			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-paragraph) {
 			color: $base-contrast-color;
 			margin-bottom: $normal-size;
-			font-family: Tahoma, sans-serif;
+			font-family: Nunito;
 		}
 		:global(.rich-strong) {
 			color: rgb(224, 181, 102);

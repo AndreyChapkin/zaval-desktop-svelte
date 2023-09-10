@@ -105,7 +105,6 @@
 </div>
 
 <style lang="scss">
-	/* @import '/static/style/variables-mixins.scss'; */
 	@import '/static/style/todo-variables.scss';
 	@import '/static/style/common/color/';
 	@import '/static/style/common/composition/';
@@ -126,7 +125,7 @@
 		}
 
 		.todo-status-side-menu-face:hover {
-			background-color: $base-light-color;
+			background-color: $second-light-color;
 			@apply rounded-sm;
 		}
 

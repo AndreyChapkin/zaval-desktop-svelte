@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { ROOT_TODO_HIERARCHY, type DetailedTodoDto, type LightTodoDto } from '$lib/types/todo';
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
+	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 
 	// state
 	export let todo: DetailedTodoDto | LightTodoDto;
 	export let externalClass: string = '';
+	$: statusClass = chooseStatusClass(todo.status);
 
 	// events
 	type EventType = {
@@ -34,6 +36,7 @@
 			</div>
 		</a>
 	</div>
+	<div class={`todo-status-indicator ${statusClass}`} />
 	<div class="todo-info">
 		<div class="todo-name">
 			{todo.name}
@@ -53,21 +56,55 @@
 		background-color: $base-color;
 		color: $base-contrast-color;
 		font-size: small;
-
-		@include row($normal-size);
 		border-radius: $normal-size;
+
+		@include row-centered($normal-size);
 
 		img {
 			@include icon-normal-sized;
 		}
 
 		.go-to-todo {
-			padding-right: $normal-size;
-			@include bordered(right, $base-contrast-color, $border-small-size);
-
 			.link-area {
 				height: 100%;
 			}
+		}
+		
+		.todo-info {
+			overflow: hidden;
+		}
+
+		.todo-name {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+		.todo-status-indicator {
+			min-width: $wide-size;
+			min-height: $wide-size;
+			border-radius: 2 * $normal-size;
+		}
+
+		.done-status {
+			background-color: $done-status-color;
+		}
+		.backlog-status {
+			background-color: $backlog-status-color;
+		}
+		.will-be-back-status {
+			background-color: $will-be-back-status-color;
+		}
+		.ping-me-status {
+			background-color: $ping-me-status-color;
+		}
+
+		.next-to-take-status {
+			background-color: $next-to-take-status-color;
+		}
+
+		.in-progress-status {
+			background-color: $in-progress-status-color;
 		}
 	}
 </style>

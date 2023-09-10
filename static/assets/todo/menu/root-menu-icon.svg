@@ -1,10 +1,1 @@
-<svg viewBox="-1.76 -1.76 19.52 19.52"
-    xmlns="http://www.w3.org/2000/svg">
-    <g id="SVGRepo_iconCarrier">
-        <g fill="white" stroke-width="0.00016">
-            <path d="M8.04 10.471 2.938 7.953l2.085-1.03-.932-.46-3.017 1.49L8.04 11.39l6.965-3.437-3.017-1.49-.93.46 2.084 1.03z" style="-inkscape-stroke:none" transform="matrix(1.1485 0 0 1.2471 -1.233 -1.917)"></path>
-            <path d="M8.04 13.448 2.938 10.93 5.023 9.9l-.932-.46-3.017 1.49 6.966 3.437 6.965-3.437-3.017-1.49-.93.46 2.084 1.03z" style="-inkscape-stroke:none" transform="matrix(1.1485 0 0 1.2471 -1.233 -1.917)"></path>
-            <path d="M8.04 1.537 1.074 4.974 8.04 8.41l6.965-3.437zm0 .919 5.102 2.518L8.04 7.492 2.938 4.974z" style="-inkscape-stroke:none" transform="matrix(1.1485 0 0 1.2471 -1.233 -1.917)"></path>
-        </g>
-    </g>
-</svg>
+<svg fill="#ffffff" viewBox="-1.2 -1.2 26.40 26.40" id="square-root-circle" data-name="Line Color" xmlns="http://www.w3.org/2000/svg" class="icon line-color" stroke="#ffffff" stroke-width="1.7759999999999998"><g id="SVGRepo_bgCarrier" stroke-whiteidth="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><polyline id="secondary" points="7 12 9 15 11 9 16 9" style="fill: none; stroke: white; stroke-linecap: round; stroke-linejoin: round; stroke-whiteidth: 2;"></polyline><circle id="primary" cx="12" cy="12" r="9" style="fill: none; stroke: white; stroke-linecap: round; stroke-linejoin: round; stroke-whiteidth: 2;"></circle></g></svg>

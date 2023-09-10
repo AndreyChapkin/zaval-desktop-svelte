@@ -14,6 +14,7 @@
 	export let isNavigable: boolean = true;
 
 	$: statusClass = chooseStatusClass(todo.status);
+	$: secondaryStatusClass = `${statusClass}-secondary`;
 
 	// events
 	type EventType = {
@@ -43,6 +44,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class={`todo-card ${externalClass}`}>
 	<div class={`todo-status-indicator ${statusClass}`} />
+	<div class={`todo-status-indicator-secondary ${secondaryStatusClass}`} />
 	<div class="todo-interaction-panel">
 		{#if isNavigable}
 			<div
@@ -98,19 +100,20 @@
 	@import '/static/style/common/color/';
 
 	.todo-card {
-		min-height: 10 * $normal-size;
 		background-color: $base-light-color;
 		color: $base-contrast-color;
-		padding: $normal-size;
+		padding: $normal-size $normal-size;
 		position: relative;
 		overflow: hidden;
 
-		@include row;
+		@include row-start;
 		border-radius: $normal-size;
 
 		.todo-interaction-panel {
-			padding: $normal-size $normal-size $small-size 0px;
-			@include bordered(right, $base-contrast-color, $border-small-size);
+			z-index: 3;
+			background-color: lighten($base-light-color, 10%);
+			border-radius: 1.5 * $normal-size;
+			padding: 0.8 * $normal-size;
 			@include column-centered($normal-size);
 
 			.go-to-todo,
@@ -119,19 +122,55 @@
 			}
 		}
 
+		/* .todo-status-indicator {
+			width: 8 * $normal-size;
+			height: 14 * $normal-size;
+			border-radius: $normal-size;
+			top: -8 * $normal-size;
+			left: -3 * $wide-size;
+			transform: rotate(45deg);
+
+			position: absolute;
+			z-index: 1;
+		} */
+
 		.todo-status-indicator {
 			width: 3 * $normal-size;
 			height: 3 * $normal-size;
 			border-radius: 2 * $normal-size;
-			margin-bottom: $small-size;
-			top: -$normal-size;
-			left: -$normal-size;
+			top: 0 * $normal-size;
+			left: -1 * $normal-size;
+			transform: rotate(45deg);
 
 			position: absolute;
+			z-index: 2;
 		}
+
+		.todo-status-indicator-secondary {
+			width: 6 * $normal-size;
+			height: 6 * $normal-size;
+			border-radius: 6 * $normal-size;
+			top: -1 * $normal-size;
+			left: -2 * $normal-size;
+			position: absolute;
+			z-index: 1;
+		}
+
+		/* .todo-status-indicator-secondary {
+			width: 6 * $normal-size;
+			height: 16 * $normal-size;
+			border-radius: $normal-size;
+			top: -7 * $normal-size;
+			left: -2 * $normal-size;
+			transform: rotate(30deg);
+
+			position: absolute;
+			z-index: 1;
+		} */
 
 		.todo-info {
 			padding-left: $wide-size;
+			z-index: 3;
 
 			@apply flex-1;
 			@include column-justifyied;
@@ -143,24 +182,47 @@
 		}
 	}
 
+	$secondary-status-adjust-percent: -0.7;
+
 	.done-status {
 		background-color: $done-status-color;
 	}
+	.done-status-secondary {
+		background-color: adjust-color($done-status-color, $alpha: $secondary-status-adjust-percent);
+	}
+
 	.backlog-status {
 		background-color: $backlog-status-color;
 	}
+	.backlog-status-secondary {
+		background-color: adjust-color($backlog-status-color, $alpha: $secondary-status-adjust-percent);
+	}
+
 	.will-be-back-status {
 		background-color: $will-be-back-status-color;
 	}
+	.will-be-back-status-secondary {
+		background-color: adjust-color($will-be-back-status-color, $alpha: $secondary-status-adjust-percent);
+	}
+
 	.ping-me-status {
 		background-color: $ping-me-status-color;
+	}
+	.ping-me-status-secondary {
+		background-color: adjust-color($ping-me-status-color, $alpha: $secondary-status-adjust-percent);
 	}
 
 	.next-to-take-status {
 		background-color: $next-to-take-status-color;
 	}
+	.next-to-take-status-secondary {
+		background-color: adjust-color($next-to-take-status-color, $alpha: $secondary-status-adjust-percent);
+	}
 
 	.in-progress-status {
 		background-color: $in-progress-status-color;
+	}
+	.in-progress-status-secondary {
+		background-color: adjust-color($in-progress-status-color, $alpha: $secondary-status-adjust-percent);
 	}
 </style>

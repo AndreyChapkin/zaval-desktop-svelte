@@ -9,11 +9,13 @@
 	import TodoCard from '../components/TodoCard.svelte';
 	import TodoDescription from './components/TodoDescription.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
+	import TodoMenu from './components/TodoMenu.svelte';
 
 	// state
 	export let data: TodoDetailedPageData;
 	$: mainDetailedTodoDto = data.detailedTodoDto;
 	$: parentTodos = (mainDetailedTodoDto.parents ?? []).slice().reverse();
+	let createInRootMenuIsOpen = false;
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 
@@ -35,6 +37,12 @@
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
 <div class="todo-details">
 	{#if data.isRoot}
+		<div class="root-control-panel">
+			<button
+				on:click={() => (createInRootMenuIsOpen = true)}
+				class="standard-button">Add task</button
+			>
+		</div>
 		<div class="root-todos">
 			{#if mainDetailedTodoDto.children}
 				{#each mainDetailedTodoDto.children as child (child.id)}
@@ -42,6 +50,12 @@
 				{/each}
 			{/if}
 		</div>
+		{#if createInRootMenuIsOpen}
+			<TodoMenu
+				on:close={() => (createInRootMenuIsOpen = false)}
+				todoDto={null}
+			/>
+		{/if}
 	{:else}
 		<SplitPane
 			type="horizontal"
@@ -121,11 +135,20 @@
 	.todo-details {
 		height: 100vh;
 
+		.root-control-panel {
+			padding: $wide-size;
+		}
+
+		.standard-button {
+			@include standard-button;
+		}
+
 		.main-todo {
 			padding: $wide-size;
 		}
 
-		.parent-todos, .children-todos {
+		.parent-todos,
+		.children-todos {
 			padding: $wide-size;
 			@include column-stretched;
 
@@ -139,7 +162,7 @@
 			background-color: $base-light-color;
 		}
 
-		.children-todos {
+		:global(.main-split .split-area:last-child) {
 			background-color: $base-darker-color;
 		}
 

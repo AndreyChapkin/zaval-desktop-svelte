@@ -1,6 +1,7 @@
 $icon-small-size: 12px;
 $icon-normal-size: 20px;
 $icon-large-size: 24px;
+$icon-larger-size: 30px;
 $icon-super-large-size: 124px;
 
 $border-extrawide-size: 12px;
@@ -37,6 +38,11 @@ $space-normal-size: 30px;
 	min-width: $icon-large-size;
 }
 
+@mixin icon-larger-sized {
+	height: $icon-larger-size;
+	min-width: $icon-larger-size;
+}
+
 @mixin icon-super-large-sized {
 	height: $icon-super-large-size;
 	min-width: $icon-super-large-size;
@@ -45,6 +51,11 @@ $space-normal-size: 30px;
 @mixin full-screen-height {
 	min-height: 100vh;
 	max-height: 100vh;
+}
+
+@mixin full-screen-width {
+	min-width: 100vw;
+	max-width: 100vw;
 }
 
 @mixin full-screen {

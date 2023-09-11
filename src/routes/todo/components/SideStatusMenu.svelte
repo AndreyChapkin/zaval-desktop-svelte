@@ -121,12 +121,13 @@
 		}
 
 		.todo-status-side-menu-face {
+			border-radius: $normal-size;
 			@include icon-large-sized;
+			padding: 1px;
 		}
 
 		.todo-status-side-menu-face:hover {
 			background-color: $second-light-color;
-			@apply rounded-sm;
 		}
 
 		.options-pane {

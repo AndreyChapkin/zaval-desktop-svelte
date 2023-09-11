@@ -1,18 +1,19 @@
 <script lang="ts">
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
-	import { todoStatusToLabel } from '$lib/utils/todo-helpers.js';
 	import TodoCard from '../components/TodoCard.svelte';
 	import PrimitiveCard from './components/PrimitiveCard.svelte';
+	import StatusSwitcher from './components/StatusSwitcher.svelte';
 
 	// // state
 	export let data: TodosWithStatusPageData;
 	$: todosList = data.todosList.todos;
 	$: parentsMap = data.todosList.parentBranchesMap;
+	$: chosenStatus = data.status;
 </script>
 
 <div class="todos-with-status">
-	<div class="todo-status-label">{todoStatusToLabel(data.status)}</div>
-	<div class="main-todos">
+	<StatusSwitcher {chosenStatus} />
+	<div class="all-todos">
 		{#each todosList as todoAndParentBranchIdDto}
 			<div class="main-todo-and-parents">
 				<TodoCard
@@ -36,59 +37,53 @@
 	@import '/static/style/common/size';
 	@import '/static/style/common/facade';
 	@import '/static/style/common/composition';
+	@import '/static/style/todo-variables.scss';
 
 	.todos-with-status {
 		padding: $wide-size;
+		height: 100vh;
+		@include column;
 
-		@include full-screen-height;
-		@include scrollable;
-
-		.todo-status-label {
-			font-size: x-large;
-			color: white;
-			border-bottom-width: 4px;
-			border-image-slice: 1;
-			border-image-source: linear-gradient(to right, white, transparent 50%, transparent);
-			margin-bottom: $large-size;
+		.all-todos {
+			@include scrollable;
+			@include column;
+			box-sizing: border-box;
 		}
-
-		.todos-branch {
-			margin-bottom: $large-size;
-			padding-bottom: $large-size;
-			width: 90vw;
-			@include bordered(bottom, $color: $second-light-color);
+		
+		@media (min-width: 768px) {
+			.all-todos {
+				max-width: 60%;
+			}
 		}
 
 		.main-todo-and-parents {
-			@include row($wide-size);
+			margin-bottom: $normal-size;
 		}
 
 		.parents {
 			overflow-x: auto;
-			max-width: 60vw;
 			margin-bottom: $normal-size;
-			@include row-align-start($normal-size);
+			@include row($normal-size);
 			@include styled-scrollbar(transparent);
+			box-sizing: border-box;
+			max-width: 90vw;
 		}
 
-		.main-todos {
-			margin-left: $large-size;
-			@include column($large-size);
+		@media (min-width: 1080px) {
+			.parents {
+				max-width: 95vw;
+			}
+		}
+
+		@media (max-width: 540px) {
+			.parents {
+				max-width: 80vw;
+			}
 		}
 
 		:global(.primitive-card) {
-			min-width: 150px;
-			max-width: 350px;
-		}
-
-		:global(.main-todo) {
-			min-width: 450px !important;
-			max-width: 500px;
-		}
-
-		:global(.todo-card) {
-			min-width: 150px;
-			max-width: 500px;
+			min-width: 250px;
+			max-width: 450px;
 		}
 	}
 </style>

@@ -45,16 +45,17 @@
 	@import '/static/style/common/color/index.scss';
 	@import '/static/style/common/size/index.scss';
 	@import '/static/style/common/composition/index.scss';
+	@import '/static/style/todo-variables.scss';
 
 	.todo-side-menu {
 		background-color: $second-color;
 		@include column-centered($normal-size);
-		padding: $normal-size;
+		padding: $normal-size $small-size;
 
 		.todo-side-menu-item {
 			cursor: pointer;
+			border-radius: $normal-size;
 			padding: 1px;
-			@apply rounded-sm;
 
 			img {
 				@include icon-large-sized;
@@ -63,7 +64,6 @@
 
 		.todo-side-menu-item:hover {
 			background-color: $second-light-color;
-			/* background-color: $strong-second-color; */
 		}
 
 		:global(.todo-side-menu-item img) {

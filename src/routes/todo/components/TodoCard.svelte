@@ -122,51 +122,26 @@
 			}
 		}
 
-		/* .todo-status-indicator {
-			width: 8 * $normal-size;
-			height: 14 * $normal-size;
-			border-radius: $normal-size;
-			top: -8 * $normal-size;
-			left: -3 * $wide-size;
-			transform: rotate(45deg);
-
-			position: absolute;
-			z-index: 1;
-		} */
-
 		.todo-status-indicator {
 			width: 3 * $normal-size;
 			height: 3 * $normal-size;
 			border-radius: 2 * $normal-size;
 			top: 0 * $normal-size;
 			left: -1 * $normal-size;
-			transform: rotate(45deg);
 
 			position: absolute;
 			z-index: 2;
 		}
 
 		.todo-status-indicator-secondary {
-			width: 6 * $normal-size;
-			height: 6 * $normal-size;
+			width: 10 * $normal-size;
+			height: 10 * $normal-size;
 			border-radius: 6 * $normal-size;
-			top: -1 * $normal-size;
-			left: -2 * $normal-size;
+			top: -5 * $normal-size;
+			left: -5 * $normal-size;
 			position: absolute;
 			z-index: 1;
 		}
-
-		/* .todo-status-indicator-secondary {
-			width: 6 * $normal-size;
-			height: 16 * $normal-size;
-			border-radius: $normal-size;
-			top: -7 * $normal-size;
-			left: -2 * $normal-size;
-			transform: rotate(30deg);
-
-			position: absolute;
-			z-index: 1;
-		} */
 
 		.todo-info {
 			padding-left: $wide-size;

@@ -37,7 +37,8 @@
 }
 
 @mixin column($gap: 0px) {
-	@apply flex flex-col;
+	display: flex;
+	flex-direction: column;
 	gap: $gap;
 }
 

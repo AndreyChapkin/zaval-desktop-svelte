@@ -1,10 +1,11 @@
 <script lang="ts">
+	import SplitPane from './../../components/SplitPane.svelte';
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 	import TodoCard from '../components/TodoCard.svelte';
 	import PrimitiveCard from './components/PrimitiveCard.svelte';
 	import StatusSwitcher from './components/StatusSwitcher.svelte';
 
-	// // state
+	// state
 	export let data: TodosWithStatusPageData;
 	$: todosList = data.todosList.todos;
 	$: parentsMap = data.todosList.parentBranchesMap;
@@ -13,23 +14,34 @@
 
 <div class="todos-with-status">
 	<StatusSwitcher {chosenStatus} />
-	<div class="all-todos">
-		{#each todosList as todoAndParentBranchIdDto}
-			<div class="main-todo-and-parents">
-				<TodoCard
-					todo={todoAndParentBranchIdDto.todo}
-					externalClass="main-todo"
-				/>
-				{#if todoAndParentBranchIdDto.parentBranchId != null}
-					<div class="parents">
-						{#each [...parentsMap[todoAndParentBranchIdDto.parentBranchId]].reverse() as parentTodoDto}
-							<PrimitiveCard todo={parentTodoDto} />
-						{/each}
-					</div>
-				{/if}
-			</div>
-		{/each}
-	</div>
+	<SplitPane contextName="TodoWithStatusPage-1">
+		<div
+			slot="first"
+			class="todos"
+		>
+			{#each todosList as todoAndParentBranchIdDto}
+				<div class="main-todo-and-parents">
+					<TodoCard
+						todo={todoAndParentBranchIdDto.todo}
+						externalClass="main-todo"
+					/>
+					{#if todoAndParentBranchIdDto.parentBranchId != null}
+						<div class="parents">
+							{#each [...parentsMap[todoAndParentBranchIdDto.parentBranchId]].reverse() as parentTodoDto}
+								<PrimitiveCard todo={parentTodoDto} />
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
+		<div
+			slot="second"
+			class="todo-info"
+		>
+			Test dasd asd asd asd asd asd asdasdas
+		</div>
+	</SplitPane>
 </div>
 
 <style lang="scss">
@@ -39,52 +51,47 @@
 	@import '/static/style/common/composition';
 	@import '/static/style/todo-variables.scss';
 
+	:global(.split-pane) {
+		min-height: 0px;
+	}
+
+	:global(.primitive-card) {
+		min-width: 350px;
+	}
+
 	.todos-with-status {
-		padding: $wide-size;
+		flex: 1;
 		height: 100vh;
+		padding: $wide-size;
+
 		@include column;
+		min-width: 0px;
 
-		.all-todos {
-			@include scrollable;
-			@include column;
-			box-sizing: border-box;
-		}
-		
-		@media (min-width: 768px) {
-			.all-todos {
-				max-width: 60%;
+		.todos {
+			padding-right: $normal-size;
+			overflow-y: auto;
+
+			@include styled-scrollbar;
+
+			.main-todo-and-parents {
+				@include column;
+				min-width: 0px;
+
+				.parents {
+					@include row($small-size);
+					margin-top: $small-size;
+					margin-bottom: $large-size;
+					
+					overflow-x: auto;
+
+					@include styled-scrollbar;
+				}
 			}
 		}
 
-		.main-todo-and-parents {
-			margin-bottom: $normal-size;
-		}
-
-		.parents {
-			overflow-x: auto;
-			margin-top: $small-size;
-			margin-bottom: $wide-size;
-			@include row($normal-size);
-			@include styled-scrollbar(transparent);
-			box-sizing: border-box;
-			max-width: 90vw;
-		}
-
-		@media (min-width: 1080px) {
-			.parents {
-				max-width: 95vw;
-			}
-		}
-
-		@media (max-width: 540px) {
-			.parents {
-				max-width: 80vw;
-			}
-		}
-
-		:global(.primitive-card) {
-			min-width: 250px;
-			max-width: 450px;
+		.todo-info {
+			flex: 1;
+			background-color: pink;
 		}
 	}
 </style>

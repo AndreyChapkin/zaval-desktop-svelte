@@ -133,6 +133,7 @@
 	@import '/static/style/common/facade/';
 
 	.todo-details {
+		flex: 1;
 		height: 100vh;
 
 		.root-control-panel {

@@ -219,7 +219,7 @@
 	}
 
 	.colored {
-		background-color: $base-color;
+		/* background-color: $base-color; */
 
 		& > .split-separator {
 			background-color: $base-dark-color;

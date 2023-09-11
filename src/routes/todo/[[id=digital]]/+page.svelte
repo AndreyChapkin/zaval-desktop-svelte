@@ -71,7 +71,7 @@
 			>
 				<div
 					class="main-todo"
-					slot="first"
+					slot="second"
 				>
 					<TodoCard
 						todo={mainDetailedTodoDto}
@@ -80,7 +80,7 @@
 				</div>
 				<div
 					class="parent-todos"
-					slot="second"
+					slot="first"
 				>
 					{#each parentTodos as todo, i (todo.id)}
 						{#if i > 0}
@@ -159,7 +159,7 @@
 		}
 
 		:global(.primitive-card) {
-			background-color: $base-light-color;
+			/* background-color: $base-light-color; */
 		}
 
 		:global(.main-split .split-area:last-child) {

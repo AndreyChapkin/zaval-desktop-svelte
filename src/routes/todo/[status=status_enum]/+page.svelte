@@ -62,7 +62,8 @@
 
 		.parents {
 			overflow-x: auto;
-			margin-bottom: $normal-size;
+			margin-top: $small-size;
+			margin-bottom: $wide-size;
 			@include row($normal-size);
 			@include styled-scrollbar(transparent);
 			box-sizing: border-box;

@@ -23,12 +23,10 @@
 		if (chosenTodo) {
 			getTodoHeavyDetails(chosenTodo.id).then((data) => {
 				chosenTodoHeavyDetails = data;
-				console.log('@@@ completed Promise');
 			});
 		} else {
 			chosenTodoHeavyDetails = null;
 		}
-		console.log('@@@ completed reactive');
 	}
 
 	// handlers

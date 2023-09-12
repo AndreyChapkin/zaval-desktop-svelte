@@ -23,7 +23,12 @@
 		rightClick: { todo: DetailedTodoDto; x: number; y: number };
 	};
 	const dispatch = createEventDispatcher<EventType>();
-	const cardClickHandler = () => dispatch('select', todo);
+	const selectCardHandler = (e: MouseEvent) => {
+		const LEFT_BUTTON = 0;
+		if (e.ctrlKey && e.button === LEFT_BUTTON) {
+			dispatch('select', todo);
+		}
+	};
 
 	// handlers
 
@@ -42,14 +47,14 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`todo-card ${externalClass}`}>
+<div class={`todo-card ${externalClass}`} on:click={selectCardHandler}>
 	<div class={`todo-status-indicator ${statusClass}`} />
 	<div class={`todo-status-indicator-secondary ${secondaryStatusClass}`} />
 	<div class="todo-interaction-panel">
 		{#if isNavigable}
 			<div
 				class="go-to-todo"
-				on:click={cardClickHandler}
+				on:click={selectCardHandler}
 			>
 				<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
 					<div class="link-area">
@@ -177,7 +182,10 @@
 		background-color: $will-be-back-status-color;
 	}
 	.will-be-back-status-secondary {
-		background-color: adjust-color($will-be-back-status-color, $alpha: $secondary-status-adjust-percent);
+		background-color: adjust-color(
+			$will-be-back-status-color,
+			$alpha: $secondary-status-adjust-percent
+		);
 	}
 
 	.ping-me-status {
@@ -191,13 +199,19 @@
 		background-color: $next-to-take-status-color;
 	}
 	.next-to-take-status-secondary {
-		background-color: adjust-color($next-to-take-status-color, $alpha: $secondary-status-adjust-percent);
+		background-color: adjust-color(
+			$next-to-take-status-color,
+			$alpha: $secondary-status-adjust-percent
+		);
 	}
 
 	.in-progress-status {
 		background-color: $in-progress-status-color;
 	}
 	.in-progress-status-secondary {
-		background-color: adjust-color($in-progress-status-color, $alpha: $secondary-status-adjust-percent);
+		background-color: adjust-color(
+			$in-progress-status-color,
+			$alpha: $secondary-status-adjust-percent
+		);
 	}
 </style>

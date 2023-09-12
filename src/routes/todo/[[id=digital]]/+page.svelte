@@ -159,7 +159,6 @@
 	.todo-details {
 		flex: 1;
 		height: 100vh;
-		overflow: hidden;
 
 		.root-control-panel {
 			padding: $wide-size;

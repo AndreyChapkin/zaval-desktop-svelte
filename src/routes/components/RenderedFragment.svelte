@@ -3,7 +3,6 @@
 	import type { DescriptionFragment } from "$lib/types/rich-text";
 	import { getRichTag, getRichTagClass } from "$lib/utils/rich-editor-helpers";
 
-
 	// data
 	export let fragment: DescriptionFragment;
 </script>

@@ -11,6 +11,7 @@
 	// data
 	export let todoId: number;
 	export let records: string[];
+	export let viewMode = false;
 	let editRecords = records.join('\n');
 	let isEditMode = false;
 	let textAreaElement: HTMLTextAreaElement;
@@ -29,11 +30,12 @@
 	const keyUpHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Enter') {
 			const curDate = new Date();
-			const formattedDateStr = curDate.toLocaleDateString();//`${curDate.getFullYear()}.${curDate.getMonth()}.${curDate.getDay()}`;
+			const formattedDateStr = curDate.toLocaleDateString(); //`${curDate.getFullYear()}.${curDate.getMonth()}.${curDate.getDay()}`;
 			textAreaElement.value =
 				textAreaElement.value.substring(0, textAreaElement.selectionStart + 1) +
-				formattedDateStr + " "
-				textAreaElement.value.substring(textAreaElement.selectionEnd, textAreaElement.value.length);
+				formattedDateStr +
+				' ';
+			textAreaElement.value.substring(textAreaElement.selectionEnd, textAreaElement.value.length);
 		}
 	};
 
@@ -52,29 +54,31 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="todo-history">
-	<div class={`todo-history-menu ${isEditMode ? 'edit-menu' : ''}`}>
-		{#if isEditMode}
-			<button on:click={saveHandler}>
-				<img
-					src={SAVE_ICON_URL}
-					alt="status"
-				/>
-			</button>
-			<button on:click={cancelHandler}>
-				<img
-					src={CANCEL_ICON_URL}
-					alt="status"
-				/>
-			</button>
-		{:else}
-			<button on:click={editHandler}>
-				<img
-					src={EDIT_ICON_URL}
-					alt="status"
-				/>
-			</button>
-		{/if}
-	</div>
+	{#if !viewMode}
+		<div class={`todo-history-menu ${isEditMode ? 'edit-menu' : ''}`}>
+			{#if isEditMode}
+				<button on:click={saveHandler}>
+					<img
+						src={SAVE_ICON_URL}
+						alt="status"
+					/>
+				</button>
+				<button on:click={cancelHandler}>
+					<img
+						src={CANCEL_ICON_URL}
+						alt="status"
+					/>
+				</button>
+			{:else}
+				<button on:click={editHandler}>
+					<img
+						src={EDIT_ICON_URL}
+						alt="status"
+					/>
+				</button>
+			{/if}
+		</div>
+	{/if}
 	{#if isEditMode}
 		<textarea
 			cols="30"

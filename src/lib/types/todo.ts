@@ -8,6 +8,12 @@ export interface DetailedTodoDto {
     children: LightTodoDto[] | null;
 }
 
+export interface TodoHeavyDetailsDto {
+    todoId: number;
+    description?: string;
+    history?: TodoHistoryDto;
+}
+
 export interface LightTodoDto {
     id: number;
     name: string;

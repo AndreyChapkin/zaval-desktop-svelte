@@ -178,11 +178,15 @@
 		height: 100%;
 		flex: 1;
 		width: 100%;
+		min-height: 0px;
+		min-width: 0px;
 
 		.split-area {
 			overflow: auto;
 			@include styled-scrollbar;
 			box-sizing: border-box;
+			min-width: 0px;
+			min-height: 0px;
 		}
 
 		:global(.split-area > div) {
@@ -201,6 +205,8 @@
 	}
 
 	.horizontal {
+		min-height: 0px;
+
 		& > .split-separator {
 			cursor: col-resize;
 			width: 3px;
@@ -211,6 +217,8 @@
 	.vertical {
 		flex-direction: column;
 		align-items: stretch;
+
+		min-width: 0px;
 
 		& > .split-separator {
 			cursor: row-resize;

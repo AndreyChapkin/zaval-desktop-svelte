@@ -12,21 +12,31 @@
 	// events
 	type EventType = {
 		select: DetailedTodoDto | LightTodoDto;
+		view: DetailedTodoDto | LightTodoDto;
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
-	const selectHandler = () => {
+	const viewHandler = (event: MouseEvent) => {
 		dispatch('select', todo);
+	};
+	const selectHandler = (event: MouseEvent) => {
+		const LEFT_BUTTON = 0;
+		if (event.ctrlKey && event.button === LEFT_BUTTON) {
+			dispatch('select', todo);
+		}
 	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`primitive-card ${externalClass}`}>
+<div
+	class={`primitive-card ${externalClass}`}
+	on:click={selectHandler}
+>
 	<div class="go-to-todo">
 		<a
 			href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}
-			on:click={selectHandler}
+			on:click={viewHandler}
 		>
 			<div class="link-area">
 				<img
@@ -69,7 +79,7 @@
 				height: 100%;
 			}
 		}
-		
+
 		.todo-info {
 			overflow: hidden;
 		}

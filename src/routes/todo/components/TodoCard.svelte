@@ -124,21 +124,21 @@
 
 		.todo-status-indicator {
 			width: 3 * $normal-size;
-			height: 3 * $normal-size;
-			border-radius: 2 * $normal-size;
-			top: 0 * $normal-size;
-			left: -1 * $normal-size;
+			height: 5 * $normal-size;
+			top: -2.5 * $normal-size;
+			left: 0 * $normal-size;
+			transform: rotate(10deg);
 
 			position: absolute;
 			z-index: 2;
 		}
 
 		.todo-status-indicator-secondary {
-			width: 10 * $normal-size;
-			height: 10 * $normal-size;
-			border-radius: 6 * $normal-size;
-			top: -5 * $normal-size;
-			left: -5 * $normal-size;
+			width: 5 * $normal-size;
+			height: 15 * $normal-size;
+			top: -9 * $normal-size;
+			left: 1.6 * $normal-size;
+			transform: rotate(45deg);
 			position: absolute;
 			z-index: 1;
 		}

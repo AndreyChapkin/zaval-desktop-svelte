@@ -4,6 +4,7 @@
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
 	import { ARROW_URL } from '$lib/utils/assets-references';
+	import { onMount } from 'svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import PrimitiveCard from '../[status=status_enum]/components/PrimitiveCard.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
@@ -14,10 +15,20 @@
 	// state
 	export let data: TodoDetailedPageData;
 	$: mainDetailedTodoDto = data.detailedTodoDto;
-	$: parentTodos = (mainDetailedTodoDto.parents ?? []).slice().reverse();
+	$: parentTodos = (mainDetailedTodoDto.parents ?? []).slice();
 	let createInRootMenuIsOpen = false;
+	let shouldSeeElement: HTMLElement;
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
+	$: {
+		if (shouldSeeElement && data) {
+			setTimeout(() => {
+				if (shouldSeeElement.parentElement?.parentElement) {
+					shouldSeeElement.parentElement.scrollTo(0, 2000);
+				}
+			}, 500);
+		}
+	}
 
 	// handlers
 	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
@@ -32,6 +43,14 @@
 			todoHistoryRecords: savedTodoHistoryDto.records
 		};
 	};
+
+	onMount(() => {
+		setTimeout(() => {
+			if (shouldSeeElement.parentElement?.parentElement) {
+				shouldSeeElement.parentElement.scrollTo(0, 2000);
+			}
+		}, 500);
+	});
 </script>
 
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
@@ -81,6 +100,7 @@
 				<div
 					class="parent-todos"
 					slot="first"
+					bind:this={shouldSeeElement}
 				>
 					{#each parentTodos as todo, i (todo.id)}
 						{#if i > 0}
@@ -91,6 +111,10 @@
 						{/if}
 						<PrimitiveCard {todo} />
 					{/each}
+					<img
+						src={ARROW_URL}
+						alt="status"
+					/>
 				</div>
 				<div
 					class="children-todos"
@@ -135,6 +159,7 @@
 	.todo-details {
 		flex: 1;
 		height: 100vh;
+		overflow: hidden;
 
 		.root-control-panel {
 			padding: $wide-size;
@@ -156,6 +181,7 @@
 			img {
 				@include icon-small-sized;
 				margin: $normal-size;
+				transform: rotate(180deg);
 			}
 		}
 

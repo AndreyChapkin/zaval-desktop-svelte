@@ -21,7 +21,7 @@
 		serializeDescription
 	} from '$lib/utils/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
-	import RenderedFragment from './RenderedFragment.svelte';
+	import RenderedFragment from '../../../components/RenderedFragment.svelte';
 
 	// data
 	export let detailedTodoDto: DetailedTodoDto;

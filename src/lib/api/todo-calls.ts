@@ -1,5 +1,5 @@
 import type { TodosListDto } from "$lib/types/pages-data";
-import type { CreateTodoDto, DetailedTodoDto, LightTodoDto, MoveTodoDto, TodoHistoryDto, TodoStatus, UpdateTodoDto } from "$lib/types/todo";
+import type { CreateTodoDto, DetailedTodoDto, LightTodoDto, MoveTodoDto, TodoHeavyDetailsDto, TodoHistoryDto, TodoStatus, UpdateTodoDto } from "$lib/types/todo";
 import { callDelete, callGet, callPatch, callPost } from "$lib/utils/call-helpers";
 import { baseURL } from "./base";
 
@@ -31,6 +31,12 @@ export async function deleteTodo(todoId: number): Promise<void> {
 export async function getDetailedTodo(todoId: number | null): Promise<DetailedTodoDto> {
     const url = `${baseTodoURL}/detailed/${todoId === null ? '' : todoId}`;
 	const result = await callGet<DetailedTodoDto>(url);
+    return result.data;
+}
+
+export async function getTodoHeavyDetails(todoId: number): Promise<TodoHeavyDetailsDto | null> {
+    const url = `${baseTodoURL}/heavy-details/${todoId}`;
+	const result = await callGet<TodoHeavyDetailsDto | null>(url);
     return result.data;
 }
 

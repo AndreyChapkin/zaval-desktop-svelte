@@ -1,8 +1,19 @@
 import axios, { type AxiosResponse } from "axios";
 
+function asEncodedParams(params: Record<string, any> | null): Record<string, any> | null {
+    if (params) {
+        let encodedParams = {} as Record<string, any>;
+        Object.entries(params).forEach(([key, value]) => {
+            encodedParams[key] = encodeURI(value);
+        });
+        return encodedParams;
+    }
+    return null;
+}
+
 export async function callGet<T>(url:string, params: Record<string, any> | null = null) {
     return await axios.get<T>(url, {
-        params: params,
+        params: asEncodedParams(params),
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json'

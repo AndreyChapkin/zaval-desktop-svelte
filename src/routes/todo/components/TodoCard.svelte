@@ -141,6 +141,7 @@
 		.todo-status-indicator-secondary {
 			width: 5 * $normal-size;
 			height: 15 * $normal-size;
+			border-radius: $normal-size;
 			top: -9 * $normal-size;
 			left: 1.6 * $normal-size;
 			transform: rotate(45deg);

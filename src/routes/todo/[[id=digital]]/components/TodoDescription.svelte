@@ -157,9 +157,13 @@
 		makePersisted();
 	};
 
-	let cancelHandler = () => {
+	let backToRead = () => {
 		changeMode('read');
 		rerenderKey = Date.now();
+	};
+
+	let cancelHandler = () => {
+		backToRead();
 		makePersisted();
 	};
 
@@ -194,7 +198,8 @@
 				placeholderElement?.remove();
 				placeholderElement = null;
 			} else if (editorMode === 'edit') {
-				cancelHandler();
+				// Back to read
+				backToRead();
 			}
 			return;
 		}

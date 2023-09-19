@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
-	import type { DescriptionFragment, EditorModes, RichTypes } from '$lib/types/rich-text';
+	import type { EditorModes, RichTypes } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
-	import { checkTextModification } from '$lib/utils/rich-editor/key-handlers';
 	import {
 		addNewElementInsteadOfPlaceholder,
 		changeDefaultEnterBehaviour,
@@ -410,8 +409,8 @@
 		}
 
 		:global(.rich-title) {
-			color: rgb(182, 93, 126);
-			font-size: large;
+			color: rgb(236, 178, 70);
+			font-size: larger;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
@@ -422,7 +421,7 @@
 			font-family: Nunito;
 		}
 		:global(.rich-strong) {
-			color: rgb(224, 181, 102);
+			color: rgb(218, 129, 64);
 		}
 		:global(.rich-link) {
 			color: rgb(125, 180, 212);

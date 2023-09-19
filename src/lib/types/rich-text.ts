@@ -17,7 +17,7 @@ export type HierarchicalPositionTypes = 'independent' | 'dependent';
 export const RICH_TYPES_TO_TAGS_MAP: Record<RichTypes, string> = {
 	title: 'h1',
 	paragraph: 'p',
-	strong: 'strong',
+	strong: 'b',
 	link: 'a',
 } as const;
 

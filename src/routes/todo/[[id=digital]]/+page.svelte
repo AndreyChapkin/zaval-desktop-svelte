@@ -184,11 +184,7 @@
 			}
 		}
 
-		:global(.primitive-card) {
-			/* background-color: $base-light-color; */
-		}
-
-		:global(.main-split .split-area:last-child) {
+		:global(.main-split .split-area:last-child), :global(.main-split .split-area:first-child) {
 			background-color: $base-darker-color;
 		}
 

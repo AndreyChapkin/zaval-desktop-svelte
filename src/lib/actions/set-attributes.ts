@@ -1,5 +1,5 @@
 import { RICH_ATTRIBUTES } from '$lib/types/rich-text';
-import { defineElementType } from '$lib/utils/rich-editor-helpers';
+import { defineElementType } from '$lib/utils/rich-editor/rich-editor-helpers';
 
 export function setAttributes(
 	element: HTMLElement,

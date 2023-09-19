@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
-	import type { EditorModes, RichTypes } from '$lib/types/rich-text';
+	import type { DescriptionFragment, EditorModes, RichTypes } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { checkTextModification } from '$lib/utils/rich-editor/key-handlers';
 	import {
 		addNewElementInsteadOfPlaceholder,
 		changeDefaultEnterBehaviour,
@@ -19,26 +20,42 @@
 		moveElement,
 		parseDescription,
 		serializeDescription
-	} from '$lib/utils/rich-editor-helpers';
+	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RenderedFragment from '../../../components/RenderedFragment.svelte';
 
+	// const
+	const TEMP_RICH_EDITOR_CONTENT_KEY = 'tempRichEditorContent';
+	const WAIT_TO_CHECK_INPUT_RATE_MILLIS = 500;
+	const MAX_UNSAVED_INPUTS_COUNT = 15;
+
 	// data
 	export let detailedTodoDto: DetailedTodoDto;
+	let hasUnpersistedData = !!localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
 	$: descriptionFragments = parseDescription(detailedTodoDto.description);
 	let descriptionContainer: HTMLDivElement;
+	let editorPrevMode: EditorModes = 'read';
 	let editorMode: EditorModes = 'read';
 	let placeholderElement: HTMLElement | null = null;
 	let assistanceValueName: string | null = null;
-	// TODO: bad decision
-	$: if (!assistanceValueName && descriptionContainer) {
-		setTimeout(() => descriptionContainer.focus(), 300);
-	}
 	let savedNewElementType: RichTypes | null = null;
 	let assistanceValue: string | null = null;
 	let assistancePositionStyle: string | null = null;
 	let rerenderKey = Date.now();
+	let reservationState = {
+		unsavedInputsCount: 0,
+		noticedInputsCount: 0,
+		isAlreadyTryingToSave: false,
+		timerId: 0,
+	};
 
+	// Reactivity
+	// TODO: bad decision
+	// Return focus to editor after assistance window disappear
+	$: if (!assistanceValueName && descriptionContainer) {
+		setTimeout(() => descriptionContainer.focus(), 300);
+	}
+	// Move assistance window under the placeholder
 	$: if (placeholderElement) {
 		defineAssistancePosition();
 	} else {
@@ -46,10 +63,24 @@
 	}
 
 	// initial description edition - create some paragraph to edit
-	$: if (editorMode === 'edit') {
-		if (isEditorEmpty(descriptionContainer)) {
+	$: if (editorMode === 'edit' && editorPrevMode === 'read') {
+		if (hasUnpersistedData) {
+			let tempSavedContent = localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
+			if (tempSavedContent) {
+				descriptionFragments = parseDescription(tempSavedContent);
+			}
+		} else if (isEditorEmpty(descriptionContainer)) {
 			createDefaultContentInContainer(descriptionContainer);
-			descriptionContainer.focus();
+		}
+		descriptionContainer.focus();
+		// Listen for changes and make reserve when it is needed
+		descriptionContainer.addEventListener('input', reservator);
+	} else if (editorMode === 'read') {
+		// No need in further listening
+		if (descriptionContainer) {
+			// when component is fully initialized
+			descriptionContainer.removeEventListener('input', reservator);
+			descriptionFragments = parseDescription(detailedTodoDto.description);
 		}
 	}
 
@@ -59,9 +90,58 @@
 	};
 	const dispatch = createEventDispatcher<EventType>();
 
+	// functions
+	const changeMode = (mode: EditorModes) => {
+		editorPrevMode = editorMode;
+		editorMode = mode;
+	};
+
 	// handlers
 	let editHandler = () => {
-		editorMode = 'edit';
+		changeMode('edit');
+	};
+
+	function reserve(force: boolean = false) {
+		// Not intensive input or max number of savings was skipped.
+		// Save what was changed.
+		const hasUnsavedInputs = reservationState.unsavedInputsCount > 0;
+		const waitForMore = reservationState.unsavedInputsCount > reservationState.noticedInputsCount;
+		const tooManyUnsavedInputs = reservationState.unsavedInputsCount >= MAX_UNSAVED_INPUTS_COUNT;
+		if (force || tooManyUnsavedInputs || (!waitForMore && hasUnsavedInputs)) {
+			reservationState.isAlreadyTryingToSave = true;
+			// Refresh values cause we took their into account
+			reservationState.unsavedInputsCount = 0;
+			reservationState.noticedInputsCount = 0;
+			console.log('@@@ reserve');
+			const serializedEditorContent = serializeDescription(descriptionContainer);
+			if (serializedEditorContent) {
+				localStorage.setItem(TEMP_RICH_EDITOR_CONTENT_KEY, serializedEditorContent);
+			}
+			reservationState.isAlreadyTryingToSave = false;
+			// Check if new changes appeared while was saving
+			reserve();
+		} else if (waitForMore) {
+			// There is intensive input. Lets give one more time window for input.
+			reservationState.isAlreadyTryingToSave = true;
+			reservationState.noticedInputsCount = reservationState.unsavedInputsCount;
+			reservationState.timerId = setTimeout(reserve, WAIT_TO_CHECK_INPUT_RATE_MILLIS);
+		} else {
+			reservationState.isAlreadyTryingToSave = false;
+		}
+	}
+
+	let reservator = () => {
+		reservationState.unsavedInputsCount++;
+		if (!reservationState.isAlreadyTryingToSave) {
+			reservationState.isAlreadyTryingToSave = true;
+			reservationState.noticedInputsCount = reservationState.unsavedInputsCount;
+			reservationState.timerId = setTimeout(reserve, WAIT_TO_CHECK_INPUT_RATE_MILLIS);
+		}
+	};
+
+	let makePersisted = () => {
+		hasUnpersistedData = false;
+		localStorage.removeItem(TEMP_RICH_EDITOR_CONTENT_KEY);
 	};
 
 	let saveHandler = async () => {
@@ -73,12 +153,14 @@
 			...detailedTodoDto,
 			description: editedDescription
 		});
-		editorMode = 'read';
+		changeMode('read');
+		makePersisted();
 	};
 
 	let cancelHandler = () => {
-		editorMode = 'read';
+		changeMode('read');
 		rerenderKey = Date.now();
+		makePersisted();
 	};
 
 	const assistanceHandler = (event: KeyboardEvent) => {
@@ -95,7 +177,7 @@
 					editorMode,
 					newElementAttributes
 				);
-				editorMode = 'edit';
+				changeMode('edit');
 			}
 			event.stopPropagation();
 		}
@@ -108,7 +190,7 @@
 		}
 		if (checkIfEscapeModes(event)) {
 			if (editorMode === 'addition' || editorMode === 'insertion') {
-				editorMode = 'edit';
+				changeMode('edit');
 				placeholderElement?.remove();
 				placeholderElement = null;
 			} else if (editorMode === 'edit') {
@@ -134,7 +216,7 @@
 						return;
 					}
 					addNewElementInsteadOfPlaceholder(newElementType, placeholderElement, editorMode);
-					editorMode = 'edit';
+					changeMode('edit');
 				}
 				return;
 			}
@@ -151,7 +233,7 @@
 				}
 				placeholderElement = createPlaceHolderInSelectedPosition(descriptionContainer);
 			}
-			editorMode = newMode;
+			changeMode(newMode);
 			return;
 		}
 		changeDefaultEnterBehaviour(event);

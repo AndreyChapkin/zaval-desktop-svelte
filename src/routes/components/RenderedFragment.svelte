@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { setAttributes } from "$lib/actions/set-attributes";
 	import type { DescriptionFragment } from "$lib/types/rich-text";
-	import { getRichTag, getRichTagClass } from "$lib/utils/rich-editor-helpers";
+	import { getRichTag, getRichTagClass } from "$lib/utils/rich-editor/rich-editor-helpers";
 
 	// data
 	export let fragment: DescriptionFragment;

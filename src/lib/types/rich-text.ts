@@ -10,7 +10,7 @@ export const RICH_ATTRIBUTES: Partial<Record<RichTypes, string[]>> = {
 
 export type NewPositionType = 'before' | 'after';
 
-export type EditorModes = 'edit' | 'addition' | 'insertion' | 'read';
+export type EditorModes = 'edit' | 'read';
 
 export type HierarchicalPositionTypes = 'independent' | 'dependent';
 

@@ -1,24 +1,24 @@
 <script lang="ts">
 	import { updateTodo } from '$lib/api/todo-calls';
-	import type { EditorModes, RichTypes } from '$lib/types/rich-text';
+	import type { EditorModes } from '$lib/types/rich-text';
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
-		addNewElementInsteadOfPlaceholder,
 		changeDefaultEnterBehaviour,
-		checkIfChangeMode,
+		changeDefaultTabBehaviour,
+		checkIfCreatedElementAndMakeRich,
 		checkIfEscapeModes,
 		checkIfSave,
-		chooseNewElementType,
 		chooseNewPosition,
+		chooseNewRichElementType,
 		createDefaultContentInContainer,
-		createPlaceHolderAfterSelectedElement,
-		createPlaceHolderInSelectedPosition,
-		findSelectedElement,
+		createNewRichElementRelativeToCurrentPosition,
 		isEditorEmpty,
-		moveElement,
 		parseDescription,
-		serializeDescription
+		selectTextInElement,
+		serializeDescription,
+		setAttributesToElement,
+		tryToMoveSelectedElement
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RenderedFragment from '../../../components/RenderedFragment.svelte';
@@ -30,22 +30,29 @@
 
 	// data
 	export let detailedTodoDto: DetailedTodoDto;
-	let hasUnpersistedData = !!localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
 	$: descriptionFragments = parseDescription(detailedTodoDto.description);
+
+	let hasUnpersistedData = !!localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
+
 	let descriptionContainer: HTMLDivElement;
+
 	let editorPrevMode: EditorModes = 'read';
 	let editorMode: EditorModes = 'read';
-	let placeholderElement: HTMLElement | null = null;
+
 	let assistanceValueName: string | null = null;
-	let savedNewElementType: RichTypes | null = null;
 	let assistanceValue: string | null = null;
+	let elementToAssist: HTMLElement | null = null;
 	let assistancePositionStyle: string | null = null;
+
+	let artificialModifications = 0;
+
 	let rerenderKey = Date.now();
+
 	let reservationState = {
 		unsavedInputsCount: 0,
 		noticedInputsCount: 0,
 		isAlreadyTryingToSave: false,
-		timerId: 0,
+		timerId: 0
 	};
 
 	// Reactivity
@@ -53,12 +60,6 @@
 	// Return focus to editor after assistance window disappear
 	$: if (!assistanceValueName && descriptionContainer) {
 		setTimeout(() => descriptionContainer.focus(), 300);
-	}
-	// Move assistance window under the placeholder
-	$: if (placeholderElement) {
-		defineAssistancePosition();
-	} else {
-		assistancePositionStyle = null;
 	}
 
 	// initial description edition - create some paragraph to edit
@@ -80,6 +81,13 @@
 			// when component is fully initialized
 			descriptionContainer.removeEventListener('input', reservator);
 			descriptionFragments = parseDescription(detailedTodoDto.description);
+		}
+		artificialModifications = 0;
+	}
+
+	$: {
+		if (artificialModifications > 0) {
+			reservator();
 		}
 	}
 
@@ -111,7 +119,6 @@
 			// Refresh values cause we took their into account
 			reservationState.unsavedInputsCount = 0;
 			reservationState.noticedInputsCount = 0;
-			console.log('@@@ reserve');
 			const serializedEditorContent = serializeDescription(descriptionContainer);
 			if (serializedEditorContent) {
 				localStorage.setItem(TEMP_RICH_EDITOR_CONTENT_KEY, serializedEditorContent);
@@ -167,23 +174,30 @@
 	};
 
 	const assistanceHandler = (event: KeyboardEvent) => {
-		if (event.code === 'Enter' && assistanceValueName && assistanceValue) {
-			let newElementAttributes = {
-				[assistanceValueName]: assistanceValue
-			};
+		if (event.code === 'Enter' && assistanceValue) {
+			if (assistanceValue) {
+				let newElementAttributes = {
+					[assistanceValueName!!]: assistanceValue
+				};
+				setAttributesToElement(elementToAssist!!, newElementAttributes);
+				artificialModifications++;
+				selectTextInElement(elementToAssist!!);
+				assistanceValueName = null;
+				assistanceValue = null;
+				elementToAssist = null;
+				assistancePositionStyle = null;
+			}
+		} else if (event.code === 'Escape') {
 			assistanceValueName = null;
 			assistanceValue = null;
-			if (savedNewElementType && placeholderElement) {
-				addNewElementInsteadOfPlaceholder(
-					savedNewElementType,
-					placeholderElement,
-					editorMode,
-					newElementAttributes
-				);
-				changeMode('edit');
-			}
-			event.stopPropagation();
+			elementToAssist = null;
+			assistancePositionStyle = null;
 		}
+		event.stopPropagation();
+	};
+
+	const keyupHandler = (event: KeyboardEvent) => {
+		checkIfCreatedElementAndMakeRich(event, descriptionContainer);
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
@@ -192,65 +206,41 @@
 			return;
 		}
 		if (checkIfEscapeModes(event)) {
-			if (editorMode === 'addition' || editorMode === 'insertion') {
-				changeMode('edit');
-				placeholderElement?.remove();
-				placeholderElement = null;
-			} else if (editorMode === 'edit') {
-				// Back to read
+			if (editorMode === 'edit') {
 				backToRead();
 			}
 			return;
 		}
-		if (assistanceValueName) {
+		const newElementType = chooseNewRichElementType(event);
+		if (newElementType) {
+			const newElement = createNewRichElementRelativeToCurrentPosition(
+				descriptionContainer,
+				newElementType
+			);
+			artificialModifications++;
+			if (newElementType === 'link') {
+				// Delegate logic to assistance handler
+				assistanceValueName = 'href';
+				elementToAssist = newElement;
+				assistancePositionStyle = computeAssistancePosition(newElement);
+			}
 			return;
 		}
-		if (editorMode === 'addition' || editorMode === 'insertion') {
-			if (placeholderElement) {
-				const newPosition = chooseNewPosition(event, editorMode);
-				if (newPosition) {
-					moveElement(placeholderElement, newPosition);
-					return;
-				}
-				const newElementType = chooseNewElementType(event, editorMode);
-				if (newElementType) {
-					if (newElementType === 'link') {
-						savedNewElementType = newElementType;
-						assistanceValueName = 'href';
-						return;
-					}
-					addNewElementInsteadOfPlaceholder(newElementType, placeholderElement, editorMode);
-					changeMode('edit');
-				}
-				return;
-			}
-		}
-		const newMode = checkIfChangeMode(event);
-		if (newMode) {
-			if (newMode === 'addition') {
-				placeholderElement = createPlaceHolderAfterSelectedElement(descriptionContainer);
-			}
-			if (newMode === 'insertion') {
-				const selectedElement = findSelectedElement(descriptionContainer);
-				if (selectedElement === descriptionContainer) {
-					return;
-				}
-				placeholderElement = createPlaceHolderInSelectedPosition(descriptionContainer);
-			}
-			changeMode(newMode);
+		const newPosition = chooseNewPosition(event);
+		if (newPosition) {
+			tryToMoveSelectedElement(descriptionContainer, newPosition);
 			return;
 		}
 		changeDefaultEnterBehaviour(event);
+		changeDefaultTabBehaviour(event);
 	};
 
 	// functions
-	function defineAssistancePosition() {
-		if (placeholderElement) {
-			const rect = placeholderElement.getBoundingClientRect();
-			const top = placeholderElement.offsetTop + rect.height;
-			const left = placeholderElement.offsetLeft;
-			assistancePositionStyle = `top: ${top}px; left: ${left}px`;
-		}
+	function computeAssistancePosition(anchorElement: HTMLElement): string {
+		const rect = anchorElement.getBoundingClientRect();
+		const top = anchorElement.offsetTop + rect.height;
+		const left = anchorElement.offsetLeft;
+		return `top: ${top}px; left: ${left}px`;
 	}
 </script>
 
@@ -271,25 +261,15 @@
 				/>
 			</button>
 			{#if editorMode === 'edit'}
-				<span class="control-prompt"><b>ADD</b> Alt+A</span>
+				<span class="control-prompt"><b>+Title</b> Alt+1</span>
 				<div class="prompt-separator" />
-				<span class="control-prompt"><b>INSERT</b> Alt+I</span>
+				<span class="control-prompt"><b>+Paragraph</b> Alt+2</span>
 				<div class="prompt-separator" />
-				<span class="control-prompt"><b>SAVE</b> Alt+S</span>
-				<div class="prompt-separator" />
-				<span class="control-prompt"><b>CANCEL</b> Esc</span>
-			{:else if editorMode === 'addition'}
-				<span class="control-prompt"><b>Title</b> Alt+1</span>
-				<div class="prompt-separator" />
-				<span class="control-prompt"><b>Paragraph</b> Alt+2</span>
+				<span class="control-prompt"><b>+Link</b> Alt+3</span>
 				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Move Up</b> Alt+Up</span>
 				<div class="prompt-separator" />
 				<span class="control-prompt"><b>Move Down</b> Alt+Down</span>
-			{:else if editorMode === 'insertion'}
-				<span class="control-prompt"><b>Strong</b> Alt+1</span>
-				<div class="prompt-separator" />
-				<span class="control-prompt"><b>Link</b> Alt+2</span>
 			{/if}
 		{:else}
 			<button on:click={editHandler}>
@@ -306,7 +286,8 @@
 			bind:this={descriptionContainer}
 			contenteditable={editorMode === 'edit'}
 			tabindex="-1"
-			on:keydown={keydownHandler}
+			on:keyup={assistanceValueName || editorMode !== 'edit' ? null : keyupHandler}
+			on:keydown={assistanceValueName || editorMode !== 'edit' ? null : keydownHandler}
 		>
 			{#each descriptionFragments as fragment}
 				<RenderedFragment {fragment} />
@@ -323,7 +304,7 @@
 						type="text"
 						autofocus
 						bind:value={assistanceValue}
-						on:keydown={assistanceHandler}
+						on:keyup={assistanceHandler}
 					/>
 				</div>
 			{/if}

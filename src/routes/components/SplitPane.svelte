@@ -171,7 +171,9 @@
 </div>
 
 <style lang="scss">
-	@import '/static/style/variables-mixins.scss';
+	@import '/static/style/common/color/';
+	@import '/static/style/common/facade/';
+	@import '/static/style/common/size/';
 
 	.split-pane {
 		display: flex;
@@ -209,7 +211,7 @@
 
 		& > .split-separator {
 			cursor: col-resize;
-			width: 3px;
+			width: $border-normal-size;
 			min-height: 100%;
 		}
 	}
@@ -222,7 +224,7 @@
 
 		& > .split-separator {
 			cursor: row-resize;
-			height: 3px;
+			height: $border-normal-size;
 		}
 	}
 
@@ -230,7 +232,7 @@
 		/* background-color: $base-color; */
 
 		& > .split-separator {
-			background-color: $base-dark-color;
+			background-color: $base-color;
 		}
 	}
 </style>

@@ -184,8 +184,21 @@
 			}
 		}
 
-		:global(.main-split .split-area:last-child), :global(.main-split .split-area:first-child) {
+		:global(.main-split .split-area) {
 			background-color: $base-darker-color;
+		}
+
+		:global(.container-split .split-separator) {
+			background-color: $second-light-color;
+		}
+
+		:global(.main-split .split-separator) {
+			background-color: $second-light-color;
+		}
+
+		:global(.main-split .split-area:nth-child(3)) {
+			// background-color: $second-color;
+			background: $second-gradient;
 		}
 
 		:global(.children-todos .primitive-card) {
@@ -198,21 +211,9 @@
 			color: $base-weak-contrast-color;
 		}
 
-		:global(.container-split) {
-			:global(.split-separator) {
-				background-color: $base-color;
-			}
-		}
-
 		:global(.main-split > .split-separator:nth-child(2)) {
 			position: relative;
 			z-index: 1;
-		}
-
-		:global(.main-split) {
-			:global(.split-separator) {
-				background-color: $base-color;
-			}
 		}
 
 		.arrow {

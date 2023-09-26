@@ -29,7 +29,7 @@
 
 	.status-switcher {
 		@include row($normal-size);
-		margin-bottom: $normal-size;
+		margin-bottom: $wide-size;
 
 		.todo-status-button {
 			@include standard-container;
@@ -42,8 +42,10 @@
 		}
 
 		.chosen {
-			border-width: $border-normal-size;
-			border-color: lighten($second-light-color, 30%);
+			@include bordered(bottom, $second-more-lighter-color, $border-normal-size);
+			background-color: $second-light-color;
+			// border-width: $border-normal-size;
+			// border-color: lighten($second-light-color, 30%);
 		}
 	}
 </style>

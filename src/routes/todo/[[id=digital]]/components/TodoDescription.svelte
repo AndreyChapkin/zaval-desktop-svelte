@@ -334,7 +334,7 @@
 		@include column;
 
 		.todo-description-menu {
-			background-color: $base-color;
+			background-color: $second-light-color;
 			padding: $small-size;
 			color: $base-contrast-color;
 

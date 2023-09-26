@@ -1,5 +1,5 @@
 // base colors
-$base-color: #4a475e;
+$base-color: #44405e;
 $base-dark-color: darken($base-color, 15%);
 $base-darker-color: darken($base-color, 20%);
 $base-light-color: lighten($base-color, 10%);
@@ -8,6 +8,8 @@ $base-light-color: lighten($base-color, 10%);
 $second-color: #331D2C;
 $second-dark-color: darken($second-color, 10%);
 $second-light-color: lighten($second-color, 10%);
+$second-lighter-color: lighten($second-light-color, 10%);
+$second-more-lighter-color: lighten($second-light-color, 30%);
 
 // strong color
 $strong-color: #c43c45;
@@ -17,6 +19,7 @@ $strong-second-color: #dda045;
 $strong-second-light-color: lighten($strong-second-color, 15%);
 $strong-second-weak-color: rgb(220, 155, 81);
 
+$second-gradient: linear-gradient(215deg, $second-color 0%, adjust-hue($second-color, 10deg) 50%, $base-darker-color 100%);
 $strong-gradient: linear-gradient(215deg, $strong-light-color 0%, adjust-hue($strong-color, -30deg) 50%, $strong-color 100%);
 
 $base-contrast-color: white;

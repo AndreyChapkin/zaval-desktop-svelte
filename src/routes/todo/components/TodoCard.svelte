@@ -128,11 +128,11 @@
 		}
 
 		.todo-status-indicator {
-			width: 3 * $normal-size;
-			height: 5 * $normal-size;
-			top: -2.5 * $normal-size;
-			left: 0 * $normal-size;
-			transform: rotate(10deg);
+			width: 4 * $normal-size;
+			height: 4 * $normal-size;
+			top: -1 * $normal-size;
+			left: -1.5 * $normal-size;
+			transform: rotate(-10deg) skewX(30deg);
 
 			position: absolute;
 			z-index: 2;
@@ -141,7 +141,7 @@
 		.todo-status-indicator-secondary {
 			width: 5 * $normal-size;
 			height: 15 * $normal-size;
-			border-radius: $normal-size;
+			// border-radius: $normal-size;
 			top: -9 * $normal-size;
 			left: 1.6 * $normal-size;
 			transform: rotate(45deg);

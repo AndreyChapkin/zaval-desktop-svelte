@@ -15,6 +15,7 @@
 		createNewRichElementRelativeToCurrentPosition,
 		isEditorEmpty,
 		parseDescription,
+		pasteInSelection,
 		selectTextInElement,
 		serializeDescription,
 		setAttributesToElement,
@@ -55,6 +56,14 @@
 		timerId: 0
 	};
 
+	function nonRichPaste(e: ClipboardEvent) {
+		const plainTextFromClipboard = e.clipboardData?.getData('Text');
+		if (plainTextFromClipboard) {
+			pasteInSelection(plainTextFromClipboard);
+		}
+		e.preventDefault();
+	}
+
 	// Reactivity
 	// TODO: bad decision
 	// Return focus to editor after assistance window disappear
@@ -75,11 +84,13 @@
 		descriptionContainer.focus();
 		// Listen for changes and make reserve when it is needed
 		descriptionContainer.addEventListener('input', reservator);
+		descriptionContainer.addEventListener('paste', nonRichPaste);
 	} else if (editorMode === 'read') {
 		// No need in further listening
 		if (descriptionContainer) {
 			// when component is fully initialized
 			descriptionContainer.removeEventListener('input', reservator);
+			descriptionContainer.removeEventListener('paste', nonRichPaste);
 			descriptionFragments = parseDescription(detailedTodoDto.description);
 		}
 		artificialModifications = 0;

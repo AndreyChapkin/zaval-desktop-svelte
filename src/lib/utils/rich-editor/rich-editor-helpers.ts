@@ -408,6 +408,23 @@ export function findSelectedText(): Text | null {
 	return null;
 }
 
+export function pasteInSelection(pastedText: string) {
+	const textNode = findSelectedText();
+	const selection = window.getSelection();
+	const range = selection?.getRangeAt(0);
+	if (textNode && selection && range) {
+		const fullText = textNode.textContent ?? '';
+		const firstTextPart = fullText.substring(0, range.startOffset);
+		const secondTextPart = fullText.substring(range.endOffset);
+		textNode.textContent = `${firstTextPart}${pastedText}${secondTextPart}`;
+		const newRange = new Range();
+		newRange.setStart(textNode, firstTextPart.length + pastedText.length);
+		newRange.setEnd(textNode, firstTextPart.length + pastedText.length);
+		window.getSelection()?.removeAllRanges();
+		window.getSelection()?.addRange(newRange);
+	}
+}
+
 // TODO: refactor
 export function isEditorEmpty(
 	containerElement: HTMLElement

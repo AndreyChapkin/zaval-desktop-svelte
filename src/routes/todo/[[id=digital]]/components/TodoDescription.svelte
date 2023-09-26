@@ -61,6 +61,7 @@
 		if (plainTextFromClipboard) {
 			pasteInSelection(plainTextFromClipboard);
 		}
+		reserve(true);
 		e.preventDefault();
 	}
 
@@ -83,13 +84,13 @@
 		}
 		descriptionContainer.focus();
 		// Listen for changes and make reserve when it is needed
-		descriptionContainer.addEventListener('input', reservator);
+		descriptionContainer.addEventListener('input', reservationCaller);
 		descriptionContainer.addEventListener('paste', nonRichPaste);
 	} else if (editorMode === 'read') {
 		// No need in further listening
 		if (descriptionContainer) {
 			// when component is fully initialized
-			descriptionContainer.removeEventListener('input', reservator);
+			descriptionContainer.removeEventListener('input', reservationCaller);
 			descriptionContainer.removeEventListener('paste', nonRichPaste);
 			descriptionFragments = parseDescription(detailedTodoDto.description);
 		}
@@ -98,7 +99,7 @@
 
 	$: {
 		if (artificialModifications > 0) {
-			reservator();
+			reservationCaller();
 		}
 	}
 
@@ -147,7 +148,7 @@
 		}
 	}
 
-	let reservator = () => {
+	let reservationCaller = () => {
 		reservationState.unsavedInputsCount++;
 		if (!reservationState.isAlreadyTryingToSave) {
 			reservationState.isAlreadyTryingToSave = true;

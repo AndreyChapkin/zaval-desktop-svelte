@@ -19,7 +19,10 @@ $strong-second-color: #dda045;
 $strong-second-light-color: lighten($strong-second-color, 15%);
 $strong-second-weak-color: rgb(220, 155, 81);
 
-$second-gradient: linear-gradient(215deg, $second-color 0%, adjust-hue($second-color, -20deg) 50%, $base-darker-color 100%);
+$second-adjusted-color: adjust-hue($second-color, -40deg);
+$second-light-adjusted-color: adjust-hue($second-light-color, -50deg);
+
+$second-gradient: linear-gradient(215deg, $second-adjusted-color 0%, darken($second-light-adjusted-color, 5%) 50%, $second-adjusted-color 100%);
 $strong-gradient: linear-gradient(215deg, $strong-light-color 0%, adjust-hue($strong-color, -30deg) 50%, $strong-color 100%);
 
 $base-contrast-color: white;

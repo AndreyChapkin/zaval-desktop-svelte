@@ -293,17 +293,19 @@
 		{/if}
 	</div>
 	{#key rerenderKey}
-		<div
-			class="todo-description-body"
-			bind:this={descriptionContainer}
-			contenteditable={editorMode === 'edit'}
-			tabindex="-1"
-			on:keyup={assistanceValueName || editorMode !== 'edit' ? null : keyupHandler}
-			on:keydown={assistanceValueName || editorMode !== 'edit' ? null : keydownHandler}
-		>
-			{#each descriptionFragments as fragment}
-				<RenderedFragment {fragment} />
-			{/each}
+		<div class="todo-description-container">
+			<div
+				class="todo-description-body"
+				bind:this={descriptionContainer}
+				contenteditable={editorMode === 'edit'}
+				tabindex="-1"
+				on:keyup={assistanceValueName || editorMode !== 'edit' ? null : keyupHandler}
+				on:keydown={assistanceValueName || editorMode !== 'edit' ? null : keydownHandler}
+			>
+				{#each descriptionFragments as fragment}
+					<RenderedFragment {fragment} />
+				{/each}
+			</div>
 			{#if assistanceValueName}
 				<div
 					class="assistance"
@@ -377,8 +379,11 @@
 			}
 		}
 
-		.todo-description-body {
+		.todo-description-container {
 			position: relative;
+		}
+
+		.todo-description-body {
 			flex: 1;
 			overflow: auto;
 			padding: $normal-size;

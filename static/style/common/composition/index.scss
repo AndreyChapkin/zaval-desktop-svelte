@@ -57,6 +57,13 @@
 	gap: $gap;
 }
 
+@mixin scrollable-in-column() {
+	flex: 1;
+	min-height: 0px;
+	overflow-y: auto;
+	@include styled-scrollbar;
+}
+
 @mixin content-centered {
 	@apply flex flex-col items-center justify-center;
 }

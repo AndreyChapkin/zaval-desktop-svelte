@@ -141,12 +141,18 @@
 		}
 
 		.todo-info {
+			@include column;
+
 			.chosen-todo-name {
 				color: $base-contrast-color;
 				background-color: $base-color;
 				margin: $small-size $normal-size;
 
 				@include standard-container;
+			}
+
+			:global(.split-pane) {
+				@include scrollable-in-column;
 			}
 		}
 	}

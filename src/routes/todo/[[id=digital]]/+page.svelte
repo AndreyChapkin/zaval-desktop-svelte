@@ -185,7 +185,7 @@
 		}
 
 		:global(.main-split .split-area) {
-			background-color: $base-darker-color;
+			background-color: $base-dark-color;
 		}
 
 		:global(.container-split .split-separator) {

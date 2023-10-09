@@ -346,6 +346,7 @@
 
 	.todo-description {
 		@include column;
+		background: $second-gradient;
 
 		.todo-description-menu {
 			background-color: $second-light-color;
@@ -380,7 +381,8 @@
 		}
 
 		.todo-description-container {
-			position: relative;
+			@include scrollable-in-column;
+			@include styled-scrollbar;
 		}
 
 		.todo-description-body {
@@ -389,7 +391,6 @@
 			padding: $normal-size;
 			outline: none;
 			white-space: pre-wrap;
-			@include styled-scrollbar;
 		}
 
 		.assistance {

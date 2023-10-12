@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { DetailedTodoDto } from '$lib/types/todo';
-	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import { parseDescription } from '$lib/utils/rich-editor/rich-editor-helpers';
 	import RenderedFragment from './RenderedFragment.svelte';
 
 	// data
 	export let richText: string;
+	export let contentContainer: HTMLDivElement | null = null;
+
 	$: descriptionFragments = parseDescription(richText);
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="rich-text">
+<div class="rich-text" bind:this={contentContainer}>
 	{#each descriptionFragments as fragment}
 		<RenderedFragment {fragment} />
 	{/each}

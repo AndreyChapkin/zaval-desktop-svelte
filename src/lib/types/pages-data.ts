@@ -20,3 +20,12 @@ export interface TodosWithStatusPageData {
 	todosList: TodosListDto;
 	status: TodoStatus;
 }
+
+export interface MultipleArticlesPageData {
+	articleLights: ArticleLightDto[];
+}
+
+export interface ArticlePageData {
+	articleLight: ArticleLightDto;
+	articleContent: ArticleContentDto;
+}

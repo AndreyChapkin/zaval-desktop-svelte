@@ -198,6 +198,7 @@
 		.split-separator {
 			flex-grow: 0;
 			flex-shrink: 0;
+			background-color: $second-light-color;
 		}
 
 		.not-selectable {

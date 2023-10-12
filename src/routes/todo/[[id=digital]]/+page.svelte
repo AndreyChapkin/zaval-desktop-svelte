@@ -197,7 +197,6 @@
 		}
 
 		:global(.main-split .split-area:nth-child(3)) {
-			// background-color: $second-color;
 			background: $second-gradient;
 		}
 

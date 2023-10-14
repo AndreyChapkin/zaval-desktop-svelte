@@ -42,6 +42,13 @@
 	gap: $gap;
 }
 
+@mixin column-wrapping($gap: 0px) {
+	display: flex;
+	flex-direction: column;
+	gap: $gap;
+	flex-wrap: wrap;
+}
+
 @mixin column-justifyied($gap: 0px) {
 	@apply flex flex-col justify-between;
 	gap: $gap;

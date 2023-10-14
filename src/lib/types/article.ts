@@ -8,6 +8,7 @@ interface ArticleLightDto {
 interface ContentTitleDto {
     level: number;
     title: string;
+    id: string;
 }
 
 interface ArticleContentDto {

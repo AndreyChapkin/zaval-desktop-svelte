@@ -5,7 +5,6 @@
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
-	import ArticleLight from '../components/ArticleLight.svelte';
 
 	// state
 	export let data: ArticlePageData;
@@ -85,9 +84,9 @@
 				</button>
 				<div class="content-titles">
 					{#each data.articleLight.contentTitles as contentTitle}
-						<div class={`content-title ${chooseContentTitleClass(contentTitle)}`}>
+						<a class={`content-title ${chooseContentTitleClass(contentTitle)}`} href={`#${contentTitle.id}`}>
 							{contentTitle.title}
-						</div>
+						</a>
 					{/each}
 				</div>
 			{/if}
@@ -137,21 +136,32 @@
 			}
 
 			.content-titles {
+				@include scrollable-in-column;
 				
 				.content-title {
+					// padding: $small-size;
+					// border-radius: $normal-size;
+					@include standard-container;
+					padding-top: $small-size;
+					padding-bottom: $small-size;
+					display: block;
 					cursor: pointer;
+
+					&:hover {
+						background-color: $second-light-color;
+					}
 				}
 
 				.second-level {
-					margin-left: $wide-size;
+					margin-left: $large-size;
 				}
 
 				.third-level {
-					margin-left: 2 * $wide-size;
+					margin-left: 2 * $large-size;
 				}
 
 				.fourth-level {
-					margin-left: 3 * $wide-size;
+					margin-left: 3 * $large-size;
 				}
 			}
 		}
@@ -167,10 +177,10 @@
 			}
 
 			h1 {
-				font-size: larger;
+				font-size: x-large;
 				font-weight: bold;
 				font-family: Nunito;
-				margin-bottom: $normal-size;
+				padding-left: $normal-size;
 			}
 
 			:global(.rich-editor) {

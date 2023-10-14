@@ -8,7 +8,8 @@ import {
 	type DescriptionFragment,
 	type NewPositionType,
 	type RichClasses,
-	type RichTypes
+	type RichTypes,
+	type NewTransformationType
 } from '$lib/types/rich-text';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
@@ -27,6 +28,59 @@ function asCorrectRichType(tag: string): RichTypes | null {
 	return null;
 }
 
+export function serializeRichContent(richContentContainer: HTMLElement): string {
+	const resultFragments: DescriptionFragment[] = [];
+	const nodeAndFragmentToProcess: [HTMLElement, DescriptionFragment][] = [];
+	// root children
+	for (let rootChildNode of richContentContainer.childNodes) {
+		if (rootChildNode instanceof HTMLElement) {
+			const rootChildFragment = serializeRichElement(rootChildNode);
+			if (rootChildFragment) {
+				resultFragments.push(rootChildFragment);
+				if (rootChildNode.childNodes.length > 0) {
+					nodeAndFragmentToProcess.push([rootChildNode, rootChildFragment]);
+				}
+			}
+		}
+	}
+	// process remained all level children
+	while (nodeAndFragmentToProcess.length > 0) {
+		// Fragment is already inside its parent children array
+		let [node, fragment] = nodeAndFragmentToProcess.pop()!!;
+		for (let childNode of node.childNodes) {
+			if (childNode instanceof HTMLElement) {
+				const childFragment = serializeRichElement(childNode);
+				if (childFragment) {
+					fragment.children.push(childFragment);
+					if (childNode.childNodes.length > 0) {
+						nodeAndFragmentToProcess.push([childNode, childFragment]);
+					}
+				}
+			} else if (childNode instanceof Text) {
+				const text = childNode.textContent;
+				if (text) {
+					// Merge with last child if it is text too
+					const lastChild = fragment.children.pop();
+					if (typeof lastChild === 'string') {
+						const mergedString = lastChild + text;
+						fragment.children.push(mergedString);
+					} else {
+						// return last child if any
+						if (lastChild) {
+							fragment.children.push(lastChild);
+						}
+						// Add just add new child
+						fragment.children.push(text);
+					}
+				}
+			}
+		}
+	}
+	const noEmptyFragments = removeEmptyFragments(resultFragments);
+	return JSON.stringify(noEmptyFragments);
+}
+
+// Deprecated
 export function serializeDescription(descriptionElement: HTMLElement): string {
 	const fragments: DescriptionFragment[] = [];
 	const nodesToProcess: [HTMLElement, DescriptionFragment][] = [];
@@ -39,7 +93,7 @@ export function serializeDescription(descriptionElement: HTMLElement): string {
 		}
 	}
 	while (nodesToProcess.length > 0) {
-		const [element, fragment] = nodesToProcess.pop() as [HTMLElement, DescriptionFragment];
+		const [element, fragment] = nodesToProcess.pop()!!;
 		serializeElement(element, fragment, nodesToProcess);
 	}
 	const noEmptyFragments = removeEmptyFragments(fragments);
@@ -74,6 +128,24 @@ export function parseDescription(description: string): DescriptionFragment[] {
 	return [];
 }
 
+function serializeRichElement(element: HTMLElement): DescriptionFragment | null {
+	let resultFragment: DescriptionFragment | null = null;
+	const richType = defineElementRichType(element);
+	if (richType) {
+		resultFragment = {
+			richType,
+			children: []
+		};
+		// serialize attributes if any
+		const richAttributes = serializeRichAttributes(element);
+		if (richAttributes && Object.keys(richAttributes).length > 0) {
+			resultFragment.attributes = richAttributes;
+		}
+	}
+	return resultFragment;
+}
+
+// Deprecated
 function serializeElement(
 	element: HTMLElement,
 	fragment: DescriptionFragment | null,
@@ -87,32 +159,26 @@ function serializeElement(
 				richType,
 				children: []
 			};
+		// serialize attributes if any
+		const richAttributes = serializeRichAttributes(element);
+		if (richAttributes && Object.keys(richAttributes).length > 0) {
+			parentFragment.attributes = richAttributes;
+		}
 		for (let childNode of element.childNodes) {
 			if (childNode instanceof HTMLElement) {
-				const htmlChildNode = childNode as HTMLElement;
-				const childType = asCorrectRichType(htmlChildNode.tagName.toLowerCase());
+				const childType = asCorrectRichType(childNode.tagName.toLowerCase());
 				if (childType) {
 					const childBlankFragment: DescriptionFragment = {
 						richType: childType,
 						children: []
 					};
 					// serialize attributes if any
-					const allowedAttributes = RICH_ATTRIBUTES[childType];
-					if (allowedAttributes) {
-						const attributes: Record<string, string> = {};
-						for (let attr of allowedAttributes) {
-							const realAttributeValue = htmlChildNode.getAttribute(attr);
-							if (realAttributeValue) {
-								attributes[attr] = realAttributeValue;
-							}
-						}
-						// if any attribute
-						if (Object.keys(attributes).length > 0) {
-							childBlankFragment.attributes = attributes;
-						}
+					const richAttributes = serializeRichAttributes(childNode);
+					if (richAttributes && Object.keys(richAttributes).length > 0) {
+						childBlankFragment.attributes = richAttributes;
 					}
 					parentFragment.children.push(childBlankFragment);
-					nodesToProcess.push([htmlChildNode, childBlankFragment]);
+					nodesToProcess.push([childNode, childBlankFragment]);
 				}
 			} else if (childNode instanceof Text) {
 				const text = (childNode as Text).textContent;
@@ -137,6 +203,24 @@ function serializeElement(
 	return null;
 }
 
+function serializeRichAttributes(element: HTMLElement): Record<string, string> | null {
+	let resultAttributes = null as Record<string, string> | null;
+	const richType = defineElementRichType(element);
+	if (richType) {
+		resultAttributes = {};
+		const allowedAttributeNames = RICH_ATTRIBUTES[richType];
+		if (allowedAttributeNames) {
+			for (let allowedAttributeName of allowedAttributeNames) {
+				const realAttributeValue = element.getAttribute(allowedAttributeName);
+				if (realAttributeValue) {
+					resultAttributes[allowedAttributeName] = realAttributeValue;
+				}
+			}
+		}
+	}
+	return resultAttributes;
+}
+
 export function tryToMoveSelectedElement(containerElement: HTMLElement, position: NewPositionType) {
 	const selectedIndependentElement = findSelectedIndependentRichElement(containerElement);
 	if (selectedIndependentElement) {
@@ -152,6 +236,48 @@ export function tryToMoveSelectedElement(containerElement: HTMLElement, position
 		}
 		selectTextInElement(selectedIndependentElement);
 	}
+}
+
+export function tryToChangeSelectedTitleElement(containerElement: HTMLElement, transformation: NewTransformationType) {
+	const selectedIndependentElement = findSelectedIndependentRichElement(containerElement);
+	if (selectedIndependentElement) {
+		const newTitleRichType = tryToChooseNewLevelForSelectedTitle(selectedIndependentElement, transformation);
+		if (newTitleRichType) {
+			const newTitleElement = createNewRichElement(
+				newTitleRichType,
+				selectedIndependentElement.textContent,
+				{ 'id': selectedIndependentElement.id }
+			);
+			if (newTitleElement) {
+				selectedIndependentElement.replaceWith(newTitleElement);
+				selectTextInElement(newTitleElement);
+			}
+		}
+	}
+}
+
+export function tryToChooseNewLevelForSelectedTitle(selectedElement: HTMLElement, transformation: NewTransformationType): RichTypes | null {
+	const richType = defineElementRichType(selectedElement);
+	let resultRichType: RichTypes | null = null;
+	// if selected element is rich element
+	if (richType) {
+		// create transformation field
+		const richTitleTypes: RichTypes[] = ['title-1', 'title-2', 'title-3', 'title-4'];
+		// make transformation value
+		const transformationDirection = transformation === 'left' ?
+			-1 :
+			transformation === 'right' ? 1 : 0;
+		const currentTypePosition = richTitleTypes.indexOf(richType);
+		// if current element is rich title
+		if (currentTypePosition > -1) {
+			// try to transform current rich title according to the transformation value
+			const transformedTypePosition = currentTypePosition + transformationDirection;
+			if (0 <= transformedTypePosition && transformedTypePosition < richTitleTypes.length) {
+				resultRichType = richTitleTypes[transformedTypePosition];
+			}
+		}
+	}
+	return resultRichType;
 }
 
 export function selectTextInElement(
@@ -215,7 +341,7 @@ function createNewRichElement(
 		const allowedAttributes = RICH_ATTRIBUTES[richType];
 		if (attributes && allowedAttributes) {
 			const resultAttributes = Object.entries(attributes).filter(
-				([key, value]) => allowedAttributes?.indexOf(key) > -1
+				([key, _]) => allowedAttributes.indexOf(key) > -1
 			);
 			for (let [resKey, resAttribute] of resultAttributes) {
 				newElement.setAttribute(resKey, resAttribute);
@@ -316,7 +442,7 @@ export function chooseNewRichElementType(
 	if (event.altKey) {
 		switch (event.code) {
 			case 'Digit1':
-				return 'title';
+				return 'title-1';
 			case 'Digit2':
 				return 'paragraph';
 			case 'Digit3':
@@ -335,6 +461,20 @@ export function chooseNewPosition(
 				return 'before';
 			case 'ArrowDown':
 				return 'after';
+		}
+	}
+	return null;
+}
+
+export function chooseNewTransformation(
+	event: KeyboardEvent,
+): NewTransformationType | null {
+	if (event.altKey && event.shiftKey) {
+		switch (event.code) {
+			case 'ArrowLeft':
+				return 'left';
+			case 'ArrowRight':
+				return 'right';
 		}
 	}
 	return null;

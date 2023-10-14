@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { ARROW_BUTTON_URL, CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
 		changeDefaultEnterBehaviour,
 		changeDefaultTabBehaviour,
@@ -8,17 +8,21 @@
 		checkIfSave,
 		chooseNewPosition,
 		chooseNewRichElementType,
+		chooseNewTransformation,
 		createDefaultContentInContainer,
 		createNewRichElementRelativeToCurrentPosition,
 		isEditorEmpty,
 		pasteInSelection,
 		selectTextInElement,
 		serializeDescription,
+		serializeRichContent,
 		setAttributesToElement,
+		tryToChangeSelectedTitleElement,
 		tryToMoveSelectedElement
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RichText from './RichText.svelte';
+	import RichEditorShortkeys from './RichEditorShortkeys.svelte';
 
 	// const
 	const TEMP_RICH_EDITOR_CONTENT_KEY = 'tempRichEditorContent';
@@ -94,7 +98,7 @@
 
 	// functions
 	export const flushContent = () => {
-		const editedContent = serializeDescription(richContentContainer);
+		const editedContent = serializeRichContent(richContentContainer);
 		makePersisted();
 		return editedContent;
 	};
@@ -192,9 +196,14 @@
 		}
 		const newElementType = chooseNewRichElementType(event);
 		if (newElementType) {
+			let attributes = {} as Record<string, string>;
+			if (['title-1', 'title-2', 'title-3', 'title-4'].indexOf(newElementType) > -1) {
+				attributes['id'] = `${Math.floor(Math.random() * 1000000000)}`;
+			}
 			const newElement = createNewRichElementRelativeToCurrentPosition(
 				richContentContainer,
-				newElementType
+				newElementType,
+				attributes
 			);
 			nonTypedModifications++;
 			if (newElementType === 'link') {
@@ -208,6 +217,11 @@
 		const newPosition = chooseNewPosition(event);
 		if (newPosition) {
 			tryToMoveSelectedElement(richContentContainer, newPosition);
+			return;
+		}
+		const newTransformation = chooseNewTransformation(event);
+		if (newTransformation) {
+			tryToChangeSelectedTitleElement(richContentContainer, newTransformation);
 			return;
 		}
 		changeDefaultEnterBehaviour(event);
@@ -225,6 +239,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="rich-editor">
+	<RichEditorShortkeys />
 	<div class="rich-editor-menu">
 		<button on:click={saveHandler}>
 			<img
@@ -247,6 +262,8 @@
 		<span class="control-prompt"><b>Move Up</b> Alt+Up</span>
 		<div class="prompt-separator" />
 		<span class="control-prompt"><b>Move Down</b> Alt+Down</span>
+		<div class="prompt-separator" />
+		<span class="control-prompt"><b></b> Alt+Down</span>
 	</div>
 	<div class="rich-content-container">
 		<div
@@ -256,7 +273,10 @@
 			on:keyup={assistanceValueName ? null : keyupHandler}
 			on:keydown={assistanceValueName ? null : keydownHandler}
 		>
-			<RichText richText={effectiveRichContent} bind:contentContainer={richContentContainer} />
+			<RichText
+				richText={effectiveRichContent}
+				bind:contentContainer={richContentContainer}
+			/>
 		</div>
 		{#if assistanceValueName}
 			<div
@@ -299,7 +319,6 @@
 		@include column;
 
 		.rich-editor-menu {
-			// background: $strong-gradient;
 			padding: $small-size;
 			color: $base-contrast-color;
 
@@ -353,28 +372,56 @@
 			}
 		}
 
-		:global(.rich-title) {
-			color: rgb(236, 178, 70);
-			font-size: larger;
-			font-weight: bold;
-			font-family: Nunito;
-			margin-bottom: $normal-size;
-		}
-		:global(.rich-paragraph) {
-			color: $base-contrast-color;
-			margin-bottom: $normal-size;
-			font-family: Nunito;
-		}
-		:global(.rich-strong) {
-			color: rgb(218, 129, 64);
-		}
-		:global(.rich-link) {
-			color: rgb(125, 180, 212);
-			text-decoration: underline dotted;
-		}
-		:global(.rich-placeholder) {
-			border-width: $border-small-size;
-			border-color: $strong-second-color;
-		}
+		// :global(.rich-title) {
+		// 	color: rgb(236, 178, 70);
+		// 	font-size: larger;
+		// 	font-weight: bold;
+		// 	font-family: Nunito;
+		// 	margin-bottom: $normal-size;
+		// }
+		// :global(.rich-title-1) {
+		// 	color: red;
+		// 	font-size: larger;
+		// 	font-weight: bold;
+		// 	font-family: Nunito;
+		// 	margin-bottom: $normal-size;
+		// }
+		// :global(.rich-title-2) {
+		// 	color: green;
+		// 	font-size: large;
+		// 	font-weight: bold;
+		// 	font-family: Nunito;
+		// 	margin-bottom: $normal-size;
+		// }
+		// :global(.rich-title-3) {
+		// 	color: pink;
+		// 	font-size: medium;
+		// 	font-weight: bold;
+		// 	font-family: Nunito;
+		// 	margin-bottom: $normal-size;
+		// }
+		// :global(.rich-title-4) {
+		// 	color: yellow;
+		// 	font-size: small;
+		// 	font-weight: bold;
+		// 	font-family: Nunito;
+		// 	margin-bottom: $normal-size;
+		// }
+		// :global(.rich-paragraph) {
+		// 	color: $base-contrast-color;
+		// 	margin-bottom: $normal-size;
+		// 	font-family: Nunito;
+		// }
+		// :global(.rich-strong) {
+		// 	color: rgb(218, 129, 64);
+		// }
+		// :global(.rich-link) {
+		// 	color: rgb(125, 180, 212);
+		// 	text-decoration: underline dotted;
+		// }
+		// :global(.rich-placeholder) {
+		// 	border-width: $border-small-size;
+		// 	border-color: $strong-second-color;
+		// }
 	}
 </style>

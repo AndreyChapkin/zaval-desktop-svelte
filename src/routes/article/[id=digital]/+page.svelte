@@ -191,5 +191,9 @@
 				background: $strong-gradient;
 			}
 		}
+
+		:global(.rich-editor) {
+			border-radius: $normal-size;
+		}
 	}
 </style>

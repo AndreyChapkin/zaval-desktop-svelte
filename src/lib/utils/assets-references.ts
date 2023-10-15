@@ -17,5 +17,5 @@ export const EDIT_ICON_URL = '/assets/common/edit-icon.svg';
 export const SAVE_ICON_URL = '/assets/common/save-icon.svg';
 export const CANCEL_ICON_URL = '/assets/common/cancel-icon.svg';
 export const SEARCH_ICON_URL = '/assets/common/search-icon.svg';
+export const HELP_ICON_URL = '/assets/common/help-icon.svg';
 export const ARROW_URL = '/assets/common/arrow.svg';
-export const ARROW_BUTTON_URL = '/assets/common/arrow-button.svg';

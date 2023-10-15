@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ARROW_BUTTON_URL, CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { CANCEL_ICON_URL, HELP_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
 		changeDefaultEnterBehaviour,
 		changeDefaultTabBehaviour,
@@ -21,8 +21,8 @@
 		tryToMoveSelectedElement
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
-	import RichText from './RichText.svelte';
 	import RichEditorShortkeys from './RichEditorShortkeys.svelte';
+	import RichText from './RichText.svelte';
 
 	// const
 	const TEMP_RICH_EDITOR_CONTENT_KEY = 'tempRichEditorContent';
@@ -32,6 +32,7 @@
 	// data
 	export let richContent: string;
 	let effectiveRichContent: string = richContent;
+	let isPromptShown = false;
 
 	let hasUnpersistedData = !!localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
 
@@ -239,7 +240,6 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="rich-editor">
-	<RichEditorShortkeys />
 	<div class="rich-editor-menu">
 		<button on:click={saveHandler}>
 			<img
@@ -253,18 +253,16 @@
 				alt="status"
 			/>
 		</button>
-		<span class="control-prompt"><b>+Title</b> Alt+1</span>
-		<div class="prompt-separator" />
-		<span class="control-prompt"><b>+Paragraph</b> Alt+2</span>
-		<div class="prompt-separator" />
-		<span class="control-prompt"><b>+Link</b> Alt+3</span>
-		<div class="prompt-separator" />
-		<span class="control-prompt"><b>Move Up</b> Alt+Up</span>
-		<div class="prompt-separator" />
-		<span class="control-prompt"><b>Move Down</b> Alt+Down</span>
-		<div class="prompt-separator" />
-		<span class="control-prompt"><b></b> Alt+Down</span>
+		<button class="help-button" on:click={() => (isPromptShown = !isPromptShown)}>
+			<img
+				src={HELP_ICON_URL}
+				alt="status"
+			/>
+		</button>
 	</div>
+	{#if isPromptShown}
+		<RichEditorShortkeys />
+	{/if}
 	<div class="rich-content-container">
 		<div
 			class="rich-content-body"
@@ -328,20 +326,8 @@
 				@include icon-normal-sized;
 			}
 
-			.control-prompt {
-				color: $base-weak-contrast-color;
-				font-size: smaller;
-
-				b {
-					color: $base-contrast-color;
-				}
-			}
-
-			.prompt-separator {
-				width: $border-normal-size;
-				height: $border-normal-size;
-				border-radius: $border-normal-size;
-				background-color: $strong-second-color;
+			.help-button {
+				margin-left: $large-size;
 			}
 		}
 

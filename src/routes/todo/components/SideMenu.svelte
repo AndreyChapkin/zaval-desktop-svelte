@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { ROOT_MENU_ICON_URL, SEARCH_ICON_URL } from '$lib/utils/assets-references';
+	import {
+		ARTICLE_ICON_URL,
+		ROOT_MENU_ICON_URL,
+		SEARCH_ICON_URL
+	} from '$lib/utils/assets-references';
 	import SearchPanel from './SearchPanel.svelte';
 	import SideStatusMenu from './SideStatusMenu.svelte';
 
@@ -12,7 +16,7 @@
 	const showSearchHandler = () => {
 		isSearchOpen = true;
 	};
-	
+
 	const closeSearchHandler = () => {
 		isSearchOpen = false;
 	};
@@ -35,6 +39,15 @@
 			alt="search"
 			on:click={showSearchHandler}
 		/>
+	</div>
+	<div class="separator" />
+	<div class="todo-side-menu-item">
+		<a href="/article">
+			<img
+				src={ARTICLE_ICON_URL}
+				alt="search"
+			/>
+		</a>
 	</div>
 	{#if isSearchOpen}
 		<SearchPanel on:close={closeSearchHandler} />
@@ -63,7 +76,13 @@
 		}
 
 		.todo-side-menu-item:hover {
-			background-color: $second-light-color;
+			background-color: $second-lighter-color;
+		}
+
+		.separator {
+			height: 2px;
+			width: 20px;
+			background-color: $second-lighter-color;
 		}
 
 		:global(.todo-side-menu-item img) {

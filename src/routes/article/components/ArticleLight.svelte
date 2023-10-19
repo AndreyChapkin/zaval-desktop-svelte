@@ -48,7 +48,7 @@
 
 	.article-light {
 		@include standard-container;
-		@include min-max-width();
+		@include min-max-width(250px, 600px);
 		@include row-start($normal-size);
 		background-color: $base-color;
 		color: $base-contrast-color;

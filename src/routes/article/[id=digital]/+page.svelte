@@ -194,6 +194,7 @@
 
 		:global(.rich-editor) {
 			border-radius: $normal-size;
+			flex: 1;
 		}
 	}
 </style>

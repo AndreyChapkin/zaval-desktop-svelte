@@ -253,7 +253,11 @@
 				alt="status"
 			/>
 		</button>
-		<button class="help-button" on:click={() => (isPromptShown = !isPromptShown)}>
+		<div class="separator" />
+		<button
+			class="help-button"
+			on:click={() => (isPromptShown = !isPromptShown)}
+		>
 			<img
 				src={HELP_ICON_URL}
 				alt="status"
@@ -326,14 +330,20 @@
 				@include icon-normal-sized;
 			}
 
-			.help-button {
-				margin-left: $large-size;
+			.separator {
+				height: 4px;
+				width: 4px;
+				border-radius: 2px;
+				margin: 0 $normal-size;
+				background-color: $base-weak-contrast-color;
 			}
 		}
 
 		.rich-content-container {
 			@include scrollable-in-column;
 			@include styled-scrollbar;
+			border-width: 0 2px 2px 2px;
+			border-color: $strong-light-color;
 		}
 
 		.rich-content-body {

@@ -19,3 +19,4 @@ export const CANCEL_ICON_URL = '/assets/common/cancel-icon.svg';
 export const SEARCH_ICON_URL = '/assets/common/search-icon.svg';
 export const HELP_ICON_URL = '/assets/common/help-icon.svg';
 export const ARROW_URL = '/assets/common/arrow.svg';
+export const ARTICLE_ICON_URL = '/assets/article/article-icon.svg';

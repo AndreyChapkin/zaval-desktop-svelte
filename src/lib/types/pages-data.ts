@@ -1,4 +1,4 @@
-import type { DetailedTodoDto, LightTodoDto, DetailedTodoDto as TodoHierarchyDto, TodoStatus } from './todo';
+import type { DetailedTodoDto, LightTodoDto, TodoStatus } from './todo';
 
 export interface TodoDetailedPageData {
 	detailedTodoDto: DetailedTodoDto;
@@ -23,9 +23,11 @@ export interface TodosWithStatusPageData {
 
 export interface MultipleArticlesPageData {
 	articleLights: ArticleLightDto[];
+	topLabelsCombinations: FilledLabelsCombinationDto[];
 }
 
 export interface ArticlePageData {
 	articleLight: ArticleLightDto;
 	articleContent: ArticleContentDto;
+	articleLabels: ArticleLabelDto[];
 }

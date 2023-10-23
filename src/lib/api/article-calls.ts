@@ -21,6 +21,14 @@ export async function getArticleLight(id: number): Promise<ArticleLightDto> {
     return result.data;
 }
 
+export async function findAllArticlesWithAllLabels(labelIds: number[]): Promise<ArticleLightDto[]> {
+    const url = `${baseArticleURL}/with-labels`;
+    const result = await callPost<ArticleLightDto[]>(url, {
+        labelIds,
+    });
+    return result.data;
+}
+
 export async function findAllArticlesWithLabelNameFragment(nameFragment: string): Promise<ArticleLightWithLabelsDto[]> {
     const url = `${baseArticleURL}/with-label-name-fragment`;
     const result = await callGet<ArticleLightWithLabelsDto[]>(url, {
@@ -51,6 +59,12 @@ export async function getArticleContent(id: number): Promise<ArticleContentDto> 
     return result.data;
 }
 
+export async function getArticleLabels(id: number): Promise<ArticleLabelDto[]> {
+    const url = `${baseArticleURL}/${id}/connected-labels`;
+    const result = await callGet<ArticleLabelDto[]>(url);
+    return result.data;
+}
+
 export async function updateArticle(articleId: number, updateArticleDto: UpdateArticleDto): Promise<void> {
     const url = `${baseArticleURL}/${articleId}`;
     await callPatch<UpdateArticleDto>(url, updateArticleDto);
@@ -70,6 +84,14 @@ export async function createArticleLabel(articleLabelDto: ArticleLabelDto): Prom
 export async function getAllArticleLabels(): Promise<ArticleLabelDto[]> {
     const url = `${baseArticleURL}/label`;
     const result = await callGet<ArticleLabelDto[]>(url);
+    return result.data;
+}
+
+export async function findAllArticleLabelsWithNameFragment(nameFragment: string): Promise<ArticleLabelDto[]> {
+    const url = `${baseArticleURL}/label/with-name-fragment`;
+    const result = await callGet<ArticleLabelDto[]>(url, {
+        "name-fragment": nameFragment,
+    });
     return result.data;
 }
 
@@ -115,9 +137,9 @@ export async function createLabelsCombination(labelIds: number[]): Promise<Label
     return result.data;
 }
 
-export async function getTheMostPopularLabelsCombinations(number?: number): Promise<LabelsCombinationDto[]> {
+export async function getTheMostPopularLabelsCombinations(number?: number): Promise<FilledLabelsCombinationDto[]> {
     const url = `${baseArticleURL}/label/combination/popular`;
-    const result = await callGet<LabelsCombinationDto[]>(url, { number });
+    const result = await callGet<FilledLabelsCombinationDto[]>(url, { number });
     return result.data;
 }
 

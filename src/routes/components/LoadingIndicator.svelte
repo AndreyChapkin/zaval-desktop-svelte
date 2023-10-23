@@ -26,20 +26,15 @@
 		background-color: $strong-second-color;
 		border-radius: $wide-size;
 		@include icon-small-sized;
-
-		/* animation-name: swing;
-		animation-duration: 3s;
-		animation-timing-function: linear;
-		animation-iteration-count: infinite; */
-        animation: swing 1s linear infinite alternate;
+        animation: swing 0.5s linear infinite alternate;
 	}
 
     @keyframes swing {
 	from {
-		transform: translateX(-10vw);
+		transform: translateX(-25px);
 	}
 	to {
-		transform: translateX(10vw);
+		transform: translateX(25px);
 	}
 }
 </style>

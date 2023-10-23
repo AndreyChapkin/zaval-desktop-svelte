@@ -1,12 +1,13 @@
-import { getAllArticleLights } from '$lib/api/article-calls';
+import { getAllArticleLights, getTheMostPopularLabelsCombinations, getTheMostRecentArticleLights } from '$lib/api/article-calls';
 import type { MultipleArticlesPageData } from '$lib/types/pages-data';
 
 export const ssr = false;
 
 // TODO parallel requests
 export async function load(): Promise<MultipleArticlesPageData> {
-	const articleLightDtos = await getAllArticleLights();
+	const [articleLights, topLabelsCombinations] = await Promise.all([getTheMostRecentArticleLights(), getTheMostPopularLabelsCombinations()]);
 	return {
-		articleLights: articleLightDtos,
+		articleLights,
+		topLabelsCombinations,
 	}
 }

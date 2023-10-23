@@ -29,3 +29,16 @@ $base-contrast-color: white;
 $base-weak-contrast-color: darken($base-contrast-color, 10%);
 
 $second-contrast-color: #ce87b9;
+
+// other colors
+$background-gradient: linear-gradient(
+    0deg,
+    rgba($color: #000000, $alpha: 1) 0%,
+    rgba($color: #000000, $alpha: 0.9) 100%
+);
+
+$background-weak-gradient: linear-gradient(
+    0deg,
+    rgba($color: #000000, $alpha: 0.7) 0%,
+    rgba($color: #000000, $alpha: 0.5) 100%
+);

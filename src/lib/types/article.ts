@@ -2,9 +2,10 @@ interface ArticleLightDto {
     id: number;
     title: string;
     contentTitles: ContentTitleDto[];
-    popularity: number;
+    interactedOn: string;
 }
 
+// TODO: excessive?
 interface ArticleLightWithLabelsDto {
     articleLight: ArticleLightDto,
     labels: ArticleLabelDto[],
@@ -39,5 +40,11 @@ interface UpdateArticleLabelDto {
 interface LabelsCombinationDto {
     id: number,
     labelIds: number[],
+    popularity: number,
+}
+
+interface FilledLabelsCombinationDto {
+    id: number,
+    labels: ArticleLabelDto[],
     popularity: number,
 }

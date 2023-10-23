@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
+	import { presentDate } from '$lib/utils/presentation-helpers';
 	import { createEventDispatcher } from 'svelte';
 
 	// state
@@ -37,7 +38,10 @@
 			</a>
 		</div>
 	</div>
-	<div class="article-name">{articleLight.title}</div>
+	<div class="article-info">
+		<div class="article-name">{articleLight.title}</div>
+		<div class="article-date">{presentDate(articleLight.interactedOn)}</div>
+	</div>
 </div>
 
 <style lang="scss">

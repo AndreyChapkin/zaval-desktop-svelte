@@ -216,7 +216,9 @@
 					on:cancel={cancelArticleEditionHandler}
 				/>
 			{:else}
-				<h1>{data.articleLight.title}</h1>
+				<div class="article-title">
+					<h1>{data.articleLight.title}</h1>
+				</div>
 				<RichText richText={data.articleContent.content} />
 			{/if}
 			<div class="article-interaction-panel">
@@ -321,6 +323,10 @@
 			background: $second-gradient;
 			padding: $wide-size;
 			@include column($wide-size);
+
+			.article-title {
+				@include bordered(bottom);
+			}
 
 			input {
 				@include standard-input;

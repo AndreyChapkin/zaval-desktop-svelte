@@ -9,7 +9,6 @@
 	} from '$lib/api/article-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { MultipleArticlesPageData } from '$lib/types/pages-data';
-	import { CANCEL_ICON_URL } from '$lib/utils/assets-references';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import LoadingIndicator from '../components/LoadingIndicator.svelte';
 	import SplitPane from '../components/SplitPane.svelte';
@@ -26,6 +25,7 @@
 	let articleLights: ArticleLightDto[] = data.articleLights;
 	let topLabelsCombinations = data.topLabelsCombinations;
 	let isLoading = false;
+	let isChoosingLabels = false;
 	let chosenArticleLabels: ArticleLabelDto[] = [];
 	let chosenLabelsCombination: FilledLabelsCombinationDto | null = null;
 	const dropLabels = () => {
@@ -70,13 +70,6 @@
 		await refreshCombinations();
 	};
 
-	const createRemoveLabelFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
-		const filteredLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
-		chosenArticleLabels = [...filteredLabels];
-		// Current label collection is changed - chosen label collection is not relevant
-		chosenLabelsCombination = null;
-	};
-
 	const searchArticlesWithLabelsHandler = async () => {
 		await searchArticlesWithLabels();
 	};
@@ -85,8 +78,22 @@
 		refreshCombinations();
 	};
 
-	const acceptChosenArticleLabelsHandler = (event: CustomSvelteEvent<ArticleLabelDto[]>) => {
+	const acceptChosenArticleLabelsHandler = async (event: CustomSvelteEvent<ArticleLabelDto[]>) => {
 		chosenArticleLabels = event.detail;
+		isChoosingLabels = false;
+		await searchArticlesWithLabels();
+	};
+
+	const startChoosingLabelsHandler = () => {
+		isChoosingLabels = true;
+	};
+
+	const clearLabelsHandler = () => {
+		chosenArticleLabels = [];
+	};
+
+	const cancelChoosingLabelsHandler = () => {
+		isChoosingLabels = false;
 	};
 
 	const pickCombinationHandler = async (
@@ -149,9 +156,16 @@
 				slot="first"
 				class="article-labels-panel"
 			>
-				<ArticleLabelSearch on:accept={acceptChosenArticleLabelsHandler} />
-				{#if chosenArticleLabels.length > 0}
-					<button on:click={searchArticlesWithLabelsHandler}>Search</button>
+				{#if isChoosingLabels}
+					<ArticleLabelSearch
+						isOpen={true}
+						autofocus={true}
+						on:cancel={cancelChoosingLabelsHandler}
+						on:accept={acceptChosenArticleLabelsHandler}
+					/>
+				{:else}
+					<button on:click={startChoosingLabelsHandler}>Choose labels</button>
+					<button on:click={clearLabelsHandler}>Clear labels</button>
 				{/if}
 				<div class="article-label-search-collection">
 					{#each chosenArticleLabels as articleLabel}
@@ -253,7 +267,13 @@
 		}
 
 		.article-lights {
-			@include responsive-grid($x-gap: $wide-size, $y-gap: $wide-size);
+			@include row($wide-size);
+			flex-wrap: wrap;
+
+			:global(.article-light) {
+				flex: 1;
+				min-width: 300px;
+			}
 		}
 
 		.article-label {

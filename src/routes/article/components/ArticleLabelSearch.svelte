@@ -15,7 +15,7 @@
 	let suggestedArticleLabels: ArticleLabelDto[] = [];
 	let searchValue = '';
 	const notTriggeringValue = () => searchValue;
-	const dropSearchValue = () => searchValue = '';
+	const dropSearchValue = () => (searchValue = '');
 	export let chosenArticleLabels: ArticleLabelDto[] = [];
 	let selectedItemIndex: number | null = null;
 	let optionsGeometry: {
@@ -24,23 +24,25 @@
 		width: number;
 	} | null = null;
 	let searchInputElement: HTMLElement;
-	let isOpen = false;
+	export let isOpen = false;
+	export let autofocus = false;
 
 	// reactivity
 	$: searchValue, fetchSuggestedLabelsInhibitly(searchValue);
 
 	$: if (isOpen) {
 		// Set options geometry based on the input element
-		const rect = searchInputElement.getBoundingClientRect();
-		optionsGeometry = {
-			x: rect.left + window.scrollX,
-			y: rect.bottom + window.scrollY,
-			width: rect.width
-		};
+		if (searchInputElement) {
+			const rect = searchInputElement.getBoundingClientRect();
+			optionsGeometry = {
+				x: rect.left + window.scrollX,
+				y: rect.bottom + window.scrollY,
+				width: rect.width
+			};
+		}
 		fetchSuggestedLabels(notTriggeringValue());
 	} else {
 		dropSearchValue();
-		// chosenArticleLabels = [];
 	}
 
 	$: if (isLoading || suggestedArticleLabels.length < 1) {
@@ -147,6 +149,7 @@
 	<input
 		class={`search-name-fragment ${isOpen ? 'above-background' : ''}`}
 		type="text"
+		{autofocus}
 		bind:value={searchValue}
 		bind:this={searchInputElement}
 		on:keyup={inputKeyupHandler}

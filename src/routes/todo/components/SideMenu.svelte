@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		ARTICLE_ICON_URL,
+		ROOT_MENU_ICON_URL,
 		SEARCH_ICON_URL
 	} from '$lib/utils/assets-references';
 	import { chooseStatusImgUrl, todoStatusToUrlForm } from '$lib/utils/todo-helpers';
@@ -33,6 +34,14 @@
 		</a>
 	</div>
 	<SideStatusMenu />
+	<div class="todo-side-menu-item">
+		<a href={`/todo`}>
+			<img
+				src={ROOT_MENU_ICON_URL}
+				alt="status"
+			/>
+		</a>
+	</div>
 	<div class="todo-side-menu-item">
 		<img
 			src={SEARCH_ICON_URL}

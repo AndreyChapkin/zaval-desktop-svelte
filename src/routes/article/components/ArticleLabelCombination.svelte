@@ -34,12 +34,14 @@
 			alt="status"
 		/>
 	</button>
-	{#each articleLabelCombination.labels as label}
-		<ArticleLabel
-			isReadOnlyMode={true}
-			articleLabel={label}
-		/>
-	{/each}
+	<div class="article-labels">
+		{#each articleLabelCombination.labels as label}
+			<ArticleLabel
+				isReadOnlyMode={true}
+				articleLabel={label}
+			/>
+		{/each}
+	</div>
 	<button on:click={removeHandler}>
 		<img
 			src={REMOVE_ICON_URL}
@@ -56,12 +58,15 @@
 
 	.article-label-combination {
 		@include row($normal-size);
-		@include standard-container;
-		@include bordered(all, $second-light-color);
 		color: $base-contrast-color;
 
 		img {
 			@include icon-normal-sized;
+		}
+
+		.article-labels {
+			@include row-align-start($normal-size);
+			flex-wrap: wrap;
 		}
 	}
 </style>

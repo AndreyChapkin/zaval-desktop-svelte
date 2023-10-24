@@ -92,6 +92,11 @@
 		@include standard-container;
 		background-color: $base-color;
 		color: $base-contrast-color;
+		
+
+		.label-name {
+			min-width: 150px;
+		}
 
 		img {
 			@include icon-normal-sized;

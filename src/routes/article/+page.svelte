@@ -2,44 +2,61 @@
 	import {
 		createLabelsCombination,
 		findAllArticlesWithAllLabels,
+		findAllArticlesWithTitleFragment,
 		getTheMostPopularLabelsCombinations,
+		getTheMostRecentArticleLights,
 		updateLabelsCombinationPopularity
 	} from '$lib/api/article-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { MultipleArticlesPageData } from '$lib/types/pages-data';
 	import { CANCEL_ICON_URL } from '$lib/utils/assets-references';
+	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
+	import LoadingIndicator from '../components/LoadingIndicator.svelte';
 	import SplitPane from '../components/SplitPane.svelte';
 	import ArticleLabel from './components/ArticleLabel.svelte';
 	import ArticleLabelCombination from './components/ArticleLabelCombination.svelte';
 	import ArticleLabelSearch from './components/ArticleLabelSearch.svelte';
 	import ArticleLight from './components/ArticleLight.svelte';
+	import CreateArticle from './components/CreateArticle.svelte';
 
 	// state
 	export let data: MultipleArticlesPageData;
+	let articleSearchFragment = '';
+	const dropSearchFragment = () => (articleSearchFragment = '');
 	let articleLights: ArticleLightDto[] = data.articleLights;
 	let topLabelsCombinations = data.topLabelsCombinations;
 	let isLoading = false;
-	let chosenArticleLabel: ArticleLabelDto | null = null;
-	let currentArticleLabels: ArticleLabelDto[] = [];
+	let chosenArticleLabels: ArticleLabelDto[] = [];
 	let chosenLabelsCombination: FilledLabelsCombinationDto | null = null;
+	const dropLabels = () => {
+		if (chosenArticleLabels.length > 0) {
+			chosenArticleLabels = [];
+		}
+		if (chosenLabelsCombination) {
+			chosenLabelsCombination = null;
+		}
+	};
 
 	// reactivity
-	$: if (chosenArticleLabel) {
-		// Add new label to the current labels collection
-		const isPresented =
-			currentArticleLabels.findIndex((i) => i.id === chosenArticleLabel!!.id) > -1;
-		if (!isPresented) {
-			currentArticleLabels = [...currentArticleLabels, chosenArticleLabel];
-		}
-		chosenArticleLabel = null;
-		// Current label collection is changed - chosen label collection is not relevant
-		chosenLabelsCombination = null;
+	$: if (!articleSearchFragment && chosenArticleLabels.length < 1 && !chosenLabelsCombination) {
+		getTheMostRecentArticleLights().then((articles) => {
+			articleLights = articles;
+		});
+	}
+
+	$: if (articleSearchFragment) {
+		searchArticlesWithSearchFragmentInhibitly(articleSearchFragment);
+		dropLabels();
+	}
+
+	$: if (chosenArticleLabels.length > 0 || chosenLabelsCombination) {
+		dropSearchFragment();
 	}
 
 	// handlers
 	const onLabelUpdateHandler = async (event: CustomSvelteEvent<ArticleLabelDto>) => {
 		const updatedDto = event.detail;
-		currentArticleLabels = currentArticleLabels.map((label) => {
+		chosenArticleLabels = chosenArticleLabels.map((label) => {
 			return label.id === updatedDto.id ? updatedDto : label;
 		});
 		await refreshCombinations();
@@ -47,15 +64,15 @@
 
 	const onLabelRemoveHandler = async (event: CustomSvelteEvent<ArticleLabelDto>) => {
 		const removedDto = event.detail;
-		currentArticleLabels = currentArticleLabels.filter((label) => {
+		chosenArticleLabels = chosenArticleLabels.filter((label) => {
 			return label.id !== removedDto.id;
 		});
 		await refreshCombinations();
 	};
 
 	const createRemoveLabelFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
-		const filteredLabels = currentArticleLabels.filter((label) => label.id !== articleLabel.id);
-		currentArticleLabels = [...filteredLabels];
+		const filteredLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
+		chosenArticleLabels = [...filteredLabels];
 		// Current label collection is changed - chosen label collection is not relevant
 		chosenLabelsCombination = null;
 	};
@@ -68,12 +85,17 @@
 		refreshCombinations();
 	};
 
-	const pickCombinationHandler = async (pickEvent: CustomSvelteEvent<FilledLabelsCombinationDto>) => {
+	const acceptChosenArticleLabelsHandler = (event: CustomSvelteEvent<ArticleLabelDto[]>) => {
+		chosenArticleLabels = event.detail;
+	};
+
+	const pickCombinationHandler = async (
+		pickEvent: CustomSvelteEvent<FilledLabelsCombinationDto>
+	) => {
 		const combination = pickEvent.detail;
 		chosenLabelsCombination = combination;
-		currentArticleLabels = chosenLabelsCombination.labels;
+		chosenArticleLabels = chosenLabelsCombination.labels;
 		await searchArticlesWithLabels();
-		await refreshCombinations();
 	};
 
 	// functions
@@ -85,7 +107,7 @@
 	async function searchArticlesWithLabels() {
 		const effectiveLabelIds = chosenLabelsCombination
 			? chosenLabelsCombination.labels.map((i) => i.id)
-			: currentArticleLabels.map((i) => i.id);
+			: chosenArticleLabels.map((i) => i.id);
 		if (effectiveLabelIds.length > 0) {
 			isLoading = true;
 			articleLights = await findAllArticlesWithAllLabels(effectiveLabelIds);
@@ -105,6 +127,14 @@
 			isLoading = false;
 		}
 	}
+
+	const searchArticlesWithSearchFragmentInhibitly = decreaseNumberOfCalls(async (value: string) => {
+		if (value) {
+			isLoading = true;
+			articleLights = await findAllArticlesWithTitleFragment(value);
+			isLoading = false;
+		}
+	}, 800);
 </script>
 
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
@@ -119,25 +149,17 @@
 				slot="first"
 				class="article-labels-panel"
 			>
-				<ArticleLabelSearch bind:chosenArticleLabel />
-				{#if currentArticleLabels.length > 0}
+				<ArticleLabelSearch on:accept={acceptChosenArticleLabelsHandler} />
+				{#if chosenArticleLabels.length > 0}
 					<button on:click={searchArticlesWithLabelsHandler}>Search</button>
 				{/if}
-				<div class="current-labels-combination">
-					{#each currentArticleLabels as articleLabel}
-						<div class="current-collection-article-label">
-							<ArticleLabel
-								{articleLabel}
-								on:edit={onLabelUpdateHandler}
-								on:remove={onLabelRemoveHandler}
-							/>
-							<button on:click={createRemoveLabelFromCollectionHandler(articleLabel)}>
-								<img
-									src={CANCEL_ICON_URL}
-									alt="status"
-								/>
-							</button>
-						</div>
+				<div class="article-label-search-collection">
+					{#each chosenArticleLabels as articleLabel}
+						<ArticleLabel
+							{articleLabel}
+							on:edit={onLabelUpdateHandler}
+							on:remove={onLabelRemoveHandler}
+						/>
 					{/each}
 				</div>
 			</div>
@@ -151,6 +173,7 @@
 						on:pick={pickCombinationHandler}
 						on:remove={removeCombinationHandler}
 					/>
+					<div class="delimiter" />
 				{/each}
 			</div>
 		</SplitPane>
@@ -162,12 +185,18 @@
 				<input
 					class="title-search"
 					type="text"
+					bind:value={articleSearchFragment}
 				/>
 			</div>
+			<CreateArticle />
 			<div class="article-lights">
-				{#each articleLights as article}
-					<ArticleLight articleLight={article} />
-				{/each}
+				{#if isLoading}
+					<LoadingIndicator />
+				{:else}
+					{#each articleLights as article}
+						<ArticleLight articleLight={article} />
+					{/each}
+				{/if}
 			</div>
 		</div>
 	</SplitPane>
@@ -194,25 +223,23 @@
 			padding-right: $normal-size;
 		}
 
-		.current-collection-article-label {
-			@include row($small-size);
+		.article-panel {
+			padding-left: $normal-size;
+			@include column($normal-size);
+		}
 
-			button {
-				background-color: transparent;
+		.top-labels-combinations {
+			padding: $normal-size;
 
-				&:hover {
-					background-color: $base-color;
-				}
-			}
-
-			img {
-				@include icon-small-sized;
+			.delimiter {
+				height: 3px;
+				background-color: $second-light-color;
+				margin: $wide-size 0;
 			}
 		}
 
 		.article-interactive-panel {
 			@include row-start($normal-size);
-			margin-bottom: $large-size;
 
 			input {
 				flex: 1;
@@ -220,8 +247,9 @@
 			}
 		}
 
-		.current-labels-combination {
+		.article-label-search-collection {
 			@include row($normal-size);
+			flex-wrap: wrap;
 		}
 
 		.article-lights {

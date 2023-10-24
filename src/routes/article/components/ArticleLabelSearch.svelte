@@ -7,12 +7,16 @@
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
+	import ArticleLabel from './ArticleLabel.svelte';
+	import { CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 
 	// state
 	let isLoading = false;
 	let suggestedArticleLabels: ArticleLabelDto[] = [];
 	let searchValue = '';
-	export let chosenArticleLabel: ArticleLabelDto | null = null;
+	const notTriggeringValue = () => searchValue;
+	const dropSearchValue = () => searchValue = '';
+	export let chosenArticleLabels: ArticleLabelDto[] = [];
 	let selectedItemIndex: number | null = null;
 	let optionsGeometry: {
 		x: number;
@@ -23,11 +27,7 @@
 	let isOpen = false;
 
 	// reactivity
-	$: if (searchValue) {
-		fetchSuggestedLabels(searchValue);
-	} else {
-		suggestedArticleLabels = [];
-	}
+	$: searchValue, fetchSuggestedLabelsInhibitly(searchValue);
 
 	$: if (isOpen) {
 		// Set options geometry based on the input element
@@ -37,26 +37,19 @@
 			y: rect.bottom + window.scrollY,
 			width: rect.width
 		};
-		isLoading = true;
-		searchValue = '';
-		getAllArticleLabels().then(articleLabels => {
-			suggestedArticleLabels = articleLabels;
-			isLoading = false;
-		});
+		fetchSuggestedLabels(notTriggeringValue());
+	} else {
+		dropSearchValue();
+		// chosenArticleLabels = [];
 	}
 
 	$: if (isLoading || suggestedArticleLabels.length < 1) {
 		selectedItemIndex = null;
 	}
 
-	$: if (chosenArticleLabel) {
-		isOpen = false;
-		dispatch('choose', chosenArticleLabel);
-	}
-
 	// events and issuers
 	type EventType = {
-		choose: ArticleLabelDto;
+		accept: ArticleLabelDto[];
 		cancel: void;
 	};
 	const dispatch = createEventDispatcher<EventType>();
@@ -75,12 +68,9 @@
 
 	const inputKeyupHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Escape') {
-			cancel();
+			cancelHandler();
 		} else if (e.code === 'Enter') {
-			if (selectedItemIndex !== null) {
-				chosenArticleLabel = suggestedArticleLabels[selectedItemIndex];
-				searchValue = '';
-			}
+			// TODO
 		}
 	};
 
@@ -96,36 +86,46 @@
 
 	const focusHandler = () => {
 		isOpen = true;
-		if (suggestedArticleLabels.length > 0) {
-			if (!searchValue) {
-				suggestedArticleLabels = [];
-			}
-		}
 	};
 
-	const backgroundClickHandler = () => {
-		cancel();
-		dispatch('cancel');
-	};
-
-	const showAllLabelsHandler = async () => {
-		isLoading = true;
-		searchValue = '';
-		suggestedArticleLabels = await getAllArticleLabels();
-		isLoading = false;
-	};
-
-	const cancel = () => {
+	const acceptHandler = () => {
+		dispatch('accept', chosenArticleLabels);
 		isOpen = false;
 	};
 
+	const clearHandler = () => {
+		chosenArticleLabels = [];
+	};
+
+	const cancelHandler = () => {
+		dispatch('cancel');
+		isOpen = false;
+	};
+
+	const createChooseOptionHandler = (dto: ArticleLabelDto) => () => {
+		// Add new label to the current labels collection
+		const isPresented = chosenArticleLabels.findIndex((i) => i.id === dto!!.id) > -1;
+		if (!isPresented) {
+			chosenArticleLabels = [...chosenArticleLabels, dto];
+		}
+	};
+
+	const createRemoveOptionFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
+		chosenArticleLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
+	};
+
 	// functions
-	const fetchSuggestedLabels = decreaseNumberOfCalls(async (value: string) => {
+	const fetchSuggestedLabels = async (value: string) => {
 		isLoading = true;
-		let labelNameFragment = value;
-		suggestedArticleLabels = await findAllArticleLabelsWithNameFragment(labelNameFragment);
+		if (value) {
+			suggestedArticleLabels = await findAllArticleLabelsWithNameFragment(value);
+		} else {
+			suggestedArticleLabels = await getAllArticleLabels();
+		}
 		isLoading = false;
-	}, 800);
+	};
+
+	const fetchSuggestedLabelsInhibitly = decreaseNumberOfCalls(fetchSuggestedLabels, 800);
 
 	function moveSelectedIndex(action: 'increase' | 'decrease') {
 		if (suggestedArticleLabels.length > 0) {
@@ -156,31 +156,58 @@
 	{#if isOpen}
 		<div
 			class="suggested-options-background"
-			on:click={backgroundClickHandler}
+			on:click={cancelHandler}
 		/>
 		<div
-			class="suggested-options above-background"
+			class="choice-pane above-background"
 			style={`left: ${optionsGeometry?.x}px; top: ${optionsGeometry?.y}px; width: ${optionsGeometry?.width}px`}
 		>
-			{#if isLoading}
-				<LoadingIndicator />
-			{:else if suggestedArticleLabels.length > 0}
-				{#each suggestedArticleLabels as suggestedArticleLabel, i}
-					<div
-						class={`suggested-option ${i === selectedItemIndex ? 'selected-option' : ''}`}
-						on:click={() => {
-							chosenArticleLabel = suggestedArticleLabel;
-							searchValue = '';
-						}}
-					>
-						{suggestedArticleLabel.name}
-					</div>
-				{/each}
-			{:else}
-				{#if searchValue}
+			<div class="suggested-options">
+				{#if isLoading}
+					<LoadingIndicator />
+				{:else if suggestedArticleLabels.length > 0}
+					{#each suggestedArticleLabels as suggestedArticleLabel, i}
+						<div
+							class={`suggested-option ${i === selectedItemIndex ? 'selected-option' : ''}`}
+							on:click={createChooseOptionHandler(suggestedArticleLabel)}
+						>
+							{suggestedArticleLabel.name}
+						</div>
+					{/each}
+				{:else if searchValue}
 					<button on:click={createClickHandler}>Create label</button>
 				{/if}
-			{/if}
+			</div>
+			<div class="interaction-panel">
+				<button on:click={acceptHandler}>
+					<img
+						src={SAVE_ICON_URL}
+						alt="status"
+					/>
+				</button>
+				<button on:click={clearHandler}>
+					<img
+						src={CANCEL_ICON_URL}
+						alt="status"
+					/>
+				</button>
+			</div>
+			<div class="article-label-editable-combination">
+				{#each chosenArticleLabels as chosenLabel}
+					<div class="removable-article-label">
+						<ArticleLabel
+							isReadOnlyMode
+							articleLabel={chosenLabel}
+						/>
+						<button on:click={createRemoveOptionFromCollectionHandler(chosenLabel)}>
+							<img
+								src={CANCEL_ICON_URL}
+								alt="status"
+							/>
+						</button>
+					</div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>
@@ -202,6 +229,10 @@
 			@include standard-button;
 		}
 
+		img {
+			@include icon-normal-sized;
+		}
+
 		.search-name-fragment {
 			@include standard-input;
 		}
@@ -212,14 +243,19 @@
 			z-index: 1;
 		}
 
+		.choice-pane {
+			position: absolute;
+			@include column($small-size);
+		}
+
 		.suggested-options {
 			@include standard-container;
 			@include bordered(all, $second-light-color, 1px);
 			@include styled-scrollbar;
+			width: 100%;
 			overflow-y: auto;
-			max-height: 30vh;
-			
-			position: absolute;
+			height: 30vh;
+
 			background-color: $second-color;
 			color: $base-contrast-color;
 		}
@@ -244,6 +280,21 @@
 
 		.selected-option {
 			@include selected-option();
+		}
+
+		.article-label-editable-combination {
+			@include row($normal-size);
+			flex-wrap: wrap;
+		}
+
+		.removable-article-label {
+			@include row($small-size);
+			flex-wrap: wrap;
+			flex-shrink: 0;
+
+			button:not(:hover) {
+				background-color: transparent;
+			}
 		}
 	}
 </style>

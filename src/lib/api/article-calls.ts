@@ -3,9 +3,9 @@ import { baseURL } from "./base";
 
 const baseArticleURL = baseURL + "/article";
 
-export async function createArticle(articleLightDto: ArticleLightDto): Promise<ArticleLightDto> {
+export async function createArticle(title: string): Promise<ArticleLightDto> {
     const url = baseArticleURL;
-    const result = await callPost<ArticleLightDto>(url, articleLightDto);
+    const result = await callPost<ArticleLightDto>(url, { title });
     return result.data;
 }
 
@@ -111,19 +111,19 @@ export async function deleteArticleLabel(articleLabelId: number): Promise<void> 
     await callDelete<void>(url);
 }
 
-export async function bindLabelToArticle(labelId: number, articleId: number): Promise<void> {
+export async function bindLabelsToArticle(labelIds: number[], articleId: number): Promise<void> {
     const url = `${baseArticleURL}/label/bind`;
     const result = await callPost<void>(url, {
-        labelId,
+        labelIds,
         articleId,
     });
     return result.data;
 }
 
-export async function unbindLabelFromArticle(labelId: number, articleId: number): Promise<void> {
+export async function unbindLabelsFromArticle(labelIds: number[], articleId: number): Promise<void> {
     const url = `${baseArticleURL}/label/unbind`;
     const result = await callPost<void>(url, {
-        labelId,
+        labelIds,
         articleId,
     });
     return result.data;

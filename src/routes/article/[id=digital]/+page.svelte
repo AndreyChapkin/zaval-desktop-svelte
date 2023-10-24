@@ -1,18 +1,21 @@
 <script lang="ts">
 	import {
-		bindLabelToArticle,
+		bindLabelsToArticle,
+		deleteArticle,
 		getArticleLabels,
-		unbindLabelFromArticle,
+		unbindLabelsFromArticle,
 		updateArticle
 	} from '$lib/api/article-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { ArticlePageData } from '$lib/types/pages-data';
-	import { CANCEL_ICON_URL } from '$lib/utils/assets-references';
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import ArticleLabel from '../components/ArticleLabel.svelte';
 	import ArticleLabelSearch from '../components/ArticleLabelSearch.svelte';
+
+	// const
+	const REMOVE_TIMEOUT_MS = 3000;
 
 	// state
 	export let data: ArticlePageData;
@@ -21,7 +24,10 @@
 	let articleLight = data.articleLight;
 	let title: string = articleLight.title;
 	let content: string = data.articleContent.content;
-	let labels: ArticleLabelDto[] = data.articleLabels;
+	let articleLabels: ArticleLabelDto[] = data.articleLabels;
+	let isGoingRemove = false;
+	let removeCounter = 0;
+	let counterIncreaserId: number | null = null;
 
 	// handlers
 	const editHandler = () => {
@@ -63,16 +69,60 @@
 		isChangingLabels = false;
 	};
 
-	const chooseLabelHandler = async (chooseEvent: CustomSvelteEvent<ArticleLabelDto>) => {
-		let chosenArticleLabel = chooseEvent.detail;
-		await bindLabelToArticle(chosenArticleLabel.id, articleLight.id);
+	const acceptChosenArticleLabelsHandler = async (event: CustomSvelteEvent<ArticleLabelDto[]>) => {
+		const excessiveLabelIds = [];
+		const neededLabelIds = [];
+		let chosenArticleLabelIds = event.detail.map((i) => i.id);
+		let currentArticleLabelIds = articleLabels.map((i) => i.id);
+		for (let currentId of currentArticleLabelIds) {
+			// if doesn't contain
+			if (chosenArticleLabelIds.indexOf(currentId) < 0) {
+				excessiveLabelIds.push(currentId);
+			}
+		}
+		for (let chosenId of chosenArticleLabelIds) {
+			// if doesn't contain
+			if (currentArticleLabelIds.indexOf(chosenId) < 0) {
+				neededLabelIds.push(chosenId);
+			}
+		}
+		if (excessiveLabelIds.length > 0) {
+			await unbindLabelsFromArticle(excessiveLabelIds, articleLight.id);
+		}
+		if (neededLabelIds.length > 0) {
+			await bindLabelsToArticle(neededLabelIds, articleLight.id);
+		}
 		isChangingLabels = false;
 		await refreshLabels();
 	};
 
-	const createRemoveLabelFromCollectionHandler = (articleLabel: ArticleLabelDto) => async () => {
-		await unbindLabelFromArticle(articleLabel.id, articleLight.id);
-		await refreshLabels();
+	const removeMouseDownHandler = () => {
+		isGoingRemove = true;
+		removeCounter = 0;
+		setTimeout(async () => {
+			if (isGoingRemove) {
+				await deleteArticle(articleLight.id);
+				isGoingRemove = false;
+				clearCounterIncrease();
+				window.location.href = '/article';
+			}
+		}, REMOVE_TIMEOUT_MS);
+		// counter
+		const COUNTER_TIMEOUT_MS = 1000;
+		const increaseCounter = () => {
+			if (isGoingRemove) {
+				removeCounter = removeCounter + 1;
+				counterIncreaserId = setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
+			} else {
+				clearCounterIncrease();
+			}
+		};
+		setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
+	};
+
+	const removeMouseUpHandler = async () => {
+		isGoingRemove = false;
+		clearCounterIncrease();
 	};
 
 	// function
@@ -96,7 +146,15 @@
 
 	async function refreshLabels() {
 		const freshLabels = await getArticleLabels(articleLight.id);
-		labels = freshLabels;
+		articleLabels = freshLabels;
+	}
+
+	function clearCounterIncrease() {
+		removeCounter = 0;
+		if (counterIncreaserId != null) {
+			clearTimeout(counterIncreaserId);
+			counterIncreaserId = null;
+		}
 	}
 </script>
 
@@ -116,29 +174,17 @@
 					<button on:click={saveComplexArticleHandler}>Save changes</button>
 				{:else if isChangingLabels}
 					<ArticleLabelSearch
-						on:choose={chooseLabelHandler}
+						chosenArticleLabels={articleLabels}
+						on:accept={acceptChosenArticleLabelsHandler}
 					/>
 					<button on:click={cancelLabelAddingHandler}>Stop labels change</button>
 				{:else}
 					<button on:click={switchToLabelAddingHandler}>Change labels</button>
-					<button on:click={editHandler}>Edit article</button>
 				{/if}
 			</div>
 			<div class="article-labels">
-				{#each labels as articleLabel}
-					{#if isChangingLabels}
-						<div class="current-article-label">
-							<ArticleLabel {articleLabel} />
-							<button on:click={createRemoveLabelFromCollectionHandler(articleLabel)}>
-								<img
-									src={CANCEL_ICON_URL}
-									alt="status"
-								/>
-							</button>
-						</div>
-					{:else}
-						<ArticleLabel {articleLabel} />
-					{/if}
+				{#each articleLabels as articleLabel}
+					<ArticleLabel {articleLabel} />
 				{/each}
 			</div>
 			<div class="content-titles">
@@ -155,7 +201,7 @@
 
 		<div
 			slot="second"
-			class="article"
+			class="article-pane"
 		>
 			{#if isContentEditable}
 				<input
@@ -173,6 +219,18 @@
 				<h1>{data.articleLight.title}</h1>
 				<RichText richText={data.articleContent.content} />
 			{/if}
+			<div class="article-interaction-panel">
+				<button on:click={editHandler}>Edit article</button>
+				{#if isGoingRemove}
+					<div class="remove-counter">{removeCounter}</div>
+				{/if}
+				<button
+					on:mousedown={removeMouseDownHandler}
+					on:mouseup={removeMouseUpHandler}
+				>
+					Remove article
+				</button>
+			</div>
 		</div>
 	</SplitPane>
 </div>
@@ -197,14 +255,21 @@
 			padding: $wide-size;
 
 			.interaction-panel {
-				@include row($normal-size);
+				@include column($normal-size);
 			}
 
 			.article-labels {
-				@include row($normal-size);
+				@include row-align-start($normal-size);
+				max-height: 150px;
+				@include scrollable-in-column;
 				@include bordered(top, $second-light-color, 2px);
 				@include bordered(bottom, $second-light-color, 2px);
+				flex-wrap: wrap;
 				padding: $wide-size 0;
+
+				:global(.article-label) {
+					min-width: 50px;
+				}
 			}
 
 			.current-article-label {
@@ -252,7 +317,7 @@
 			}
 		}
 
-		.article {
+		.article-pane {
 			background: $second-gradient;
 			padding: $wide-size;
 			@include column($wide-size);
@@ -268,19 +333,32 @@
 				font-family: Nunito;
 				padding-left: $normal-size;
 			}
+		}
 
-			:global(.rich-editor) {
-				@include scrollable-in-column;
-			}
+		.article-interaction-panel {
+			@include row-justifyied;
+		}
 
-			:global(.rich-editor .rich-editor-menu) {
-				background: $strong-gradient;
-			}
+		.remove-counter {
+			@include standard-container;
+			background-color: $strong-color;
+		}
+
+		:global(.rich-editor) {
+			@include scrollable-in-column;
+		}
+
+		:global(.rich-editor .rich-editor-menu) {
+			background: $strong-gradient;
 		}
 
 		:global(.rich-editor) {
 			border-radius: $normal-size;
 			flex: 1;
+		}
+
+		:global(.rich-text) {
+			@include scrollable-in-column;
 		}
 	}
 </style>

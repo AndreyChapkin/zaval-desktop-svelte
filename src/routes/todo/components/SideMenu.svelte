@@ -1,9 +1,9 @@
 <script lang="ts">
 	import {
 		ARTICLE_ICON_URL,
-		ROOT_MENU_ICON_URL,
 		SEARCH_ICON_URL
 	} from '$lib/utils/assets-references';
+	import { chooseStatusImgUrl, todoStatusToUrlForm } from '$lib/utils/todo-helpers';
 	import SearchPanel from './SearchPanel.svelte';
 	import SideStatusMenu from './SideStatusMenu.svelte';
 
@@ -25,10 +25,10 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="todo-side-menu">
 	<div class="todo-side-menu-item">
-		<a href="/todo">
+		<a href={`/todo/${todoStatusToUrlForm('IN_PROGRESS')}`}>
 			<img
-				src={ROOT_MENU_ICON_URL}
-				alt="root"
+				src={chooseStatusImgUrl('IN_PROGRESS')}
+				alt="status"
 			/>
 		</a>
 	</div>
@@ -65,14 +65,14 @@
 		@include column-centered($normal-size);
 		padding: $normal-size $small-size;
 
+		img {
+				@include icon-large-sized;
+			}
+
 		.todo-side-menu-item {
 			cursor: pointer;
 			border-radius: $normal-size;
 			padding: 1px;
-
-			img {
-				@include icon-large-sized;
-			}
 		}
 
 		.todo-side-menu-item:hover {

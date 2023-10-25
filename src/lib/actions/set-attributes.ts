@@ -1,11 +1,11 @@
 import { RICH_ATTRIBUTES } from '$lib/types/rich-text';
-import { defineElementType } from '$lib/utils/rich-editor/rich-editor-helpers';
+import { defineElementRichType } from '$lib/utils/rich-editor/rich-editor-helpers';
 
 export function setAttributes(
 	element: HTMLElement,
 	attributes: Record<string, string> | null = null
 ) {
-	const elementType = defineElementType(element);
+	const elementType = defineElementRichType(element);
 	if (elementType) {
 		const allowedAttributes = RICH_ATTRIBUTES[elementType];
 		if (attributes && allowedAttributes) {

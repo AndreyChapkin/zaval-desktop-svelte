@@ -10,7 +10,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="rich-text" bind:this={contentContainer}>
+<div
+	class="rich-text"
+	bind:this={contentContainer}
+>
 	{#each descriptionFragments as fragment}
 		<RenderedFragment {fragment} />
 	{/each}
@@ -88,6 +91,22 @@
 		:global(.rich-link) {
 			color: rgb(125, 180, 212);
 			text-decoration: underline dotted;
+		}
+		:global(ul.rich-list) {
+			list-style-type: none;
+		}
+		:global(.rich-list-item) {
+			@include row;
+			margin-bottom: $normal-size;
+		}
+		:global(.rich-list-item-sign) {
+			background-color: $base-contrast-color;
+			width: 5px;
+			height: 5px;
+			border-radius: 5px;
+			margin: 8px 8px 0 0;
+		}
+		:global(.rich-list-item-content) {
 		}
 		:global(.rich-placeholder) {
 			border-width: $border-small-size;

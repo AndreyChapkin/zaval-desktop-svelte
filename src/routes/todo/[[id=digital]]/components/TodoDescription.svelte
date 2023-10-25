@@ -4,19 +4,9 @@
 	import type { DetailedTodoDto } from '$lib/types/todo';
 	import { CANCEL_ICON_URL, EDIT_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import {
-		changeDefaultEnterBehaviour,
-		changeDefaultTabBehaviour,
-		checkIfCreatedElementAndMakeRich,
-		checkIfEscapeModes,
-		checkIfSave,
-		chooseNewPosition,
-		chooseNewRichElementType,
 		createDefaultContentInContainer,
-		createNewRichElementRelativeToCurrentPosition,
 		isEditorEmpty,
 		parseDescription,
-		pasteInSelection,
-		selectTextInElement,
 		serializeDescription,
 		setAttributesToElement,
 		tryToMoveSelectedElement
@@ -57,12 +47,12 @@
 	};
 
 	function nonRichPaste(e: ClipboardEvent) {
-		const plainTextFromClipboard = e.clipboardData?.getData('Text');
-		if (plainTextFromClipboard) {
-			pasteInSelection(plainTextFromClipboard);
-		}
-		reserve(true);
-		e.preventDefault();
+		// const plainTextFromClipboard = e.clipboardData?.getData('Text');
+		// if (plainTextFromClipboard) {
+		// 	pasteInSelection(plainTextFromClipboard);
+		// }
+		// reserve(true);
+		// e.preventDefault();
 	}
 
 	// Reactivity
@@ -193,7 +183,7 @@
 				};
 				setAttributesToElement(elementToAssist!!, newElementAttributes);
 				artificialModifications++;
-				selectTextInElement(elementToAssist!!);
+				// selectTextInElement(elementToAssist!!);
 				assistanceValueName = null;
 				assistanceValue = null;
 				elementToAssist = null;
@@ -209,42 +199,42 @@
 	};
 
 	const keyupHandler = (event: KeyboardEvent) => {
-		checkIfCreatedElementAndMakeRich(event, descriptionContainer);
+		// checkIfCreatedElementAndMakeRich(event, descriptionContainer);
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
-		if (checkIfSave(event)) {
-			saveHandler();
-			return;
-		}
-		if (checkIfEscapeModes(event)) {
-			if (editorMode === 'edit') {
-				backToRead();
-			}
-			return;
-		}
-		const newElementType = chooseNewRichElementType(event);
-		if (newElementType) {
-			const newElement = createNewRichElementRelativeToCurrentPosition(
-				descriptionContainer,
-				newElementType
-			);
-			artificialModifications++;
-			if (newElementType === 'link') {
-				// Delegate logic to assistance handler
-				assistanceValueName = 'href';
-				elementToAssist = newElement;
-				assistancePositionStyle = computeAssistancePosition(newElement);
-			}
-			return;
-		}
-		const newPosition = chooseNewPosition(event);
-		if (newPosition) {
-			tryToMoveSelectedElement(descriptionContainer, newPosition);
-			return;
-		}
-		changeDefaultEnterBehaviour(event);
-		changeDefaultTabBehaviour(event);
+		// if (checkIfSave(event)) {
+		// 	saveHandler();
+		// 	return;
+		// }
+		// if (checkIfEscapeModes(event)) {
+		// 	if (editorMode === 'edit') {
+		// 		backToRead();
+		// 	}
+		// 	return;
+		// }
+		// const newElementType = chooseNewRichElementType(event);
+		// if (newElementType) {
+		// 	const newElement = createNewRichElementRelativeToCurrentPosition(
+		// 		descriptionContainer,
+		// 		newElementType
+		// 	);
+		// 	artificialModifications++;
+		// 	if (newElementType === 'link') {
+		// 		// Delegate logic to assistance handler
+		// 		assistanceValueName = 'href';
+		// 		elementToAssist = newElement;
+		// 		assistancePositionStyle = computeAssistancePosition(newElement);
+		// 	}
+		// 	return;
+		// }
+		// const newPosition = chooseNewPosition(event);
+		// if (newPosition) {
+		// 	tryToMoveSelectedElement(descriptionContainer, newPosition);
+		// 	return;
+		// }
+		// changeDefaultEnterBehaviour(event);
+		// changeDefaultTabBehaviour(event);
 	};
 
 	// functions

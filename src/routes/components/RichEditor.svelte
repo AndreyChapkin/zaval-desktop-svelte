@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { CANCEL_ICON_URL, HELP_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { pasteTextInSelection, selectTextInElement } from '$lib/utils/rich-editor/dom-helpers';
 	import {
 		changeDefaultEnterBehaviour,
 		changeDefaultTabBehaviour,
-		checkIfCreatedElementAndMakeRich,
+		adjustStrongElementClass,
 		checkIfEscapeModes,
 		checkIfSave,
 		chooseNewPosition,
-		chooseNewRichElementType,
+		chooseNewRichElementType
+	} from '$lib/utils/rich-editor/event-helpers';
+	import {
 		chooseNewTransformation,
+		createAndManageNewRichElement,
 		createDefaultContentInContainer,
-		createNewRichElementRelativeToCurrentPosition,
 		isEditorEmpty,
-		pasteInSelection,
-		selectTextInElement,
 		serializeDescription,
 		serializeRichContent,
 		setAttributesToElement,
@@ -55,7 +56,7 @@
 	function nonRichPaste(e: ClipboardEvent) {
 		const plainTextFromClipboard = e.clipboardData?.getData('Text');
 		if (plainTextFromClipboard) {
-			pasteInSelection(plainTextFromClipboard);
+			pasteTextInSelection(plainTextFromClipboard);
 		}
 		reserve(true);
 		e.preventDefault();
@@ -183,7 +184,7 @@
 	};
 
 	const keyupHandler = (event: KeyboardEvent) => {
-		checkIfCreatedElementAndMakeRich(event, richContentContainer);
+		adjustStrongElementClass(event);
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
@@ -197,32 +198,31 @@
 		}
 		const newElementType = chooseNewRichElementType(event);
 		if (newElementType) {
-			let attributes = {} as Record<string, string>;
-			if (['title-1', 'title-2', 'title-3', 'title-4'].indexOf(newElementType) > -1) {
-				attributes['id'] = `${Math.floor(Math.random() * 1000000000)}`;
-			}
-			const newElement = createNewRichElementRelativeToCurrentPosition(
+			const newElement = createAndManageNewRichElement(
 				richContentContainer,
 				newElementType,
-				attributes
 			);
-			nonTypedModifications++;
-			if (newElementType === 'link') {
-				// Delegate logic to assistance handler
-				assistanceValueName = 'href';
-				elementToAssist = newElement;
-				assistancePositionStyle = computeAssistancePosition(newElement);
+			if (newElement) {
+				nonTypedModifications++;
+				if (newElementType === 'link') {
+					// Delegate logic to assistance handler
+					assistanceValueName = 'href';
+					elementToAssist = newElement;
+					assistancePositionStyle = computeAssistancePosition(newElement);
+				}
+				selectTextInElement(newElement);
+				newElement.scrollIntoView();
 			}
 			return;
 		}
 		const newPosition = chooseNewPosition(event);
 		if (newPosition) {
-			tryToMoveSelectedElement(richContentContainer, newPosition);
+			tryToMoveSelectedElement(newPosition);
 			return;
 		}
 		const newTransformation = chooseNewTransformation(event);
 		if (newTransformation) {
-			tryToChangeSelectedTitleElement(richContentContainer, newTransformation);
+			tryToChangeSelectedTitleElement(newTransformation);
 			return;
 		}
 		changeDefaultEnterBehaviour(event);
@@ -363,61 +363,13 @@
 				color: $base-contrast-color;
 			}
 
+			input {
+				color: black;
+			}
+
 			.assistance-input {
 				@include standard-input;
 			}
 		}
-
-		// :global(.rich-title) {
-		// 	color: rgb(236, 178, 70);
-		// 	font-size: larger;
-		// 	font-weight: bold;
-		// 	font-family: Nunito;
-		// 	margin-bottom: $normal-size;
-		// }
-		// :global(.rich-title-1) {
-		// 	color: red;
-		// 	font-size: larger;
-		// 	font-weight: bold;
-		// 	font-family: Nunito;
-		// 	margin-bottom: $normal-size;
-		// }
-		// :global(.rich-title-2) {
-		// 	color: green;
-		// 	font-size: large;
-		// 	font-weight: bold;
-		// 	font-family: Nunito;
-		// 	margin-bottom: $normal-size;
-		// }
-		// :global(.rich-title-3) {
-		// 	color: pink;
-		// 	font-size: medium;
-		// 	font-weight: bold;
-		// 	font-family: Nunito;
-		// 	margin-bottom: $normal-size;
-		// }
-		// :global(.rich-title-4) {
-		// 	color: yellow;
-		// 	font-size: small;
-		// 	font-weight: bold;
-		// 	font-family: Nunito;
-		// 	margin-bottom: $normal-size;
-		// }
-		// :global(.rich-paragraph) {
-		// 	color: $base-contrast-color;
-		// 	margin-bottom: $normal-size;
-		// 	font-family: Nunito;
-		// }
-		// :global(.rich-strong) {
-		// 	color: rgb(218, 129, 64);
-		// }
-		// :global(.rich-link) {
-		// 	color: rgb(125, 180, 212);
-		// 	text-decoration: underline dotted;
-		// }
-		// :global(.rich-placeholder) {
-		// 	border-width: $border-small-size;
-		// 	border-color: $strong-second-color;
-		// }
 	}
 </style>

@@ -1,25 +1,20 @@
 <script lang="ts">
 	import { CANCEL_ICON_URL, HELP_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import { pasteTextInSelection, selectTextInElement } from '$lib/utils/rich-editor/dom-helpers';
+	import type { EditorCommand } from '$lib/utils/rich-editor/editor-actions/editor-action-general-types';
 	import {
-		changeDefaultEnterBehaviour,
-		changeDefaultTabBehaviour,
 		adjustStrongElementClass,
-		checkIfEscapeModes,
-		checkIfSave,
-		chooseNewPosition,
-		chooseNewRichElementType
+		processEditionAction,
+		rewriteDefaultBehaviourForSomeInputs,
+		translateEventToEditorCommand,
+		translateToEditionActionEventAndProcess
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
-		chooseNewTransformation,
-		createAndManageNewRichElement,
 		createDefaultContentInContainer,
 		isEditorEmpty,
 		serializeDescription,
 		serializeRichContent,
-		setAttributesToElement,
-		tryToChangeSelectedTitleElement,
-		tryToMoveSelectedElement
+		setAttributesToElement
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RichEditorShortkeys from './RichEditorShortkeys.svelte';
@@ -166,9 +161,16 @@
 				let newElementAttributes = {
 					[assistanceValueName!!]: assistanceValue
 				};
-				setAttributesToElement(elementToAssist!!, newElementAttributes);
-				nonTypedModifications++;
-				selectTextInElement(elementToAssist!!);
+				const modifyResult = processEditionAction({
+					type: 'modify',
+					name: 'attributes',
+					element: elementToAssist!!,
+					data: newElementAttributes,
+				});
+				if (modifyResult) {
+					nonTypedModifications++;
+					selectTextInElement(elementToAssist!!);
+				}				
 				assistanceValueName = null;
 				assistanceValue = null;
 				elementToAssist = null;
@@ -188,45 +190,28 @@
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
-		if (checkIfSave(event)) {
-			saveHandler();
+		// Process global events like save, cancel and etc.
+		const editorCommand = translateEventToEditorCommand(event);
+		if (editorCommand) {
+			manageEditorCommand(editorCommand);
 			return;
 		}
-		if (checkIfEscapeModes(event)) {
-			dispatch('cancel');
-			return;
-		}
-		const newElementType = chooseNewRichElementType(event);
-		if (newElementType) {
-			const newElement = createAndManageNewRichElement(
-				richContentContainer,
-				newElementType,
-			);
-			if (newElement) {
+		// Process content manipulation actions and get new/changed element
+		const actionResult = translateToEditionActionEventAndProcess(event, richContentContainer);
+		if (actionResult) {
+			if (actionResult.elementInfo) {
 				nonTypedModifications++;
-				if (newElementType === 'link') {
+				const { name: actionName, elementInfo } = actionResult;
+				if (actionName === 'created' && elementInfo.richType === 'link') {
 					// Delegate logic to assistance handler
 					assistanceValueName = 'href';
-					elementToAssist = newElement;
-					assistancePositionStyle = computeAssistancePosition(newElement);
+					elementToAssist = elementInfo.element;
+					assistancePositionStyle = computeAssistancePosition(elementToAssist);
 				}
-				selectTextInElement(newElement);
-				newElement.scrollIntoView();
 			}
 			return;
 		}
-		const newPosition = chooseNewPosition(event);
-		if (newPosition) {
-			tryToMoveSelectedElement(newPosition);
-			return;
-		}
-		const newTransformation = chooseNewTransformation(event);
-		if (newTransformation) {
-			tryToChangeSelectedTitleElement(newTransformation);
-			return;
-		}
-		changeDefaultEnterBehaviour(event);
-		changeDefaultTabBehaviour(event);
+		rewriteDefaultBehaviourForSomeInputs(event);
 	};
 
 	// functions
@@ -235,6 +220,15 @@
 		const top = anchorElement.offsetTop + rect.height;
 		const left = anchorElement.offsetLeft;
 		return `top: ${top}px; left: ${left}px`;
+	}
+
+	function manageEditorCommand(command: EditorCommand) {
+		switch (command.name) {
+			case 'save':
+				saveHandler();
+			case 'cancel':
+				dispatch('cancel');
+		}
 	}
 </script>
 

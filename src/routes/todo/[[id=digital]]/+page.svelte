@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { updateTodoHistory } from '$lib/api/todo-calls';
+	import { updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
 	import { ARROW_URL } from '$lib/utils/assets-references';
 	import { onMount } from 'svelte';
+	import RichEditor from '../../components/RichEditor.svelte';
+	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import PrimitiveCard from '../[status=status_enum]/components/PrimitiveCard.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
-	import TodoDescription from './components/TodoDescription.svelte';
 	import TodoHistory from './components/TodoHistory.svelte';
 	import TodoMenu from './components/TodoMenu.svelte';
 
@@ -18,6 +19,7 @@
 	$: parentTodos = (mainDetailedTodoDto.parents ?? []).slice();
 	let createInRootMenuIsOpen = false;
 	let shouldSeeElement: HTMLElement;
+	let isDescriptionEditable: boolean = false;
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 	$: {
@@ -33,6 +35,17 @@
 	// handlers
 	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
 		window.location.reload();
+	};
+
+	const saveContentEditionHandler = (updateEvent: CustomSvelteEvent<string>) => {
+		const content = updateEvent.detail;
+		updateTodo(mainDetailedTodoDto.id, {
+			description: content
+		}).then(() => window.location.reload());
+	};
+
+	const cancelContentEditionHandler = (cancelEvent: CustomSvelteEvent<void>) => {
+		isDescriptionEditable = false;
 	};
 
 	const historySaveHandler = async (saveHistoryEvent: CustomSvelteEvent<SaveHistoryDto>) => {
@@ -134,11 +147,19 @@
 				class="info-split"
 				slot="second"
 			>
-				<TodoDescription
-					detailedTodoDto={mainDetailedTodoDto}
-					slot="first"
-					on:update={todoDescriptionUpdateHandler}
-				/>
+				{#if isDescriptionEditable}
+					<RichEditor
+						slot="first"
+						richContent={mainDetailedTodoDto.description}
+						on:save={saveContentEditionHandler}
+						on:cancel={cancelContentEditionHandler}
+					/>
+				{:else}
+					<RichText
+						slot="first"
+						richText={mainDetailedTodoDto.description}
+					/>
+				{/if}
 				<TodoHistory
 					slot="second"
 					todoId={data.detailedTodoDto.id}

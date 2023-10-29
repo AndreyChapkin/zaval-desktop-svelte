@@ -53,17 +53,17 @@ export function getSelectedText(): string | null {
 }
 
 export function findSelectedElement(): HTMLElement | null {
-    let selection = window.getSelection();
+	let selection = window.getSelection();
 	if (selection) {
 		if (selection.anchorNode) {
 			let curNode = selection.anchorNode as Node | ParentNode | null;
 			// go to the nearest HTMLElement node
-            while (curNode && !(curNode instanceof HTMLElement)) {
-                curNode = curNode.parentNode;
-            }
-            if (curNode) {
-                return curNode;
-            }
+			while (curNode && !(curNode instanceof HTMLElement)) {
+				curNode = curNode.parentNode;
+			}
+			if (curNode) {
+				return curNode;
+			}
 		}
 	}
 	return null;
@@ -86,6 +86,42 @@ export function pasteTextInSelection(pastedText: string) {
 	}
 }
 
+// deprecated
+export function pasteEnterInSelection() {
+	const textNode = findSelectedTextNode();
+	let selection = window.getSelection();
+	if (selection && textNode) {
+		const range = selection.getRangeAt(0);
+		if (range) {
+			const textOffset = range.startOffset;
+			if (range.startOffset >= textNode.textContent!!.length) {
+				textNode.after("\r\n\r\n");
+				selectText(textNode.nextSibling as Text, 2, 2);
+			} else {
+				const prevText = textNode.textContent ?? '';
+				const newText = prevText.substring(0, textOffset) + '\r\n' + prevText.substring(textOffset);
+				textNode.textContent = newText;
+				selectText(textNode, textOffset + 2, textOffset + 2);
+			}
+		}
+	}
+}
+
+// deprecated
+export function pasteSpacesInSelection() {
+	const textNode = findSelectedTextNode();
+	let selection = window.getSelection();
+	if (selection && textNode) {
+		const range = selection.getRangeAt(0);
+		if (range) {
+			const textOffset = range.startOffset;
+			const prevText = textNode.textContent ?? '';
+			const newText = prevText.substring(0, textOffset) + '  ' + prevText.substring(textOffset);
+			textNode.textContent = newText;
+			selectText(textNode, textOffset + 2, textOffset + 2);
+		}
+	}
+}
 
 export function pasteElementsInSelection(elements: (string | Node)[]) {
 	const textNode = findSelectedTextNode();

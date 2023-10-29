@@ -8,6 +8,7 @@ export const RICH_TYPES = [
 	'additional-info-block', 'bad-block',
 ] as const;
 export type RichTypes = (typeof RICH_TYPES)[number];
+export type RichTitleTypes = Extract<RichTypes, 'title-1' | 'title-2' | 'title-3' | 'title-4'>;
 
 export const RICH_CLASSES = [
 	'rich-title', 'rich-title-1', 'rich-title-2', 'rich-title-3', 'rich-title-4',
@@ -76,7 +77,7 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'strong': ['paragraph'],
 	'link': ['paragraph'],
 	'list': ['root',],
-	'list-item': ['list'],
+	'list-item': ['list', 'list-item'],
 	'expandable-block': ['root', 'list-item'],
 	'additional-info-block': ['root', 'list-item'],
 	'bad-block': ['root', 'list-item']

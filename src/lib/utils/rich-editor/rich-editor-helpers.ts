@@ -13,10 +13,12 @@ import {
 	type RichTypes,
 	RICH_CLASSES_TO_RICH_TYPES_MAP,
 	defineRichTypeComplexity,
-	RICH_LIST_ITEM_CONTENT_CLASS
+	RICH_LIST_ITEM_CONTENT_CLASS,
+	type RichTitleTypes
 } from '$lib/types/rich-text';
 import { extractRichElementChildren } from './complex-rich-element-creators';
 import { findSelectedElement, getSelectedText, pasteElementsInSelection, selectTextInElement } from './dom-helpers';
+import type { EditionResult, TransformAction } from './editor-actions/editor-action-general-types';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
 	return RICH_TYPES_TO_RICH_CLASSES_MAP[richType];
@@ -246,30 +248,33 @@ export function tryToChangeSelectedTitleElement(transformation: NewTransformatio
 	}
 }
 
-export function tryToChooseNewLevelForSelectedTitle(selectedElement: HTMLElement, transformation: NewTransformationType): RichTypes | null {
+export function tryToChooseNewLevelForSelectedTitle(selectedElement: HTMLElement, action: TransformAction): RichTitleTypes | null {
 	const richType = defineElementRichType(selectedElement);
-	let resultRichType: RichTypes | null = null;
 	// if selected element is rich element
 	if (richType) {
 		// create transformation field
-		const richTitleTypes: RichTypes[] = ['title-1', 'title-2', 'title-3', 'title-4'];
+		const richTitleTypes: Extract<RichTypes, 'title-1' | 'title-2' | 'title-3' | 'title-4'>[] = ['title-1', 'title-2', 'title-3', 'title-4'];
 		// make transformation value
-		const transformationDirection = transformation === 'left' ?
+		const transformationDirection = action.description === 'upgrade' ?
 			-1 :
-			transformation === 'right' ? 1 : 0;
-		const currentTypePosition = richTitleTypes.indexOf(richType);
+			action.description === 'downgrade' ?
+				1 :
+				0;
+		const currentTypePosition = richTitleTypes.indexOf(richType as any);
 		// if current element is rich title
 		if (currentTypePosition > -1) {
 			// try to transform current rich title according to the transformation value
 			const transformedTypePosition = currentTypePosition + transformationDirection;
 			if (0 <= transformedTypePosition && transformedTypePosition < richTitleTypes.length) {
-				resultRichType = richTitleTypes[transformedTypePosition];
+				return richTitleTypes[transformedTypePosition];
 			}
 		}
+
 	}
-	return resultRichType;
+	return null;
 }
 
+// Deprecated
 export function tryToMoveSelectedElement(position: NewPositionType) {
 	const selectedElement = findSelectedElement();
 	const selectedRichType = selectedElement && defineElementRichType(selectedElement);
@@ -291,7 +296,7 @@ export function tryToMoveSelectedElement(position: NewPositionType) {
 
 export function setAttributesToElement(
 	richElement: HTMLElement,
-	attributes: Record<string, string>
+	attributes: Record<string, string | number>
 ) {
 	const richType = defineElementRichType(richElement);
 	if (richType) {
@@ -300,14 +305,14 @@ export function setAttributesToElement(
 			for (let allowedAttribute of allowedAttributes) {
 				const allowedAttributeValue = attributes[allowedAttribute];
 				if (allowedAttributeValue) {
-					richElement.setAttribute(allowedAttribute, allowedAttributeValue);
+					richElement.setAttribute(allowedAttribute, String(allowedAttributeValue));
 				}
 			}
 		}
 	}
 }
 
-function createNewRichElement(
+export function createNewRichElement(
 	richType: RichTypes,
 	text: string | null,
 	attributes: Record<string, string> | null = null
@@ -431,6 +436,7 @@ export function findTheNearestAppropriatePlace(
 	return null;
 }
 
+// Deprecated
 export function createAndManageNewRichElement(
 	containerElement: HTMLElement,
 	richType: RichTypes,

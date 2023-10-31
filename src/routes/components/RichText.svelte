@@ -52,30 +52,34 @@
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
+
+		$title-color: rgb(217, 200, 73);
+		$title-font-size: 28px;
+
 		:global(.rich-title-1) {
-			color: red;
-			font-size: larger;
+			color: $title-color;
+			font-size: $title-font-size;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-2) {
-			color: green;
-			font-size: large;
+			color: darken($title-color, 5%);
+			font-size: $title-font-size - 4px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-3) {
-			color: pink;
-			font-size: medium;
+			color: darken($title-color, 10%);
+			font-size: $title-font-size - 8px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-4) {
-			color: yellow;
-			font-size: small;
+			color: darken($title-color, 15%);
+			font-size: $title-font-size - 12px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;

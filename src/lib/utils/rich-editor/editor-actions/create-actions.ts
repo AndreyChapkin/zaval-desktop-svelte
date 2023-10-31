@@ -14,4 +14,12 @@ export interface CreateSimpleAction {
     data?: string,
 }
 
-export type CreateAction = CreateDraftAction | CreateSimpleAction;
+export interface CreateComplexAction {
+    type: 'create',
+    name: 'complex',
+    richType: RichTypes,
+    container: HTMLElement,
+    data?: string,
+}
+
+export type CreateAction = CreateDraftAction | CreateSimpleAction | CreateComplexAction;

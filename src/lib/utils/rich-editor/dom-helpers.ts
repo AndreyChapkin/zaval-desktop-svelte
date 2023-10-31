@@ -69,6 +69,18 @@ export function findSelectedElement(): HTMLElement | null {
 	return null;
 }
 
+export function findNearestParentElement(childElement: HTMLElement): HTMLElement | null {
+	let curNode = childElement.parentNode;
+	// go to the nearest HTMLElement node
+	while (curNode && !(curNode instanceof HTMLElement)) {
+		curNode = curNode.parentNode;
+	}
+	if (curNode) {
+		return curNode;
+	}
+	return null;
+}
+
 export function pasteTextInSelection(pastedText: string) {
 	const textNode = findSelectedTextNode();
 	const selection = window.getSelection();

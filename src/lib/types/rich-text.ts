@@ -5,7 +5,7 @@ export const RICH_TYPES = [
 	'paragraph', 'strong', 'link',
 	'list', 'list-item',
 	'expandable-block',
-	'additional-info-block', 'bad-block',
+	'info-block', 'bad-block',
 ] as const;
 export type RichTypes = (typeof RICH_TYPES)[number];
 export type RichTitleTypes = Extract<RichTypes, 'title-1' | 'title-2' | 'title-3' | 'title-4'>;
@@ -15,7 +15,7 @@ export const RICH_CLASSES = [
 	'rich-paragraph', 'rich-strong', 'rich-link',
 	'rich-list', 'rich-list-item',
 	'rich-expandable-block',
-	'rich-additional-info-block', 'rich-bad-block',
+	'rich-info-block', 'rich-bad-block',
 ] as const;
 export type RichClasses = (typeof RICH_CLASSES)[number];
 
@@ -76,7 +76,7 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'paragraph': ['root', 'list-item'],
 	'strong': ['paragraph'],
 	'link': ['paragraph'],
-	'list': ['root',],
+	'list': ['root', 'list-item'],
 	'list-item': ['list', 'list-item'],
 	'expandable-block': ['root', 'list-item'],
 	'additional-info-block': ['root', 'list-item'],

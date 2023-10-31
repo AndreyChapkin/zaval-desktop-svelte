@@ -17,7 +17,7 @@ import {
 	type RichTitleTypes
 } from '$lib/types/rich-text';
 import { extractRichElementChildren } from './complex-rich-element-creators';
-import { findSelectedElement, getSelectedText, pasteElementsInSelection, selectTextInElement } from './dom-helpers';
+import { findNearestParentElement, findSelectedElement, getSelectedText, pasteElementsInSelection, selectTextInElement } from './dom-helpers';
 import type { EditionResult, TransformAction } from './editor-actions/editor-action-general-types';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
@@ -436,53 +436,15 @@ export function findTheNearestAppropriatePlace(
 	return null;
 }
 
-// Deprecated
-export function createAndManageNewRichElement(
-	containerElement: HTMLElement,
-	richType: RichTypes,
-	attributes: Record<string, string> | null = null,
-) {
-	// if list-item - should be created inside list element
-	if (richType === 'list-item') {
-		const nearestAppropriatePlace = findTheNearestAppropriatePlace(containerElement, richType);
-		// if not presented - create list item element with list element
-		const needCreateList = !nearestAppropriatePlace
-			|| defineElementRichType(nearestAppropriatePlace.anchorElement) === 'list-item';
-		if (needCreateList) {
-			const newListElement = createNewRichElementAccordingToSelection(
-				containerElement,
-				'list',
-				null,
-			);
-			if (newListElement) {
-				const newListItemElement = createNewRichElement('list-item', 'placeholder');
-				newListElement.append(newListItemElement);
-				return newListItemElement;
-			}
+export function findSelectedElementWithRichType(richType: RichTypes, containerElement: HTMLElement): HTMLElement | null {
+	let element = findSelectedElement();
+	while(element && defineElementRichType(element) !== richType) {
+		if (element === containerElement) {
+			return null;
 		}
+		element = findNearestParentElement(element);
 	}
-	// if link
-	if (richType === 'link') {
-		const selectedText = getSelectedText();
-		const newElement = createNewRichElement('link', selectedText);
-		pasteElementsInSelection(["[", newElement, "]"]);
-		return newElement;
-	}
-	// if title - create id
-	let effectiveAttributes = attributes;
-	if (['title-1', 'title-2', 'title-3', 'title-4'].indexOf(richType) > -1) {
-		if (!effectiveAttributes) {
-			effectiveAttributes = {};
-		}
-		effectiveAttributes['id'] = `${Math.floor(Math.random() * 1000000000)}`;
-	}
-	const newElement = createNewRichElementAccordingToSelection(
-		containerElement,
-		richType,
-		"placeholder",
-		effectiveAttributes
-	);
-	return newElement;
+	return element;
 }
 
 export function createNewRichElementAccordingToSelection(

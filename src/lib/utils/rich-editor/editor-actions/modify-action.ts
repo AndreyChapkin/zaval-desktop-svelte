@@ -5,10 +5,17 @@ export interface ModifyAttributesAction {
     data: Record<string, string | number>,
 }
 
-export interface ModifyListAction {
+export interface ModifyDraftListAction {
     type: 'modify',
-    name: 'extendList',
+    name: 'draftExtendList',
     data?: string,
 }
 
-export type ModifyAction = ModifyAttributesAction | ModifyListAction;
+export interface ModifyListAction {
+    type: 'modify',
+    name: 'extendList',
+    container: HTMLElement,
+    data?: string,
+}
+
+export type ModifyAction = ModifyAttributesAction | ModifyListAction | ModifyDraftListAction;

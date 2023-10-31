@@ -1,11 +1,11 @@
-import { RICH_TYPES_TO_RICH_CLASSES_MAP, TAGS_TO_SIMPLE_RICH_TYPES_MAP } from "$lib/types/rich-text";
-import { findSelectedElement, getSelectedText, pasteEnterInSelection, pasteSpacesInSelection, selectTextInElement } from "./dom-helpers";
-import type { CreateSimpleAction } from "./editor-actions/create-actions";
+import { RICH_TYPES_TO_RICH_CLASSES_MAP, TAGS_TO_SIMPLE_RICH_TYPES_MAP, defineRichTypeComplexity } from "$lib/types/rich-text";
+import { findSelectedElement, getSelectedText, pasteElementsInSelection, pasteEnterInSelection, pasteSpacesInSelection, selectTextInElement } from "./dom-helpers";
+import type { CreateAction, CreateComplexAction, CreateSimpleAction } from "./editor-actions/create-actions";
 import type { EditionAction, EditionResult, EditorCommand } from "./editor-actions/editor-action-general-types";
 import type { ModifyAction } from "./editor-actions/modify-action";
 import type { MoveAction } from "./editor-actions/move-actions";
 import type { TransformTitleAction } from "./editor-actions/transform-actions";
-import { createAndManageNewRichElement, createNewRichElement, defineElementRichType, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
+import { createNewRichElement, createNewRichElementAccordingToSelection, defineElementRichType, findSelectedElementWithRichType, findTheNearestAppropriatePlace, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
 
 const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	'Alt+Digit1': {
@@ -30,7 +30,7 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	},
 	'Alt+Digit5': {
 		type: 'modify',
-		name: 'extendList',
+		name: 'draftExtendList',
 	},
 	'Alt+ArrowUp': {
 		type: 'move',
@@ -70,8 +70,14 @@ export function translateToEditionActionEventAndProcess(event: KeyboardEvent, co
 		if (action.type === 'create' && action.name === 'draft') {
 			action = {
 				type: 'create',
-				name: 'simple',
+				name: defineRichTypeComplexity(action.richType),
 				richType: action.richType,
+				container: contentContainer,
+			} as CreateAction;
+		} else if (action.type === 'modify' && action.name === 'draftExtendList') {
+			action = {
+				type: 'modify',
+				name: 'extendList',
 				container: contentContainer,
 			};
 		}
@@ -119,10 +125,7 @@ function defineEditionAction(event: KeyboardEvent): EditionAction | null {
 export function processEditionAction(action: EditionAction): EditionResult | null {
 	switch (action.type) {
 		case 'create':
-			if (action.name === 'simple') {
-				return createRichElementAndResult(action);
-			}
-			break;
+			return createNewRichElementAndResult(action);
 		case 'move':
 			return moveRichElementAndResult(action);
 		case 'transform':
@@ -133,8 +136,14 @@ export function processEditionAction(action: EditionAction): EditionResult | nul
 	return null;
 }
 
-function createRichElementAndResult(action: CreateSimpleAction): EditionResult | null {
-	const newElement = createAndManageNewRichElement(action.container, action.richType);
+function createNewRichElementAndResult(action: CreateAction): EditionResult | null {
+	console.log("@@@ action" + JSON.stringify(action));
+	let newElement: HTMLElement | null = null;
+	if (action.name === 'simple') {
+		newElement = createNewSimpleRichElementAccordingToSelection(action);
+	} else if (action.name === 'complex') {
+		newElement = createNewComplexRichElementAccordingToSelection(action);
+	}
 	if (newElement) {
 		return {
 			name: 'created',
@@ -145,6 +154,77 @@ function createRichElementAndResult(action: CreateSimpleAction): EditionResult |
 		};
 	}
 	return null;
+}
+
+export function createNewSimpleRichElementAccordingToSelection(action: CreateSimpleAction): HTMLElement | null {
+	switch (action.richType) {
+		case 'link':
+			return createLinkElementAccordingToSelection(action.container);
+	}
+	// if title - create id
+	if (['title-1', 'title-2', 'title-3', 'title-4'].indexOf(action.richType) > -1) {
+		return createTitleElementAccordingToSelection(action);
+	}
+	// other simple elements
+	return createNewRichElementAccordingToSelection(action.container,
+		action.richType,
+		action.data as string || 'placeholder',
+		{}
+	);
+}
+
+export function createNewComplexRichElementAccordingToSelection(action: CreateComplexAction): HTMLElement | null {
+	switch (action.richType) {
+		case 'list-item':
+			const listItemElement = createListItemAccordingToSelection('placeholder', action.container);
+			return listItemElement;
+	}
+	return null;
+}
+
+function createLinkElementAccordingToSelection(containerElement: HTMLElement): HTMLElement | null {
+	const selectedText = getSelectedText();
+	if (selectedText) {
+		const newElement = createNewRichElementAccordingToSelection(containerElement, 'link', selectedText);
+		if (newElement) {
+			pasteElementsInSelection(["[", newElement, "]"]);
+			return newElement;
+		}
+	}
+	return null;
+}
+
+function createTitleElementAccordingToSelection(action: CreateSimpleAction): HTMLElement | null {
+	const newElement = createNewRichElementAccordingToSelection(
+		action.container,
+		action.richType,
+		"placeholder",
+		{
+			id: `${Math.floor(Math.random() * 1000000000)}`
+		}
+	);
+	return newElement;
+}
+
+function createListItemAccordingToSelection(text: string, containerElement: HTMLElement): HTMLElement | null {
+	console.log("@@@ createListItemAccordingToSelection");
+	const nearestAppropriatePlace = findTheNearestAppropriatePlace(containerElement, 'list-item');
+	const needCreateList = !nearestAppropriatePlace
+		|| defineElementRichType(nearestAppropriatePlace.anchorElement) !== 'list';
+	nearestAppropriatePlace && console.log("@@@ " + defineElementRichType(nearestAppropriatePlace.anchorElement));
+	const newListItemElement = createNewRichElement('list-item', text);
+	if (needCreateList) {
+		const newListElement = createNewRichElementAccordingToSelection(
+			containerElement,
+			'list',
+			null,
+		);
+		if (newListElement) {
+			newListElement.append(newListItemElement);
+			return newListItemElement;
+		}
+	}
+	return newListItemElement;
 }
 
 function moveRichElementAndResult(action: MoveAction): EditionResult | null {
@@ -211,6 +291,19 @@ export function modifyRichElementAndResult(action: ModifyAction): EditionResult 
 					richType: defineElementRichType(action.element)!!,
 				}
 			};
+		case 'extendList':
+			const listElement = findSelectedElementWithRichType('list', action.container);
+			if (listElement) {
+				const listItemElement = createNewRichElement('list-item', 'placeholder');
+				listElement.append(listItemElement);
+				return {
+					name: 'modified',
+					elementInfo: {
+						element: listElement,
+						richType: 'list',
+					}
+				};
+			}
 	}
 	return null;
 }

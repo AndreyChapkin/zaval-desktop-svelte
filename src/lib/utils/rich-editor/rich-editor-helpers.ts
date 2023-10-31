@@ -436,6 +436,25 @@ export function findTheNearestAppropriatePlace(
 	return null;
 }
 
+export function findSelectedRichElement(containerElement: HTMLElement): { element: HTMLElement, richType: RichTypes} | null {
+	let element = findSelectedElement();
+	let richType = element && defineElementRichType(element);
+	while(element && !richType) {
+		if (element === containerElement) {
+			return null;
+		}
+		element = findNearestParentElement(element);
+		richType = element && defineElementRichType(element);
+	}
+	if (richType && element) {
+		return {
+			element,
+			richType
+		};
+	}
+	return null;
+}
+
 export function findSelectedElementWithRichType(richType: RichTypes, containerElement: HTMLElement): HTMLElement | null {
 	let element = findSelectedElement();
 	while(element && defineElementRichType(element) !== richType) {

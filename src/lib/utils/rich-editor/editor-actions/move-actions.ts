@@ -1,7 +1,14 @@
-export interface MoveWithinAction {
+export interface MoveDraftWithinAction {
     type: 'move',
-    name: 'within',
+    name: 'draftWithin',
     direction: 'up' | 'down',  
 }
 
-export type MoveAction = MoveWithinAction;
+export interface MoveWithinAction {
+    type: 'move',
+    name: 'within',
+    direction: 'up' | 'down',
+    container: HTMLElement,
+}
+
+export type MoveAction = MoveDraftWithinAction | MoveWithinAction;

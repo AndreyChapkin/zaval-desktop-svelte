@@ -53,7 +53,7 @@
 			margin-bottom: $normal-size;
 		}
 
-		$title-color: rgb(217, 200, 73);
+		$title-color: rgb(169, 217, 73);
 		$title-font-size: 28px;
 
 		:global(.rich-title-1) {
@@ -64,21 +64,21 @@
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-2) {
-			color: darken($title-color, 5%);
+			color: adjust-hue($title-color, -15%);
 			font-size: $title-font-size - 4px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-3) {
-			color: darken($title-color, 10%);
+			color: adjust-hue($title-color, -25%);
 			font-size: $title-font-size - 8px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-4) {
-			color: darken($title-color, 15%);
+			color: adjust-hue($title-color, -30%);
 			font-size: $title-font-size - 12px;
 			font-weight: bold;
 			font-family: Nunito;
@@ -104,13 +104,13 @@
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-list-item-sign) {
-			background-color: $base-contrast-color;
-			width: 5px;
-			height: 5px;
+			// background-color: $base-contrast-color;
+			width: 8px;
+			height: 8px;
+			border-color: $strong-second-color;
+			border-width: 2px;
 			border-radius: 5px;
-			margin: 8px 8px 0 0;
-		}
-		:global(.rich-list-item-content) {
+			margin: 6px 8px 0 0;
 		}
 		:global(.rich-placeholder) {
 			border-width: $border-small-size;

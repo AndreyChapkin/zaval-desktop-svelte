@@ -1,4 +1,5 @@
 import { RICH_TYPES_TO_RICH_CLASSES_MAP, defineRichTypeComplexity, type RichTypes, RICH_LIST_ITEM_SIGN_CLASS, RICH_LIST_ITEM_CONTENT_CLASS } from "$lib/types/rich-text";
+import { createNewRichElement } from "./rich-editor-helpers";
 
 export function createListItem(text: string | null): HTMLElement {
     const listItemWrapper = document.createElement('div');
@@ -9,10 +10,10 @@ export function createListItem(text: string | null): HTMLElement {
     signElement.classList.add(RICH_LIST_ITEM_SIGN_CLASS);
 
     const contentElement = document.createElement('li');
-    if (text) {
-        contentElement.textContent = text;
-    }
     contentElement.classList.add(RICH_LIST_ITEM_CONTENT_CLASS);
+
+    const paragraphElement = createNewRichElement('paragraph', text ?? 'placeholder');
+    contentElement.append(paragraphElement);
 
     listItemWrapper.append(signElement, contentElement);
     return listItemWrapper;

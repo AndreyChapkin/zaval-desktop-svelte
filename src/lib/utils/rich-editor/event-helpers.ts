@@ -3,9 +3,9 @@ import { findSelectedElement, getSelectedText, pasteElementsInSelection, pasteEn
 import type { CreateAction, CreateComplexAction, CreateSimpleAction } from "./editor-actions/create-actions";
 import type { EditionAction, EditionResult, EditorCommand } from "./editor-actions/editor-action-general-types";
 import type { ModifyAction } from "./editor-actions/modify-action";
-import type { MoveAction } from "./editor-actions/move-actions";
+import type { MoveAction, MoveWithinAction } from "./editor-actions/move-actions";
 import type { TransformTitleAction } from "./editor-actions/transform-actions";
-import { createNewRichElement, createNewRichElementAccordingToSelection, defineElementRichType, findSelectedElementWithRichType, findTheNearestAppropriatePlace, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
+import { createNewRichElement, createNewRichElementAccordingToSelection, defineElementRichType, findSelectedElementWithRichType, findSelectedRichElement, findTheNearestAppropriatePlace, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
 
 const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	'Alt+Digit1': {
@@ -34,12 +34,12 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	},
 	'Alt+ArrowUp': {
 		type: 'move',
-		name: 'within',
+		name: 'draftWithin',
 		direction: 'up'
 	},
 	'Alt+ArrowDown': {
 		type: 'move',
-		name: 'within',
+		name: 'draftWithin',
 		direction: 'down'
 	},
 	'Alt+Shift+ArrowLeft': {
@@ -78,6 +78,13 @@ export function translateToEditionActionEventAndProcess(event: KeyboardEvent, co
 			action = {
 				type: 'modify',
 				name: 'extendList',
+				container: contentContainer,
+			};
+		} else if (action.type === 'move' && action.name === 'draftWithin') {
+			action = {
+				type: 'move',
+				name: 'within',
+				direction: action.direction,
 				container: contentContainer,
 			};
 		}
@@ -137,7 +144,6 @@ export function processEditionAction(action: EditionAction): EditionResult | nul
 }
 
 function createNewRichElementAndResult(action: CreateAction): EditionResult | null {
-	console.log("@@@ action" + JSON.stringify(action));
 	let newElement: HTMLElement | null = null;
 	if (action.name === 'simple') {
 		newElement = createNewSimpleRichElementAccordingToSelection(action);
@@ -207,11 +213,9 @@ function createTitleElementAccordingToSelection(action: CreateSimpleAction): HTM
 }
 
 function createListItemAccordingToSelection(text: string, containerElement: HTMLElement): HTMLElement | null {
-	console.log("@@@ createListItemAccordingToSelection");
 	const nearestAppropriatePlace = findTheNearestAppropriatePlace(containerElement, 'list-item');
 	const needCreateList = !nearestAppropriatePlace
 		|| defineElementRichType(nearestAppropriatePlace.anchorElement) !== 'list';
-	nearestAppropriatePlace && console.log("@@@ " + defineElementRichType(nearestAppropriatePlace.anchorElement));
 	const newListItemElement = createNewRichElement('list-item', text);
 	if (needCreateList) {
 		const newListElement = createNewRichElementAccordingToSelection(
@@ -229,28 +233,29 @@ function createListItemAccordingToSelection(text: string, containerElement: HTML
 
 function moveRichElementAndResult(action: MoveAction): EditionResult | null {
 	let result: EditionResult | null = null;
-	const selectedElement = findSelectedElement();
-	const selectedRichType = selectedElement && defineElementRichType(selectedElement);
-	if (selectedRichType) {
-		switch (action.direction) {
-			case 'up':
-				let previousElement = selectedElement.previousElementSibling;
-				previousElement?.before(selectedElement);
-				break;
-			case 'down':
-				let nextElement = selectedElement.nextElementSibling;
-				nextElement?.after(selectedElement);
-				break;
+	if (action.name === 'within') {
+		const richElementInfo = findSelectedRichElement(action.container);
+		if (richElementInfo) {
+			switch (action.direction) {
+				case 'up':
+					let previousElement = richElementInfo.element.previousElementSibling;
+					previousElement?.before(richElementInfo.element);
+					break;
+				case 'down':
+					let nextElement = richElementInfo.element.nextElementSibling;
+					nextElement?.after(richElementInfo.element);
+					break;
+			}
+			richElementInfo.element.scrollIntoView();
+			selectTextInElement(richElementInfo.element);
+			result = {
+				name: 'moved',
+				elementInfo: {
+					richType: richElementInfo.richType,
+					element: richElementInfo.element,
+				},
+			};
 		}
-		selectedElement.scrollIntoView();
-		selectTextInElement(selectedElement);
-		result = {
-			name: 'moved',
-			elementInfo: {
-				richType: selectedRichType,
-				element: selectedElement,
-			},
-		};
 	}
 	return result;
 }

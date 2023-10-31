@@ -325,7 +325,7 @@
 			@include column($wide-size);
 
 			.article-title {
-				@include bordered(bottom);
+				@include bordered(bottom, $base-contrast-color, 2px);
 			}
 
 			input {

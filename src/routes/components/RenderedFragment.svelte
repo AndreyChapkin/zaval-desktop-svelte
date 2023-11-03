@@ -1,18 +1,33 @@
 <script lang="ts">
 	import { setAttributes } from '$lib/actions/set-attributes';
-	import { defineRichTypeComplexity, type DescriptionFragment } from '$lib/types/rich-text';
+	import {
+		isComplexRichType,
+		type DescriptionFragment,
+		type RichSimpleTypes
+	} from '$lib/types/rich-text';
 	import { getRichTagClass, getSimpleRichTag } from '$lib/utils/rich-editor/rich-editor-helpers';
+	import RenderedListFragment from './RenderedListFragment.svelte';
 	import RenderedListItemFragment from './RenderedListItemFragment.svelte';
+	import RenderedUnitedBlockFragment from './RenderedUnitedBlockFragment.svelte';
 
 	// data
 	export let fragment: DescriptionFragment;
-	const richComplexity = defineRichTypeComplexity(fragment.richType);
+	const isComplex = isComplexRichType(fragment.richType);
+	const simpleRichType = isComplex ? null : (fragment.richType as RichSimpleTypes);
 </script>
 
-{#if richComplexity === 'simple'}
+{#if isComplex}
+	{#if fragment.richType === 'list'}
+		<RenderedListFragment {fragment} />
+	{:else if fragment.richType === 'list-item'}
+		<RenderedListItemFragment {fragment} />
+	{:else if fragment.richType === 'united-block'}
+		<RenderedUnitedBlockFragment {fragment} />
+	{/if}
+{:else if simpleRichType}
 	<svelte:element
-		this={getSimpleRichTag(fragment.richType)}
-		class={getRichTagClass(fragment.richType) ?? ''}
+		this={getSimpleRichTag(simpleRichType)}
+		class={getRichTagClass(simpleRichType) ?? ''}
 		use:setAttributes={fragment.attributes}
 	>
 		{#each fragment.children as child}
@@ -23,10 +38,6 @@
 			{/if}
 		{/each}
 	</svelte:element>
-{:else if richComplexity === 'complex'}
-	{#if fragment.richType === 'list-item'}
-		<RenderedListItemFragment {fragment} />
-	{/if}
 {/if}
 
 <style lang="scss">

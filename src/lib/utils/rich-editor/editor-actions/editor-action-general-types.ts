@@ -8,7 +8,7 @@ export type EditionAction = CreateAction | MoveAction | TransformAction | Modify
 
 export interface EditionResult {
     name: 'created' | 'transformed' | 'moved' | 'modified',
-    elementInfo?: {
+    elementInfo: {
         element: HTMLElement,
         richType: RichTypes,
     },

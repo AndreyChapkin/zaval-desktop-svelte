@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { CANCEL_ICON_URL, HELP_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
-	import { pasteTextInSelection, selectTextInElement } from '$lib/utils/rich-editor/dom-helpers';
+	import { selectTextInElement } from '$lib/utils/rich-editor/dom-helpers';
 	import type { EditorCommand } from '$lib/utils/rich-editor/editor-actions/editor-action-general-types';
 	import {
 		adjustStrongElementClass,
+		detectNativeActions,
 		processEditionAction,
 		rewriteDefaultBehaviourForSomeInputs,
 		translateEventToEditorCommand,
-		translateToEditionActionEventAndProcess
+		tryToProcessActionEvent
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
-		createDefaultContentInContainer,
+		createNewSimpleRichElement,
 		isEditorEmpty,
-		serializeDescription,
-		serializeRichContent,
-		setAttributesToElement
+		serializeRichContent
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import RichEditorShortkeys from './RichEditorShortkeys.svelte';
@@ -48,15 +47,6 @@
 		timerId: 0
 	};
 
-	function nonRichPaste(e: ClipboardEvent) {
-		const plainTextFromClipboard = e.clipboardData?.getData('Text');
-		if (plainTextFromClipboard) {
-			pasteTextInSelection(plainTextFromClipboard);
-		}
-		reserve(true);
-		e.preventDefault();
-	}
-
 	// Reactivity
 	// TODO: bad decision
 	// Return focus to editor after assistance window disappear
@@ -72,12 +62,13 @@
 				effectiveRichContent = tempSavedContent;
 			}
 		} else if (isEditorEmpty(richContentContainer)) {
-			createDefaultContentInContainer(richContentContainer);
+			// fill with default paragraph
+			const paragraphElement = createNewSimpleRichElement('paragraph', 'placeholder');
+			richContentContainer.append(paragraphElement);
 		}
 		richContentContainer.focus();
 		// Listen for changes and make reserve when it is needed
 		richContentContainer.addEventListener('input', reservationCaller);
-		richContentContainer.addEventListener('paste', nonRichPaste);
 	}
 
 	$: {
@@ -113,7 +104,7 @@
 			// Refresh values cause we took their into account
 			reservationState.unsavedInputsCount = 0;
 			reservationState.noticedInputsCount = 0;
-			const serializedEditorContent = serializeDescription(richContentContainer);
+			const serializedEditorContent = serializeRichContent(richContentContainer);
 			if (serializedEditorContent) {
 				localStorage.setItem(TEMP_RICH_EDITOR_CONTENT_KEY, serializedEditorContent);
 				nonTypedModifications = 0;
@@ -165,12 +156,12 @@
 					type: 'modify',
 					name: 'attributes',
 					element: elementToAssist!!,
-					data: newElementAttributes,
+					data: newElementAttributes
 				});
 				if (modifyResult) {
 					nonTypedModifications++;
 					selectTextInElement(elementToAssist!!);
-				}				
+				}
 				assistanceValueName = null;
 				assistanceValue = null;
 				elementToAssist = null;
@@ -187,6 +178,10 @@
 
 	const keyupHandler = (event: KeyboardEvent) => {
 		adjustStrongElementClass(event);
+		const nativeAction = detectNativeActions(event);
+		if (nativeAction === 'paste') {
+			nonTypedModifications++;
+		}
 	};
 
 	const keydownHandler = (event: KeyboardEvent) => {
@@ -197,7 +192,7 @@
 			return;
 		}
 		// Process content manipulation actions and get new/changed element
-		const actionResult = translateToEditionActionEventAndProcess(event, richContentContainer);
+		const actionResult = tryToProcessActionEvent(event, richContentContainer);
 		if (actionResult) {
 			if (actionResult.elementInfo) {
 				nonTypedModifications++;
@@ -269,10 +264,12 @@
 			on:keyup={assistanceValueName ? null : keyupHandler}
 			on:keydown={assistanceValueName ? null : keydownHandler}
 		>
-			<RichText
-				richText={effectiveRichContent}
-				bind:contentContainer={richContentContainer}
-			/>
+			{#key effectiveRichContent}
+				<RichText
+					richText={effectiveRichContent}
+					bind:contentContainer={richContentContainer}
+				/>
+			{/key}
 		</div>
 		{#if assistanceValueName}
 			<div

@@ -1,7 +1,29 @@
-import { RICH_TYPES_TO_RICH_CLASSES_MAP, defineRichTypeComplexity, type RichTypes, RICH_LIST_ITEM_SIGN_CLASS, RICH_LIST_ITEM_CONTENT_CLASS } from "$lib/types/rich-text";
-import { createNewRichElement } from "./rich-editor-helpers";
+import { RICH_LIST_ITEM_CONTENT_CLASS, RICH_LIST_ITEM_SIGN_CLASS, RICH_TYPES_TO_RICH_CLASSES_MAP } from "$lib/types/rich-text";
+import { createNewSimpleRichElement } from "./rich-editor-helpers";
 
-export function createListItem(text: string | null): HTMLElement {
+export function createList(content: (HTMLElement | string)[] | string | null): HTMLElement {
+    const listWrapper = document.createElement('ul');
+    const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['list'];
+    listWrapper.classList.add(richClass);
+    if (content) {
+        if (typeof content === 'string') {
+            // string content
+            listWrapper.append(createListItem(content));
+        } else {
+            // array content
+            for (let contentElement of content) {
+                if (typeof contentElement === 'string') {
+                    listWrapper.append(createListItem(contentElement));
+                } else {
+                    listWrapper.append(contentElement);
+                }
+            }
+        }
+    }
+    return listWrapper;
+}
+
+export function createListItem(content: (HTMLElement | string)[] | string | null): HTMLElement {
     const listItemWrapper = document.createElement('div');
     const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['list-item'];
     listItemWrapper.classList.add(richClass);
@@ -12,44 +34,61 @@ export function createListItem(text: string | null): HTMLElement {
     const contentElement = document.createElement('li');
     contentElement.classList.add(RICH_LIST_ITEM_CONTENT_CLASS);
 
-    const paragraphElement = createNewRichElement('paragraph', text ?? 'placeholder');
-    contentElement.append(paragraphElement);
+    if (typeof content === 'string') {
+        const paragraphElement = createNewSimpleRichElement('paragraph', content ?? 'placeholder');
+        contentElement.append(paragraphElement);
+    } else if (content) {
+        contentElement.append(...content);
+    }
 
     listItemWrapper.append(signElement, contentElement);
     return listItemWrapper;
 }
 
-export function extractRichElementChildren(element: HTMLElement, richType: RichTypes): ChildNode[] {
-    const resultChildren = [] as ChildNode[];
-    const richTypeComplexity = defineRichTypeComplexity(richType);
-    if (richTypeComplexity === 'simple') {
-        for (let childNode of element.childNodes) {
-            resultChildren.push(childNode);
-        }
-    } else if (richTypeComplexity === 'complex') {
-        switch (richType) {
-            case 'list':
-                insertListChildren(element, resultChildren);
-                break;
-            case 'list-item':
-                insertListItemChildren(element, resultChildren);
-                break;
-        }
+export function appendToListItem(listItemElement: HTMLElement, childElement: HTMLElement) {
+    const contentElement = listItemElement.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
+    if (contentElement) {
+        contentElement.append(childElement);
     }
-    return resultChildren;
 }
 
-function insertListChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+export function insertListChildren(element: HTMLElement, childrenArray: ChildNode[]) {
     for (let childNode of element.childNodes) {
         childrenArray.push(childNode);
     }
 }
 
-function insertListItemChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+export function insertListItemChildren(element: HTMLElement, childrenArray: ChildNode[]) {
     const contentElement = element.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
     if (contentElement) {
         for (let childNode of contentElement.childNodes) {
             childrenArray.push(childNode);
         }
-    }    
+    }
+}
+
+export function createUnitedBlock(content: (string | HTMLElement)[] | string | null): HTMLElement {
+    const unitedBlockWrapper = document.createElement('div');
+    const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['united-block'];
+    unitedBlockWrapper.classList.add(richClass);
+
+    if (typeof content === 'string') {
+        // string content
+        const paragraphElement = createNewSimpleRichElement('paragraph', content);
+        unitedBlockWrapper.append(paragraphElement);
+    } else if (content) {
+        // array content
+        unitedBlockWrapper.append(...content);
+    } else {
+        // null content
+        const paragraphElement = createNewSimpleRichElement('paragraph', 'placeholder');
+        unitedBlockWrapper.append(paragraphElement);
+    }
+    return unitedBlockWrapper;
+}
+
+export function insertUnitedBlockChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+    for (let childNode of element.childNodes) {
+        childrenArray.push(childNode);
+    }
 }

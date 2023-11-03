@@ -3,7 +3,7 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
-	import { ARROW_URL } from '$lib/utils/assets-references';
+	import { ARROW_URL, EDIT_ICON_URL } from '$lib/utils/assets-references';
 	import { onMount } from 'svelte';
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
@@ -33,8 +33,8 @@
 	}
 
 	// handlers
-	const todoDescriptionUpdateHandler = (event: CustomSvelteEvent<DetailedTodoDto>) => {
-		window.location.reload();
+	const editHandler = () => {
+		isDescriptionEditable = true;
 	};
 
 	const saveContentEditionHandler = (updateEvent: CustomSvelteEvent<string>) => {
@@ -147,19 +147,28 @@
 				class="info-split"
 				slot="second"
 			>
-				{#if isDescriptionEditable}
-					<RichEditor
-						slot="first"
-						richContent={mainDetailedTodoDto.description}
-						on:save={saveContentEditionHandler}
-						on:cancel={cancelContentEditionHandler}
-					/>
-				{:else}
-					<RichText
-						slot="first"
-						richText={mainDetailedTodoDto.description}
-					/>
-				{/if}
+				<div
+					class="description"
+					slot="first"
+				>
+					{#if isDescriptionEditable}
+						<RichEditor
+							richContent={mainDetailedTodoDto.description}
+							on:save={saveContentEditionHandler}
+							on:cancel={cancelContentEditionHandler}
+						/>
+					{:else}
+						<div class="description-menu">
+							<button on:click={editHandler}>
+								<img
+									src={EDIT_ICON_URL}
+									alt="status"
+								/>
+							</button>
+						</div>
+						<RichText richText={mainDetailedTodoDto.description} />
+					{/if}
+				</div>
 				<TodoHistory
 					slot="second"
 					todoId={data.detailedTodoDto.id}
@@ -243,6 +252,14 @@
 			margin-left: auto;
 			margin-right: auto;
 			font-weight: bold;
+		}
+
+		.description-menu {
+			background-color: $second-light-color;
+			padding: $small-size 0 0 $small-size;
+			img {
+				@include icon-normal-sized;
+			}
 		}
 
 		.root-todos {

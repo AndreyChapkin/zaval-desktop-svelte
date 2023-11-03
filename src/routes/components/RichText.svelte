@@ -112,9 +112,11 @@
 			border-radius: 5px;
 			margin: 6px 8px 0 0;
 		}
-		:global(.rich-placeholder) {
+		:global(.rich-united-block) {
 			border-width: $border-small-size;
-			border-color: $strong-second-color;
+			border-color: $second-lighter-color;
+			border-radius: 5px;
+			padding: $normal-size;
 		}
 	}
 </style>

@@ -1,20 +1,32 @@
-import { createListItem } from "$lib/utils/rich-editor/complex-rich-element-creators";
-
-export const RICH_TYPES = [
+export const RICH_SIMPLE_TYPES = [
 	'title', 'title-1', 'title-2', 'title-3', 'title-4',
-	'paragraph', 'strong', 'link',
-	'list', 'list-item',
-	'expandable-block',
-	'info-block', 'bad-block',
+	'paragraph', 'strong', 'obscure', 'link',
 ] as const;
-export type RichTypes = (typeof RICH_TYPES)[number];
-export type RichTitleTypes = Extract<RichTypes, 'title-1' | 'title-2' | 'title-3' | 'title-4'>;
+export type RichSimpleTypes = (typeof RICH_SIMPLE_TYPES)[number];
+
+export const RICH_COMPLEX_TYPES = [
+	'list', 'list-item',
+	'expandable-block', 'united-block',
+	'info-block', 'bad-block',
+];
+export type RichComplexTypes = (typeof RICH_COMPLEX_TYPES)[number];
+export function isComplexRichType(value: RichTypes): value is RichComplexTypes {
+	return RICH_COMPLEX_TYPES.indexOf(value as any) > -1;
+}
+
+export type RichTypes = RichSimpleTypes | RichComplexTypes;
+export const RICH_TYPES = [...RICH_SIMPLE_TYPES, ...RICH_COMPLEX_TYPES];
+export function isRichType(value: string): value is RichTypes {
+	return RICH_TYPES.indexOf(value as any) > -1;
+}
+
+export type RichTitleTypes = Extract<RichSimpleTypes, 'title-1' | 'title-2' | 'title-3' | 'title-4'>;
 
 export const RICH_CLASSES = [
 	'rich-title', 'rich-title-1', 'rich-title-2', 'rich-title-3', 'rich-title-4',
-	'rich-paragraph', 'rich-strong', 'rich-link',
+	'rich-paragraph', 'rich-strong', 'rich-obscure', 'rich-link',
 	'rich-list', 'rich-list-item',
-	'rich-expandable-block',
+	'rich-expandable-block', 'rich-united-block',
 	'rich-info-block', 'rich-bad-block',
 ] as const;
 export type RichClasses = (typeof RICH_CLASSES)[number];
@@ -35,7 +47,7 @@ export type EditorModes = 'edit' | 'read';
 
 export type PossibleRichParentTypes = RichTypes | 'root';
 
-export const SIMPLE_RICH_TYPES_TO_TAGS_MAP: Partial<Record<RichTypes, string>> = {
+export const SIMPLE_RICH_TYPES_TO_TAGS_MAP: Record<RichSimpleTypes, string> = {
 	"title": 'h1',
 	"title-1": 'h1',
 	"title-2": 'h2',
@@ -43,29 +55,16 @@ export const SIMPLE_RICH_TYPES_TO_TAGS_MAP: Partial<Record<RichTypes, string>> =
 	"title-4": 'h4',
 	'paragraph': 'p',
 	'strong': 'b',
+	'obscure': 'span',
 	'link': 'a',
-	'list': 'ul',
 } as const;
 
-export const COMPLEX_RICH_TYPES_TO_CREATOR_MAP: Partial<Record<RichTypes, ((text: string | null) => HTMLElement)>> = {
-	'list-item': createListItem,
-	// 'expandable-block': 'div',
-	// 'additional-info-block': 'div',
-	// 'bad-block': 'div'
-};
-
-export function defineRichTypeComplexity(richType: RichTypes): 'complex' | 'simple' {
-	return COMPLEX_RICH_TYPES_TO_CREATOR_MAP[richType]
-		? 'complex'
-		: 'simple';
-}
-
-export const TAGS_TO_SIMPLE_RICH_TYPES_MAP: Record<string, RichTypes> = Object.entries(
+export const TAGS_TO_SIMPLE_RICH_TYPES_MAP: Record<string, RichSimpleTypes> = Object.entries(
 	SIMPLE_RICH_TYPES_TO_TAGS_MAP
 ).reduce((acc, cur) => {
 	acc[cur[1]] = cur[0];
 	return acc;
-}, {} as Record<string, string>) as Record<string, RichTypes>;
+}, {} as Record<string, string>) as Record<string, RichSimpleTypes>;
 
 export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRichParentTypes[]> = {
 	'title': ['root'],
@@ -73,13 +72,15 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'title-2': ['root'],
 	'title-3': ['root'],
 	'title-4': ['root'],
-	'paragraph': ['root', 'list-item'],
+	'paragraph': ['root', 'list-item', 'united-block'],
 	'strong': ['paragraph'],
+	'obscure': ['paragraph'],
 	'link': ['paragraph'],
-	'list': ['root', 'list-item'],
-	'list-item': ['list', 'list-item'],
+	'list': ['root', 'list-item', 'united-block'],
+	'list-item': ['list', 'list-item', 'united-block'],
 	'expandable-block': ['root', 'list-item'],
-	'additional-info-block': ['root', 'list-item'],
+	'united-block': ['root', 'list-item'],
+	'info-block': ['root', 'list-item'],
 	'bad-block': ['root', 'list-item']
 };
 
@@ -91,11 +92,13 @@ export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 	'title-4': 'rich-title-4',
 	'paragraph': 'rich-paragraph',
 	'strong': 'rich-strong',
+	'obscure': 'rich-obscure',
 	'link': 'rich-link',
 	'list': 'rich-list',
 	'list-item': 'rich-list-item',
 	'expandable-block': 'rich-expandable-block',
-	'additional-info-block': 'rich-additional-info-block',
+	'united-block': 'rich-united-block',
+	'info-block': 'rich-info-block',
 	'bad-block': 'rich-bad-block',
 };
 

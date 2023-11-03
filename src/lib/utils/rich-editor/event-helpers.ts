@@ -1,11 +1,11 @@
-import { RICH_TYPES_TO_RICH_CLASSES_MAP, TAGS_TO_SIMPLE_RICH_TYPES_MAP, defineRichTypeComplexity } from "$lib/types/rich-text";
+import { RICH_TYPES_TO_RICH_CLASSES_MAP, TAGS_TO_SIMPLE_RICH_TYPES_MAP, isComplexRichType } from "$lib/types/rich-text";
 import { findSelectedElement, getSelectedText, pasteElementsInSelection, pasteEnterInSelection, pasteSpacesInSelection, selectTextInElement } from "./dom-helpers";
 import type { CreateAction, CreateComplexAction, CreateSimpleAction } from "./editor-actions/create-actions";
 import type { EditionAction, EditionResult, EditorCommand } from "./editor-actions/editor-action-general-types";
 import type { ModifyAction } from "./editor-actions/modify-action";
-import type { MoveAction, MoveWithinAction } from "./editor-actions/move-actions";
+import type { MoveAction } from "./editor-actions/move-actions";
 import type { TransformTitleAction } from "./editor-actions/transform-actions";
-import { createNewRichElement, createNewRichElementAccordingToSelection, defineElementRichType, findSelectedElementWithRichType, findSelectedRichElement, findTheNearestAppropriatePlace, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
+import { createNewComplexRichElement, createNewRichElementAccordingToSelection, createNewSimpleRichElement, defineElementRichType, findSelectedElementWithRichType, findSelectedRichElement, findTheNearestAppropriatePlace, setAttributesToElement, tryToChooseNewLevelForSelectedTitle } from "./rich-editor-helpers";
 
 const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	'Alt+Digit1': {
@@ -31,6 +31,11 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 	'Alt+Digit5': {
 		type: 'modify',
 		name: 'draftExtendList',
+	},
+	'Alt+Digit6': {
+		type: 'create',
+		name: 'draft',
+		richType: 'united-block',
 	},
 	'Alt+ArrowUp': {
 		type: 'move',
@@ -64,30 +69,10 @@ const KEY_TO_EDITION_COMMAND_MAP: Record<string, EditorCommand> = {
 	},
 };
 
-export function translateToEditionActionEventAndProcess(event: KeyboardEvent, contentContainer: HTMLElement) {
-	let action = defineEditionAction(event);
+export function tryToProcessActionEvent(event: KeyboardEvent, contentContainer: HTMLElement) {
+	let action = translateEventToEditionAction(event);
 	if (action) {
-		if (action.type === 'create' && action.name === 'draft') {
-			action = {
-				type: 'create',
-				name: defineRichTypeComplexity(action.richType),
-				richType: action.richType,
-				container: contentContainer,
-			} as CreateAction;
-		} else if (action.type === 'modify' && action.name === 'draftExtendList') {
-			action = {
-				type: 'modify',
-				name: 'extendList',
-				container: contentContainer,
-			};
-		} else if (action.type === 'move' && action.name === 'draftWithin') {
-			action = {
-				type: 'move',
-				name: 'within',
-				direction: action.direction,
-				container: contentContainer,
-			};
-		}
+		action = fillDraftActionWithDataOrReturnSame(action, contentContainer);
 		return processEditionAction(action);
 	}
 	return null;
@@ -117,7 +102,32 @@ export function rewriteDefaultBehaviourForSomeInputs(event: KeyboardEvent): 'don
 	return null;
 }
 
-function defineEditionAction(event: KeyboardEvent): EditionAction | null {
+function fillDraftActionWithDataOrReturnSame(action: EditionAction, containerElement: HTMLElement): EditionAction {
+	if (action.type === 'create' && action.name === 'draft') {
+		return {
+			type: 'create',
+			name: isComplexRichType(action.richType) ? 'complex' : 'simple',
+			richType: action.richType,
+			container: containerElement,
+		};
+	} else if (action.type === 'modify' && action.name === 'draftExtendList') {
+		return {
+			type: 'modify',
+			name: 'extendList',
+			container: containerElement,
+		};
+	} else if (action.type === 'move' && action.name === 'draftWithin') {
+		return {
+			type: 'move',
+			name: 'within',
+			direction: action.direction,
+			container: containerElement,
+		};
+	}
+	return action;
+}
+
+function translateEventToEditionAction(event: KeyboardEvent): EditionAction | null {
 	if (event.altKey) {
 		let pressedCombinationName = event.code;
 		if (event.shiftKey) {
@@ -167,7 +177,6 @@ export function createNewSimpleRichElementAccordingToSelection(action: CreateSim
 		case 'link':
 			return createLinkElementAccordingToSelection(action.container);
 	}
-	// if title - create id
 	if (['title-1', 'title-2', 'title-3', 'title-4'].indexOf(action.richType) > -1) {
 		return createTitleElementAccordingToSelection(action);
 	}
@@ -182,8 +191,9 @@ export function createNewSimpleRichElementAccordingToSelection(action: CreateSim
 export function createNewComplexRichElementAccordingToSelection(action: CreateComplexAction): HTMLElement | null {
 	switch (action.richType) {
 		case 'list-item':
-			const listItemElement = createListItemAccordingToSelection('placeholder', action.container);
-			return listItemElement;
+			return createListItemAccordingToSelection('placeholder', action.container);
+		case 'united-block':
+			return createNewRichElementAccordingToSelection(action.container, 'united-block', 'placeholder');
 	}
 	return null;
 }
@@ -216,7 +226,7 @@ function createListItemAccordingToSelection(text: string, containerElement: HTML
 	const nearestAppropriatePlace = findTheNearestAppropriatePlace(containerElement, 'list-item');
 	const needCreateList = !nearestAppropriatePlace
 		|| defineElementRichType(nearestAppropriatePlace.anchorElement) !== 'list';
-	const newListItemElement = createNewRichElement('list-item', text);
+	const newListItemElement = createNewComplexRichElement('list-item', text);
 	if (needCreateList) {
 		const newListElement = createNewRichElementAccordingToSelection(
 			containerElement,
@@ -225,7 +235,7 @@ function createListItemAccordingToSelection(text: string, containerElement: HTML
 		);
 		if (newListElement) {
 			newListElement.append(newListItemElement);
-			return newListItemElement;
+			return newListElement;
 		}
 	}
 	return newListItemElement;
@@ -265,7 +275,7 @@ export function transformRichTitleElementAndResult(action: TransformTitleAction)
 	if (selectedElement) {
 		const newTitleRichType = tryToChooseNewLevelForSelectedTitle(selectedElement, action);
 		if (newTitleRichType) {
-			const newTitleElement = createNewRichElement(
+			const newTitleElement = createNewSimpleRichElement(
 				newTitleRichType,
 				selectedElement.textContent,
 				{ 'id': selectedElement.id }
@@ -297,10 +307,11 @@ export function modifyRichElementAndResult(action: ModifyAction): EditionResult 
 				}
 			};
 		case 'extendList':
-			const listElement = findSelectedElementWithRichType('list', action.container);
-			if (listElement) {
-				const listItemElement = createNewRichElement('list-item', 'placeholder');
-				listElement.append(listItemElement);
+			const selectedListItemElement = findSelectedElementWithRichType('list-item', action.container);
+			if (selectedListItemElement) {
+				const newListItemElement = createNewComplexRichElement('list-item', 'placeholder');
+				selectedListItemElement.after(newListItemElement);
+				const listElement = findSelectedElementWithRichType('list', action.container)!!;
 				return {
 					name: 'modified',
 					elementInfo: {
@@ -333,4 +344,13 @@ export function adjustStrongElementClass(event: KeyboardEvent,) {
 			}
 		}
 	}
+}
+
+export function detectNativeActions(event: KeyboardEvent): 'paste' | null {
+	if (event.ctrlKey) {
+		if (event.code === "KeyV") {
+			return 'paste';
+		}
+	}
+	return null;
 }

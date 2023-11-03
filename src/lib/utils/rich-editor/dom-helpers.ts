@@ -69,7 +69,7 @@ export function findSelectedElement(): HTMLElement | null {
 	return null;
 }
 
-export function findNearestParentElement(childElement: HTMLElement): HTMLElement | null {
+export function findNearestParentElement(childElement: Node): HTMLElement | null {
 	let curNode = childElement.parentNode;
 	// go to the nearest HTMLElement node
 	while (curNode && !(curNode instanceof HTMLElement)) {

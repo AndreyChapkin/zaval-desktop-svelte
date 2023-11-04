@@ -10,7 +10,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="rich-text" bind:this={contentContainer}>
+<div
+	class="rich-text"
+	bind:this={contentContainer}
+>
 	{#each descriptionFragments as fragment}
 		<RenderedFragment {fragment} />
 	{/each}
@@ -49,30 +52,34 @@
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
+
+		$title-color: rgb(169, 217, 73);
+		$title-font-size: 28px;
+
 		:global(.rich-title-1) {
-			color: red;
-			font-size: larger;
+			color: $title-color;
+			font-size: $title-font-size;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-2) {
-			color: green;
-			font-size: large;
+			color: adjust-hue($title-color, -15%);
+			font-size: $title-font-size - 4px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-3) {
-			color: pink;
-			font-size: medium;
+			color: adjust-hue($title-color, -25%);
+			font-size: $title-font-size - 8px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-title-4) {
-			color: yellow;
-			font-size: small;
+			color: adjust-hue($title-color, -30%);
+			font-size: $title-font-size - 12px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin-bottom: $normal-size;
@@ -89,9 +96,27 @@
 			color: rgb(125, 180, 212);
 			text-decoration: underline dotted;
 		}
-		:global(.rich-placeholder) {
-			border-width: $border-small-size;
+		:global(ul.rich-list) {
+			list-style-type: none;
+		}
+		:global(.rich-list-item) {
+			@include row;
+			margin-bottom: $normal-size;
+		}
+		:global(.rich-list-item-sign) {
+			// background-color: $base-contrast-color;
+			width: 8px;
+			height: 8px;
 			border-color: $strong-second-color;
+			border-width: 2px;
+			border-radius: 5px;
+			margin: 6px 8px 0 0;
+		}
+		:global(.rich-united-block) {
+			border-width: $border-small-size;
+			border-color: $second-lighter-color;
+			border-radius: 5px;
+			padding: $normal-size;
 		}
 	}
 </style>

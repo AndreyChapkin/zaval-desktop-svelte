@@ -1,27 +1,35 @@
 import {
 	RICH_ATTRIBUTES,
 	RICH_CLASSES,
-	RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP,
+	RICH_CLASSES_TO_RICH_TYPES_MAP,
+	RICH_TYPES_TO_POSSIBLE_PARENT_TYPES,
 	RICH_TYPES_TO_RICH_CLASSES_MAP,
-	RICH_TYPES_TO_TAGS_MAP,
-	TAGS_TO_RICH_TYPES_MAP,
+	SIMPLE_RICH_TYPES_TO_TAGS_MAP,
+	TAGS_TO_SIMPLE_RICH_TYPES_MAP,
+	isComplexRichType,
 	type DescriptionFragment,
 	type NewPositionType,
+	type NewTransformationType,
 	type RichClasses,
-	type RichTypes,
-	type NewTransformationType
+	type RichComplexTypes,
+	type RichSimpleTypes,
+	type RichTitleTypes,
+	type RichTypes
 } from '$lib/types/rich-text';
+import { appendToListItem, createList, createListItem, createUnitedBlock, insertListChildren, insertListItemChildren, insertUnitedBlockChildren } from './complex-rich-element-creators';
+import { findNearestParentElement, findSelectedElement, selectTextInElement } from './dom-helpers';
+import type { TransformTitleAction } from './editor-actions/transform-actions';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
 	return RICH_TYPES_TO_RICH_CLASSES_MAP[richType];
 }
 
-export function getRichTag(richType: RichTypes): string {
-	return RICH_TYPES_TO_TAGS_MAP[richType];
+export function getSimpleRichTag(richType: RichSimpleTypes): string | undefined {
+	return SIMPLE_RICH_TYPES_TO_TAGS_MAP[richType];
 }
 
 function asCorrectRichType(tag: string): RichTypes | null {
-	const type = TAGS_TO_RICH_TYPES_MAP[tag];
+	const type = TAGS_TO_SIMPLE_RICH_TYPES_MAP[tag];
 	if (type) {
 		return type;
 	}
@@ -46,13 +54,16 @@ export function serializeRichContent(richContentContainer: HTMLElement): string 
 	// process remained all level children
 	while (nodeAndFragmentToProcess.length > 0) {
 		// Fragment is already inside its parent children array
-		let [node, fragment] = nodeAndFragmentToProcess.pop()!!;
-		for (let childNode of node.childNodes) {
+		const [curNode, curFragment] = nodeAndFragmentToProcess.pop()!!;
+		const curChildren = extractRichElementChildren(curNode, curFragment.richType);
+		for (let childNode of curChildren) {
 			if (childNode instanceof HTMLElement) {
+				// Create fragment in parent's children
 				const childFragment = serializeRichElement(childNode);
 				if (childFragment) {
-					fragment.children.push(childFragment);
+					curFragment.children.push(childFragment);
 					if (childNode.childNodes.length > 0) {
+						// if has children - plan to check it too
 						nodeAndFragmentToProcess.push([childNode, childFragment]);
 					}
 				}
@@ -60,43 +71,23 @@ export function serializeRichContent(richContentContainer: HTMLElement): string 
 				const text = childNode.textContent;
 				if (text) {
 					// Merge with last child if it is text too
-					const lastChild = fragment.children.pop();
+					const lastChild = curFragment.children.pop();
 					if (typeof lastChild === 'string') {
 						const mergedString = lastChild + text;
-						fragment.children.push(mergedString);
+						curFragment.children.push(mergedString);
 					} else {
 						// return last child if any
 						if (lastChild) {
-							fragment.children.push(lastChild);
+							curFragment.children.push(lastChild);
 						}
 						// Add just add new child
-						fragment.children.push(text);
+						curFragment.children.push(text);
 					}
 				}
 			}
 		}
 	}
 	const noEmptyFragments = removeEmptyFragments(resultFragments);
-	return JSON.stringify(noEmptyFragments);
-}
-
-// Deprecated
-export function serializeDescription(descriptionElement: HTMLElement): string {
-	const fragments: DescriptionFragment[] = [];
-	const nodesToProcess: [HTMLElement, DescriptionFragment][] = [];
-	for (let childNode of descriptionElement.childNodes) {
-		if (childNode instanceof HTMLElement) {
-			const childFragment = serializeElement(childNode, null, nodesToProcess);
-			if (childFragment) {
-				fragments.push(childFragment);
-			}
-		}
-	}
-	while (nodesToProcess.length > 0) {
-		const [element, fragment] = nodesToProcess.pop()!!;
-		serializeElement(element, fragment, nodesToProcess);
-	}
-	const noEmptyFragments = removeEmptyFragments(fragments);
 	return JSON.stringify(noEmptyFragments);
 }
 
@@ -145,64 +136,6 @@ function serializeRichElement(element: HTMLElement): DescriptionFragment | null 
 	return resultFragment;
 }
 
-// Deprecated
-function serializeElement(
-	element: HTMLElement,
-	fragment: DescriptionFragment | null,
-	nodesToProcess: [HTMLElement, DescriptionFragment][]
-): DescriptionFragment | null {
-	const richType = asCorrectRichType(element.tagName.toLowerCase());
-	if (richType) {
-		const parentFragment: DescriptionFragment = fragment
-			? fragment
-			: {
-				richType,
-				children: []
-			};
-		// serialize attributes if any
-		const richAttributes = serializeRichAttributes(element);
-		if (richAttributes && Object.keys(richAttributes).length > 0) {
-			parentFragment.attributes = richAttributes;
-		}
-		for (let childNode of element.childNodes) {
-			if (childNode instanceof HTMLElement) {
-				const childType = asCorrectRichType(childNode.tagName.toLowerCase());
-				if (childType) {
-					const childBlankFragment: DescriptionFragment = {
-						richType: childType,
-						children: []
-					};
-					// serialize attributes if any
-					const richAttributes = serializeRichAttributes(childNode);
-					if (richAttributes && Object.keys(richAttributes).length > 0) {
-						childBlankFragment.attributes = richAttributes;
-					}
-					parentFragment.children.push(childBlankFragment);
-					nodesToProcess.push([childNode, childBlankFragment]);
-				}
-			} else if (childNode instanceof Text) {
-				const text = (childNode as Text).textContent;
-				if (text) {
-					const prevChild =
-						parentFragment.children.length > 0
-							? parentFragment.children[parentFragment.children.length - 1]
-							: null;
-					if (typeof prevChild === 'string') {
-						// Merge sibling text nodes
-						const mergedString = prevChild + text;
-						parentFragment.children[parentFragment.children.length - 1] = mergedString;
-					} else {
-						// Or just add new child
-						parentFragment.children.push(text);
-					}
-				}
-			}
-		}
-		return parentFragment;
-	}
-	return null;
-}
-
 function serializeRichAttributes(element: HTMLElement): Record<string, string> | null {
 	let resultAttributes = null as Record<string, string> | null;
 	const richType = defineElementRichType(element);
@@ -221,97 +154,35 @@ function serializeRichAttributes(element: HTMLElement): Record<string, string> |
 	return resultAttributes;
 }
 
-export function tryToMoveSelectedElement(containerElement: HTMLElement, position: NewPositionType) {
-	const selectedIndependentElement = findSelectedIndependentRichElement(containerElement);
-	if (selectedIndependentElement) {
-		switch (position) {
-			case 'before':
-				let previousElement = selectedIndependentElement.previousElementSibling;
-				previousElement?.before(selectedIndependentElement);
-				break;
-			case 'after':
-				let nextElement = selectedIndependentElement.nextElementSibling;
-				nextElement?.after(selectedIndependentElement);
-				break;
-		}
-		selectTextInElement(selectedIndependentElement);
-	}
-}
-
-export function tryToChangeSelectedTitleElement(containerElement: HTMLElement, transformation: NewTransformationType) {
-	const selectedIndependentElement = findSelectedIndependentRichElement(containerElement);
-	if (selectedIndependentElement) {
-		const newTitleRichType = tryToChooseNewLevelForSelectedTitle(selectedIndependentElement, transformation);
-		if (newTitleRichType) {
-			const newTitleElement = createNewRichElement(
-				newTitleRichType,
-				selectedIndependentElement.textContent,
-				{ 'id': selectedIndependentElement.id }
-			);
-			if (newTitleElement) {
-				selectedIndependentElement.replaceWith(newTitleElement);
-				selectTextInElement(newTitleElement);
-			}
-		}
-	}
-}
-
-export function tryToChooseNewLevelForSelectedTitle(selectedElement: HTMLElement, transformation: NewTransformationType): RichTypes | null {
+export function tryToChooseNewLevelForSelectedTitle(selectedElement: HTMLElement, action: TransformTitleAction): RichTitleTypes | null {
 	const richType = defineElementRichType(selectedElement);
-	let resultRichType: RichTypes | null = null;
 	// if selected element is rich element
 	if (richType) {
 		// create transformation field
-		const richTitleTypes: RichTypes[] = ['title-1', 'title-2', 'title-3', 'title-4'];
+		const richTitleTypes: RichTitleTypes[] = ['title-1', 'title-2', 'title-3', 'title-4'];
 		// make transformation value
-		const transformationDirection = transformation === 'left' ?
+		const transformationDirection = action.description === 'upgrade' ?
 			-1 :
-			transformation === 'right' ? 1 : 0;
-		const currentTypePosition = richTitleTypes.indexOf(richType);
+			action.description === 'downgrade' ?
+				1 :
+				0;
+		const currentTypePosition = richTitleTypes.indexOf(richType as any);
 		// if current element is rich title
 		if (currentTypePosition > -1) {
 			// try to transform current rich title according to the transformation value
 			const transformedTypePosition = currentTypePosition + transformationDirection;
 			if (0 <= transformedTypePosition && transformedTypePosition < richTitleTypes.length) {
-				resultRichType = richTitleTypes[transformedTypePosition];
+				return richTitleTypes[transformedTypePosition];
 			}
 		}
-	}
-	return resultRichType;
-}
 
-export function selectTextInElement(
-	element: HTMLElement,
-	startOffset: number | null = null,
-	endOffset: number | null = null
-) {
-	const elementText = element.firstChild;
-	if (elementText) {
-		const range = new Range();
-		range.setStart(elementText, startOffset == null ? 0 : startOffset);
-		const textLength = elementText.textContent?.length ?? 0;
-		range.setEnd(elementText, endOffset == null ? textLength : endOffset);
-		window.getSelection()?.removeAllRanges();
-		window.getSelection()?.addRange(range);
 	}
-}
-
-function selectText(
-	textNode: Text,
-	startOffset: number | null = null,
-	endOffset: number | null = null
-) {
-	const range = new Range();
-	range.setStart(textNode, startOffset == null ? 0 : startOffset);
-	const textLength = textNode.textContent?.length ?? 0;
-	range.setEnd(textNode, endOffset == null ? textLength : endOffset);
-	window.getSelection()?.removeAllRanges();
-	window.getSelection()?.addRange(range);
+	return null;
 }
 
 export function setAttributesToElement(
 	richElement: HTMLElement,
-	attributes: Record<string, string>
+	attributes: Record<string, string | number>
 ) {
 	const richType = defineElementRichType(richElement);
 	if (richType) {
@@ -320,150 +191,215 @@ export function setAttributesToElement(
 			for (let allowedAttribute of allowedAttributes) {
 				const allowedAttributeValue = attributes[allowedAttribute];
 				if (allowedAttributeValue) {
-					richElement.setAttribute(allowedAttribute, allowedAttributeValue);
+					richElement.setAttribute(allowedAttribute, String(allowedAttributeValue));
 				}
 			}
 		}
 	}
 }
 
-function createNewRichElement(
-	richType: RichTypes,
-	text: string | null = null,
+export function createNewSimpleRichElement(
+	richType: RichSimpleTypes,
+	text: string | null,
 	attributes: Record<string, string> | null = null
-): HTMLElement | null {
-	const tagName = RICH_TYPES_TO_TAGS_MAP[richType];
+): HTMLElement {
+	const tagName = SIMPLE_RICH_TYPES_TO_TAGS_MAP[richType];
 	const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP[richType];
-	if (tagName && richClass) {
-		const newElement = document.createElement(tagName);
-		newElement.classList.add(richClass);
-		newElement.innerText = text === null ? 'placeholder' : text;
-		const allowedAttributes = RICH_ATTRIBUTES[richType];
-		if (attributes && allowedAttributes) {
-			const resultAttributes = Object.entries(attributes).filter(
-				([key, _]) => allowedAttributes.indexOf(key) > -1
-			);
-			for (let [resKey, resAttribute] of resultAttributes) {
-				newElement.setAttribute(resKey, resAttribute);
-			}
+	const newElement = document.createElement(tagName);
+	newElement.classList.add(richClass);
+	if (text) {
+		newElement.innerText = text;
+	}
+	const allowedAttributes = RICH_ATTRIBUTES[richType];
+	if (attributes && allowedAttributes) {
+		const resultAttributes = Object.entries(attributes).filter(
+			([key, _]) => allowedAttributes.indexOf(key) > -1
+		);
+		for (let [resKey, resAttribute] of resultAttributes) {
+			newElement.setAttribute(resKey, resAttribute);
+		}
+	}
+	return newElement;
+}
+
+export function createNewComplexRichElement(
+	richType: RichComplexTypes,
+	content: (HTMLElement | string)[] | string | null,
+): HTMLElement {
+	switch (richType) {
+		case 'list':
+			return createList(content);
+		case 'list-item':
+			return createListItem(content);
+		default:
+			return createUnitedBlock(content);
+	}
+}
+
+export function extractRichElementChildren(element: HTMLElement, richType: RichTypes): ChildNode[] {
+	const resultChildren = [] as ChildNode[];
+	const isComplex = isComplexRichType(richType);
+	if (isComplex) {
+		switch (richType) {
+			case 'list':
+				insertListChildren(element, resultChildren);
+				break;
+			case 'list-item':
+				insertListItemChildren(element, resultChildren);
+				break;
+			case 'united-block':
+				insertUnitedBlockChildren(element, resultChildren);
+				break;
+		}
+	} else {
+		for (let childNode of element.childNodes) {
+			resultChildren.push(childNode);
+		}
+	}
+	return resultChildren;
+}
+
+export function findTheNearestAppropriatePlace(
+	containerElement: HTMLElement,
+	richType: RichTypes,
+): { anchorElement: HTMLElement, place: 'append' | 'after' } | null {
+	let selectedRichElementInfo = findSelectedRichElement(containerElement);
+	if (selectedRichElementInfo) {
+		const appropriateParentTypes = RICH_TYPES_TO_POSSIBLE_PARENT_TYPES[richType];
+		let prevConsideredRichElementInfo: typeof selectedRichElementInfo | null = null;
+		// if selected element = null then container is reached
+		while (selectedRichElementInfo && !appropriateParentTypes.includes(selectedRichElementInfo.richType)) {
+			prevConsideredRichElementInfo = selectedRichElementInfo;
+			selectedRichElementInfo = findNearestRichParentElement(selectedRichElementInfo.element, containerElement);
+		}
+		if (selectedRichElementInfo) {
+			return prevConsideredRichElementInfo
+				? {
+					anchorElement: prevConsideredRichElementInfo.element,
+					place: 'after'
+				}
+				: {
+					anchorElement: selectedRichElementInfo.element,
+					place: 'append',
+				};
+		} else if (appropriateParentTypes.includes('root')) {
+			return prevConsideredRichElementInfo
+				? {
+					anchorElement: prevConsideredRichElementInfo.element,
+					place: 'after'
+				}
+				: {
+					anchorElement: containerElement,
+					place: 'append',
+				};
+		}
+	}
+	return null;
+}
+
+export function findSelectedRichElement(containerElement: HTMLElement): { element: HTMLElement, richType: RichTypes } | null {
+	let element = findSelectedElement();
+	let richType = element && defineElementRichType(element);
+	while (element && !richType) {
+		if (element === containerElement) {
+			return null;
+		}
+		element = findNearestParentElement(element);
+		richType = element && defineElementRichType(element);
+	}
+	if (richType && element) {
+		return {
+			element,
+			richType
+		};
+	}
+	return null;
+}
+
+export function findNearestRichParentElement(
+	childElement: Node,
+	containerElement: HTMLElement
+): { element: HTMLElement, richType: RichTypes } | null {
+	let element = findNearestParentElement(childElement);
+	let richType = element && defineElementRichType(element);
+	while (element && !richType) {
+		if (element === containerElement) {
+			return null;
+		}
+		element = findNearestParentElement(element);
+		richType = element && defineElementRichType(element);
+	}
+	if (richType && element) {
+		return {
+			element,
+			richType
+		};
+	}
+	return null;
+}
+
+export function findSelectedElementWithRichType(richType: RichTypes, containerElement: HTMLElement): HTMLElement | null {
+	let element = findSelectedElement();
+	while (element && defineElementRichType(element) !== richType) {
+		if (element === containerElement) {
+			return null;
+		}
+		element = findNearestParentElement(element);
+	}
+	return element;
+}
+
+export function createNewRichElementAccordingToSelection(
+	containerElement: HTMLElement,
+	richType: RichTypes,
+	text: string | null,
+	attributes: Record<string, string> | null = null,
+): HTMLElement | null {
+	const appropriatePlace = findTheNearestAppropriatePlace(containerElement, richType);
+	if (appropriatePlace) {
+		const newElement = isComplexRichType(richType)
+			? createNewComplexRichElement(richType, text)
+			: createNewSimpleRichElement(richType, text, attributes);
+		const { anchorElement, place } = appropriatePlace;
+		if (place === 'append') {
+			appendToRichOrNotRichElement(anchorElement, newElement);
+		} else if (place === 'after') {
+			anchorElement.after(newElement);
 		}
 		return newElement;
 	}
 	return null;
 }
 
-export function createNewRichElementRelativeToCurrentPosition(
-	containerElement: HTMLElement,
-	richType: RichTypes,
-	attributes: Record<string, string> | null = null,
-): HTMLElement {
-	const newElement = createNewRichElement(richType, "placeholder", attributes)!!;
-	const isDependent = RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[richType] === 'dependent';
-	if (isDependent) {
-		placeDependentRichElementInSelectedPosition(newElement, containerElement);
-	} else {
-		placeIndependentRichElementInContainer(newElement, containerElement);
-	}
-	selectTextInElement(newElement);
-	return newElement;
-}
-
-// Use for dependent elements. No checks
-export function placeDependentRichElementInSelectedPosition(
-	newRichElement: HTMLElement,
-	containerElement: HTMLElement,
-) {
-	const selectedElement = findSelectedElement(containerElement);
-	const textNode = findSelectedText();
-	let selection = window.getSelection();
-	if (selectedElement && selection && textNode) {
-		const range = selection.getRangeAt(0);
-		if (range) {
-			const fullText = textNode.textContent ?? '';
-			const firstTextPart = fullText.substring(0, range.startOffset);
-			const newRichElementText = fullText.substring(range.startOffset, range.endOffset);
-			const secondTextPart = fullText.substring(range.endOffset);
-			const selectedType = defineElementType(selectedElement);
-			if (selectedType) {
-				newRichElement.textContent = newRichElementText ? newRichElementText : newRichElement.textContent;
-				const replacingElements = [firstTextPart, "[", newRichElement, "]", secondTextPart].filter(
-					(el) => !!el
-				);
-				textNode.replaceWith(...replacingElements);
-				return newRichElement;
-			}
-		}
-	}
-}
-
-// Use for independent elements. No checks
-function placeIndependentRichElementInContainer(element: HTMLElement, containerElement: HTMLElement) {
-	const selectedIndependentElement = findSelectedIndependentRichElement(containerElement);
-	if (selectedIndependentElement) {
-		selectedIndependentElement.after(element);
-	} else {
-		containerElement.append(element);
-	}
-}
-
-export function createDefaultContentInContainer(containerElement: HTMLElement) {
-	const paragraphElement = createNewRichElement('paragraph')!!;
-	const garbageChildren = [...containerElement.childNodes];
-	garbageChildren.forEach((child) => child.remove());
-	containerElement.append(paragraphElement);
-	selectTextInElement(paragraphElement);
-}
-
 export function defineElementRichType(element: HTMLElement): RichTypes | null {
 	if (element) {
 		let richClass: RichClasses | null = null;
-		element.classList.forEach((className) => {
+		for (let className of element.classList) {
 			if (RICH_CLASSES.indexOf(className as any) > -1) {
 				richClass = className as RichClasses;
+				break;
 			}
-		});
+		}
 		if (richClass) {
-			return TAGS_TO_RICH_TYPES_MAP[element.tagName.toLowerCase()] ?? null;
+			return RICH_CLASSES_TO_RICH_TYPES_MAP[richClass]!!;
 		}
 	}
 	return null;
 }
 
-export function defineElementType(element: HTMLElement): RichTypes | null {
-	if (element) {
-		return TAGS_TO_RICH_TYPES_MAP[element.tagName.toLowerCase()] ?? null;
-	}
-	return null;
-}
-
-export function chooseNewRichElementType(
-	event: KeyboardEvent,
-): RichTypes | null {
-	if (event.altKey) {
-		switch (event.code) {
-			case 'Digit1':
-				return 'title-1';
-			case 'Digit2':
-				return 'paragraph';
-			case 'Digit3':
-				return 'link';
+export function appendToRichOrNotRichElement(parentElement: HTMLElement, childElement: HTMLElement) {
+	const richType = defineElementRichType(parentElement);
+	if (richType) {
+		const isComplex = isComplexRichType(richType);
+		if (isComplex) {
+			switch (richType) {
+				case 'list-item':
+					appendToListItem(parentElement, childElement);
+					break;
+			}
 		}
 	}
-	return null;
-}
-
-export function chooseNewPosition(
-	event: KeyboardEvent,
-): NewPositionType | null {
-	if (event.altKey) {
-		switch (event.code) {
-			case 'ArrowUp':
-				return 'before';
-			case 'ArrowDown':
-				return 'after';
-		}
-	}
-	return null;
+	parentElement.append(childElement);
 }
 
 export function chooseNewTransformation(
@@ -480,91 +416,6 @@ export function chooseNewTransformation(
 	return null;
 }
 
-export function checkIfSave(event: KeyboardEvent): boolean {
-	if (event.code === 'KeyS' && event.altKey) {
-		return true;
-	}
-	return false;
-}
-
-export function checkIfEscapeModes(event: KeyboardEvent): boolean {
-	if (event.code === 'Escape') {
-		return true;
-	}
-	return false;
-}
-
-export function changeDefaultEnterBehaviour(event: KeyboardEvent) {
-	if (event.code === 'Enter' && !event.shiftKey) {
-		event.preventDefault();
-		const textNode = findSelectedText();
-		let selection = window.getSelection();
-		if (selection && textNode) {
-			const range = selection.getRangeAt(0);
-			if (range) {
-				const textOffset = range.startOffset;
-				if (range.startOffset >= textNode.textContent!!.length) {
-					textNode.after("\r\n\r\n");
-					selectText(textNode.nextSibling as Text, 2, 2);
-				} else {
-					const prevText = textNode.textContent ?? '';
-					const newText = prevText.substring(0, textOffset) + '\r\n' + prevText.substring(textOffset);
-					textNode.textContent = newText;
-					selectText(textNode, textOffset + 2, textOffset + 2);
-				}
-			}
-		}
-	}
-}
-
-export function changeDefaultTabBehaviour(event: KeyboardEvent) {
-	if (event.code === 'Tab') {
-		event.preventDefault();
-		const textNode = findSelectedText();
-		let selection = window.getSelection();
-		if (selection && textNode) {
-			const range = selection.getRangeAt(0);
-			if (range) {
-				const textOffset = range.startOffset;
-				const prevText = textNode.textContent ?? '';
-				const newText = prevText.substring(0, textOffset) + '  ' + prevText.substring(textOffset);
-				textNode.textContent = newText;
-				selectText(textNode, textOffset + 2, textOffset + 2);
-			}
-		}
-	}
-}
-
-export function findSelectedText(): Text | null {
-	let selection = window.getSelection();
-	if (selection) {
-		if (selection.anchorNode) {
-			let curNode = selection.anchorNode as Node | ParentNode | null;
-			if (curNode && curNode instanceof Text) {
-				return curNode as Text;
-			}
-		}
-	}
-	return null;
-}
-
-export function pasteInSelection(pastedText: string) {
-	const textNode = findSelectedText();
-	const selection = window.getSelection();
-	const range = selection?.getRangeAt(0);
-	if (textNode && selection && range) {
-		const fullText = textNode.textContent ?? '';
-		const firstTextPart = fullText.substring(0, range.startOffset);
-		const secondTextPart = fullText.substring(range.endOffset);
-		textNode.textContent = `${firstTextPart}${pastedText}${secondTextPart}`;
-		const newRange = new Range();
-		newRange.setStart(textNode, firstTextPart.length + pastedText.length);
-		newRange.setEnd(textNode, firstTextPart.length + pastedText.length);
-		window.getSelection()?.removeAllRanges();
-		window.getSelection()?.addRange(newRange);
-	}
-}
-
 // TODO: refactor
 export function isEditorEmpty(
 	containerElement: HTMLElement
@@ -575,87 +426,4 @@ export function isEditorEmpty(
 		}
 	}
 	return true;
-}
-
-// TODO: refactor
-export function findSelectedIndependentRichElement(
-	containerElement: HTMLElement
-): HTMLElement | null {
-	let selection = window.getSelection();
-	if (selection) {
-		let container: HTMLElement | null = null;
-		if (selection.anchorNode) {
-			let curNode = selection.anchorNode as Node | ParentNode | null;
-			let independentElementIsFound = false;
-			while (curNode) {
-				// go to the nearest HTMLElement node
-				while (curNode && !(curNode instanceof HTMLElement)) {
-					curNode = curNode.parentNode;
-				}
-				if (!curNode || curNode === containerElement) {
-					// further search makes no sense
-					break;
-				}
-				const richType = defineElementRichType(curNode as HTMLElement);
-				const hierarchicalType = richType
-					? RICH_TYPES_TO_HIERARCHICAL_POSITION_MAP[richType]
-					: null;
-				if (hierarchicalType === 'independent') {
-					independentElementIsFound = true;
-					break;
-				}
-				// force switching from current improper HTMLElement to parent
-				curNode = curNode.parentNode;
-			}
-			container = independentElementIsFound ? (curNode as HTMLElement) : null;
-		}
-		return container;
-	}
-	return null;
-}
-
-export function checkIfCreatedElementAndMakeRich(event: KeyboardEvent, containerElement: HTMLElement) {
-	if (event.ctrlKey) {
-		if (event.code === "KeyB") {
-			const element = findSelectedElement(containerElement);
-			if (element) {
-				const probablyStrongType = defineElementType(element);
-				if (probablyStrongType && probablyStrongType === 'strong') {
-					tryToMakeElementRich(element);
-				} else {
-					const text = element.textContent ?? "???";
-					element.replaceWith(text);
-				}
-			}
-		}
-	}
-}
-
-export function tryToMakeElementRich(element: HTMLElement) {
-	const elementType = defineElementType(element);
-	if (elementType) {
-		const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP[elementType];
-		if (richClass) {
-			element.classList.add(richClass);
-		}
-	}
-}
-
-// TODO: deprecated
-export function findSelectedElement(containerElement: HTMLElement): HTMLElement | null {
-	let selection = window.getSelection();
-	if (selection) {
-		let selectedElement: HTMLElement | null = null;
-		if (selection.anchorNode) {
-			let curNode = selection.anchorNode as Node | ParentNode | null;
-			while (curNode && !(curNode instanceof HTMLElement) && curNode !== containerElement) {
-				curNode = curNode.parentNode;
-			}
-			if (curNode && curNode !== containerElement) {
-				selectedElement = curNode as HTMLElement;
-			}
-		}
-		return selectedElement;
-	}
-	return null;
 }

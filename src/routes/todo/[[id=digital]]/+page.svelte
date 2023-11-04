@@ -245,6 +245,10 @@
 			z-index: 1;
 		}
 
+		:global(.rich-editor-menu) {
+			background: $strong-gradient;
+		}
+
 		.arrow {
 			color: $base-light-color;
 			margin-top: $small-size;

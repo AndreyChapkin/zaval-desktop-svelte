@@ -11,6 +11,7 @@
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
+	import RichEditorMarkdown from '../../components/rich-editor-markdown/RichEditorMarkdown.svelte';
 	import ArticleLabel from '../components/ArticleLabel.svelte';
 	import ArticleLabelSearch from '../components/ArticleLabelSearch.svelte';
 
@@ -203,7 +204,8 @@
 			slot="second"
 			class="article-pane"
 		>
-			{#if isContentEditable}
+			<RichEditorMarkdown />
+			<!-- {#if isContentEditable}
 				<input
 					type="text"
 					bind:value={title}
@@ -220,7 +222,7 @@
 					<h1>{data.articleLight.title}</h1>
 				</div>
 				<RichText richText={data.articleContent.content} />
-			{/if}
+			{/if} -->
 			<div class="article-interaction-panel">
 				<button on:click={editHandler}>Edit article</button>
 				{#if isGoingRemove}

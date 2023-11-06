@@ -1,3 +1,15 @@
+export function selectTextInNode(
+	node: Node,
+	startOffset: number | null = null,
+	endOffset: number | null = null
+) {
+	if (node instanceof Text) {
+		selectText(node, startOffset, endOffset);
+	} else if (node instanceof HTMLElement) {
+		selectTextInElement(node, startOffset, endOffset);
+	}
+}
+
 export function selectTextInElement(
 	element: HTMLElement,
 	startOffset: number | null = null,
@@ -27,6 +39,33 @@ export function selectText(
 	window.getSelection()?.addRange(range);
 }
 
+export function findSelectedAnchorTextNode(): Text | null {
+	let selection = window.getSelection();
+	if (selection) {
+		if (selection.anchorNode) {
+			let curNode = selection.anchorNode as Node | ParentNode | null;
+			if (curNode && curNode instanceof Text) {
+				return curNode as Text;
+			}
+		}
+	}
+	return null;
+}
+
+export function findSelectedFocusTextNode(): Text | null {
+	let selection = window.getSelection();
+	if (selection) {
+		if (selection.focusNode) {
+			let curNode = selection.focusNode as Node | ParentNode | null;
+			if (curNode && curNode instanceof Text) {
+				return curNode as Text;
+			}
+		}
+	}
+	return null;
+}
+
+// Deprecated
 export function findSelectedTextNode(): Text | null {
 	let selection = window.getSelection();
 	if (selection) {
@@ -48,6 +87,84 @@ export function getSelectedText(): string | null {
 		const fullText = textNode.textContent ?? '';
 		const selectedText = fullText.substring(range.startOffset, range.endOffset);
 		return selectedText;
+	}
+	return null;
+}
+
+export function findSelectedElementsWithClass(className: string): HTMLElement[] | null {
+	let selection = window.getSelection();
+	let result: HTMLElement[] = [];
+	if (selection) {
+		if (selection.anchorNode) {
+			let curNode = selection.anchorNode as Node | null;
+			while (curNode) {
+				if (curNode instanceof HTMLElement && curNode.classList.contains(className)) {
+					result.push(curNode);
+					break;
+				}
+				curNode = curNode.parentNode;
+			}
+		}
+		if (selection.focusNode) {
+			let curNode = selection.focusNode as Node | null;
+			while (curNode) {
+				if (curNode instanceof HTMLElement && curNode.classList.contains(className)) {
+					result.push(curNode);
+					break;
+				}
+				curNode = curNode.parentNode;
+			}
+		}
+		return result;
+	}
+	return null;
+}
+
+// Deprecated
+export function findSelectedElementWithClass(className: string): HTMLElement | null {
+	let selection = window.getSelection();
+	if (selection) {
+		if (selection.anchorNode) {
+			let curNode = selection.anchorNode as Node | ParentNode | null;
+			while (curNode) {
+				if (curNode instanceof HTMLElement && curNode.classList.contains(className)) {
+					return curNode;
+				}
+				curNode = curNode.parentNode;
+			}
+		}
+	}
+	return null;
+}
+
+export function findSelectedAnchorElementWithClass(className: string): HTMLElement | null {
+	let selection = window.getSelection();
+	if (selection) {
+		if (selection.anchorNode) {
+			let curNode = selection.anchorNode as Node | ParentNode | null;
+			while (curNode) {
+				if (curNode instanceof HTMLElement && curNode.classList.contains(className)) {
+					return curNode;
+				}
+				curNode = curNode.parentNode;
+			}
+		}
+	}
+	return null;
+}
+
+export function findSelectedFocusElementWithClass(className: string): HTMLElement | null {
+	let selection = window.getSelection();
+	if (selection) {
+		if (selection.focusNode) {
+			let curNode = selection.focusNode as Node | ParentNode | null;
+			while (curNode) {
+				if (curNode instanceof HTMLElement && curNode.classList.contains(className)) {
+					return curNode;
+				}
+				curNode = curNode.parentNode;
+			}
+		}
 	}
 	return null;
 }

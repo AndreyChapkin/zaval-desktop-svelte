@@ -132,6 +132,11 @@ function serializeRichElement(element: HTMLElement): DescriptionFragment | null 
 		if (richAttributes && Object.keys(richAttributes).length > 0) {
 			resultFragment.attributes = richAttributes;
 		}
+	} else {
+		resultFragment = {
+			richType: 'unknown',
+			children: []
+		};
 	}
 	return resultFragment;
 }
@@ -275,8 +280,8 @@ export function findTheNearestAppropriatePlace(
 		let prevConsideredRichElementInfo: typeof selectedRichElementInfo | null = null;
 		// if selected element = null then container is reached
 		while (selectedRichElementInfo &&
-			!appropriateParentTypes.includes('any-parent') &&
-			!appropriateParentTypes.includes(selectedRichElementInfo.richType)
+			!(appropriateParentTypes.includes('any-parent') ||
+				appropriateParentTypes.includes(selectedRichElementInfo.richType))
 		) {
 			prevConsideredRichElementInfo = selectedRichElementInfo;
 			selectedRichElementInfo = findNearestRichParentElement(selectedRichElementInfo.element, containerElement);
@@ -391,8 +396,6 @@ export function defineElementRichType(element: HTMLElement): RichTypes | null {
 		}
 		if (richClass) {
 			return RICH_CLASSES_TO_RICH_TYPES_MAP[richClass]!!;
-		} else {
-			return 'unknown';
 		}
 	}
 	return null;

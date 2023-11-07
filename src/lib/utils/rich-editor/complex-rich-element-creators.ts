@@ -39,6 +39,10 @@ export function createListItem(content: (HTMLElement | string)[] | string | null
         contentElement.append(paragraphElement);
     } else if (content) {
         contentElement.append(...content);
+    } else {
+        // null content
+        const paragraphElement = createNewSimpleRichElement('paragraph', 'placeholder');
+        contentElement.append(paragraphElement);
     }
 
     listItemWrapper.append(signElement, contentElement);

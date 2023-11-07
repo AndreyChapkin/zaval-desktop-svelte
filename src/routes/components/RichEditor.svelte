@@ -12,10 +12,12 @@
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
 		createNewSimpleRichElement,
+		defineElementRichType,
 		isEditorEmpty,
+		markNonRichElements,
 		serializeRichContent
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import RichEditorShortkeys from './RichEditorShortkeys.svelte';
 	import RichText from './RichText.svelte';
 
@@ -46,6 +48,33 @@
 		isAlreadyTryingToSave: false,
 		timerId: 0
 	};
+
+	// TODO
+	// Browser can create inappropriate elements during content edition. Mark such elements.
+	onMount(() => {
+		// Options for the observer (which mutations to observe)
+		const config = { attributes: true, childList: true, subtree: true };
+
+		// Callback function to execute when mutations are observed
+		const callback = (mutations: MutationRecord[], observer: MutationObserver) => {
+			for (const mutation of mutations) {
+				if (mutation.type === 'childList' || mutation.type === 'characterData') {
+					mutation.addedNodes.forEach((n) => {
+						if (n instanceof HTMLElement) {
+							markNonRichElements(n);
+						}
+					});
+				}
+			}
+		};
+
+		// Create an observer instance linked to the callback function
+		const observer = new MutationObserver(callback);
+
+		// Start observing the target node for configured mutations
+		observer.observe(richContentContainer, config);
+		return () => observer.disconnect();
+	});
 
 	// Reactivity
 	// TODO: bad decision

@@ -387,6 +387,20 @@ export function defineElementRichType(element: HTMLElement): RichTypes | null {
 	return null;
 }
 
+export function markNonRichElements(element: HTMLElement) {
+	const richType = defineElementRichType(element);
+	if (!richType) {
+		element.style.backgroundColor = 'red';
+	} else {
+		const children = extractRichElementChildren(element, richType);
+		children.forEach(child => {
+			if (child instanceof HTMLElement) {
+				markNonRichElements(child);
+			}
+		});
+	}
+}
+
 export function appendToRichOrNotRichElement(parentElement: HTMLElement, childElement: HTMLElement) {
 	const richType = defineElementRichType(parentElement);
 	if (richType) {

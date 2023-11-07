@@ -53,7 +53,7 @@
 			margin-bottom: $normal-size;
 		}
 
-		$title-color: rgb(169, 217, 73);
+		$title-color: rgb(217, 200, 73);
 		$title-font-size: 28px;
 
 		:global(.rich-title-1) {
@@ -117,6 +117,7 @@
 			border-color: $second-lighter-color;
 			border-radius: 5px;
 			padding: $normal-size;
+			margin: $wide-size 0;
 		}
 	}
 </style>

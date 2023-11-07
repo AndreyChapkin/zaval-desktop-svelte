@@ -12,7 +12,6 @@
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
 		createNewSimpleRichElement,
-		defineElementRichType,
 		isEditorEmpty,
 		markNonRichElements,
 		serializeRichContent
@@ -61,7 +60,7 @@
 				if (mutation.type === 'childList' || mutation.type === 'characterData') {
 					mutation.addedNodes.forEach((n) => {
 						if (n instanceof HTMLElement) {
-							markNonRichElements(n);
+							// markNonRichElements(n);
 						}
 					});
 				}

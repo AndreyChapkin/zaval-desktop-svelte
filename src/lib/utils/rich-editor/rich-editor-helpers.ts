@@ -252,8 +252,14 @@ export function extractRichElementChildren(element: HTMLElement, richType: RichT
 				break;
 		}
 	} else {
-		for (let childNode of element.childNodes) {
-			resultChildren.push(childNode);
+		if (richType === 'unknown') {
+			// It is not clear how to process unkown element content. So save the raw text at least.
+			const textChild = document.createTextNode(element.textContent ?? '');
+			resultChildren.push(textChild);
+		} else {
+			for (let childNode of element.childNodes) {
+				resultChildren.push(childNode);
+			}
 		}
 	}
 	return resultChildren;
@@ -268,7 +274,10 @@ export function findTheNearestAppropriatePlace(
 		const appropriateParentTypes = RICH_TYPES_TO_POSSIBLE_PARENT_TYPES[richType];
 		let prevConsideredRichElementInfo: typeof selectedRichElementInfo | null = null;
 		// if selected element = null then container is reached
-		while (selectedRichElementInfo && !appropriateParentTypes.includes(selectedRichElementInfo.richType)) {
+		while (selectedRichElementInfo &&
+			!appropriateParentTypes.includes('any-parent') &&
+			!appropriateParentTypes.includes(selectedRichElementInfo.richType)
+		) {
 			prevConsideredRichElementInfo = selectedRichElementInfo;
 			selectedRichElementInfo = findNearestRichParentElement(selectedRichElementInfo.element, containerElement);
 		}
@@ -382,6 +391,8 @@ export function defineElementRichType(element: HTMLElement): RichTypes | null {
 		}
 		if (richClass) {
 			return RICH_CLASSES_TO_RICH_TYPES_MAP[richClass]!!;
+		} else {
+			return 'unknown';
 		}
 	}
 	return null;

@@ -1,6 +1,6 @@
 export const RICH_SIMPLE_TYPES = [
 	'title', 'title-1', 'title-2', 'title-3', 'title-4',
-	'paragraph', 'strong', 'obscure', 'link',
+	'paragraph', 'unknown', 'strong', 'obscure', 'link',
 ] as const;
 export type RichSimpleTypes = (typeof RICH_SIMPLE_TYPES)[number];
 
@@ -24,7 +24,7 @@ export type RichTitleTypes = Extract<RichSimpleTypes, 'title-1' | 'title-2' | 't
 
 export const RICH_CLASSES = [
 	'rich-title', 'rich-title-1', 'rich-title-2', 'rich-title-3', 'rich-title-4',
-	'rich-paragraph', 'rich-strong', 'rich-obscure', 'rich-link',
+	'rich-paragraph', 'rich-unknown', 'rich-strong', 'rich-obscure', 'rich-link',
 	'rich-list', 'rich-list-item',
 	'rich-expandable-block', 'rich-united-block',
 	'rich-info-block', 'rich-bad-block',
@@ -45,7 +45,7 @@ export type NewTransformationType = 'left' | 'right';
 
 export type EditorModes = 'edit' | 'read';
 
-export type PossibleRichParentTypes = RichTypes | 'root';
+export type PossibleRichParentTypes = RichTypes | 'root' | 'any-parent';
 
 export const SIMPLE_RICH_TYPES_TO_TAGS_MAP: Record<RichSimpleTypes, string> = {
 	"title": 'h1',
@@ -54,6 +54,7 @@ export const SIMPLE_RICH_TYPES_TO_TAGS_MAP: Record<RichSimpleTypes, string> = {
 	"title-3": 'h3',
 	"title-4": 'h4',
 	'paragraph': 'p',
+	'unknown': 'div',
 	'strong': 'b',
 	'obscure': 'span',
 	'link': 'a',
@@ -73,6 +74,7 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'title-3': ['root'],
 	'title-4': ['root'],
 	'paragraph': ['root', 'list-item', 'united-block'],
+	'unknown': ['any-parent'],
 	'strong': ['paragraph'],
 	'obscure': ['paragraph'],
 	'link': ['paragraph'],
@@ -91,6 +93,7 @@ export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 	'title-3': 'rich-title-3',
 	'title-4': 'rich-title-4',
 	'paragraph': 'rich-paragraph',
+	'unknown': 'rich-unknown',
 	'strong': 'rich-strong',
 	'obscure': 'rich-obscure',
 	'link': 'rich-link',

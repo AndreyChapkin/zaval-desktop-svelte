@@ -89,6 +89,10 @@
 			margin-bottom: $normal-size;
 			font-family: Nunito;
 		}
+		:global(.rich-unknown) {
+			@include standard-container;
+			background-color: rgb(173, 30, 30);
+		}
 		:global(.rich-strong) {
 			color: rgb(218, 129, 64);
 		}

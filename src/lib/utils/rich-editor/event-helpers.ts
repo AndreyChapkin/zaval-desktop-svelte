@@ -64,6 +64,9 @@ const KEY_TO_EDITION_COMMAND_MAP: Record<string, EditorCommand> = {
 	'Alt+KeyS': {
 		name: 'save',
 	},
+	'Alt+KeyH': {
+		name: 'help',
+	},
 	'Esc': {
 		name: 'cancel'
 	},

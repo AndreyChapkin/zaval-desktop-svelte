@@ -250,8 +250,13 @@
 		switch (command.name) {
 			case 'save':
 				saveHandler();
+				break;
+			case 'help':
+				isPromptShown = true;
+				break;
 			case 'cancel':
 				dispatch('cancel');
+				break;
 		}
 	}
 </script>
@@ -283,7 +288,7 @@
 		</button>
 	</div>
 	{#if isPromptShown}
-		<RichEditorShortkeys />
+		<RichEditorShortkeys on:close={() => (isPromptShown = false)} />
 	{/if}
 	<div class="rich-content-container">
 		<div

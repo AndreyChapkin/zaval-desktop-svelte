@@ -415,6 +415,27 @@ export function markNonRichElements(element: HTMLElement) {
 	}
 }
 
+export function fixSuspiciousElements(element: HTMLElement) {
+	const richType = defineElementRichType(element);
+	if (!richType) {
+		// Browser can paste span elements when ctrl+V or delete some elements
+		if (element.tagName === 'SPAN') {
+			const textNode = document.createTextNode(element.textContent ?? 'placeholder');
+			element.replaceWith(textNode);
+		} else {
+			const unknownElement = createNewSimpleRichElement('unknown', element.textContent ?? 'placeholder');
+			element.replaceWith(unknownElement);
+		}
+	} else {
+		const children = extractRichElementChildren(element, richType);
+		children.forEach(child => {
+			if (child instanceof HTMLElement) {
+				fixSuspiciousElements(child);
+			}
+		});
+	}
+}
+
 export function appendToRichOrNotRichElement(parentElement: HTMLElement, childElement: HTMLElement) {
 	const richType = defineElementRichType(parentElement);
 	if (richType) {

@@ -12,8 +12,8 @@
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
 		createNewSimpleRichElement,
+		fixSuspiciousElements,
 		isEditorEmpty,
-		markNonRichElements,
 		serializeRichContent
 	} from '$lib/utils/rich-editor/rich-editor-helpers';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -60,7 +60,7 @@
 				if (mutation.type === 'childList' || mutation.type === 'characterData') {
 					mutation.addedNodes.forEach((n) => {
 						if (n instanceof HTMLElement) {
-							// markNonRichElements(n);
+							fixSuspiciousElements(n);
 						}
 					});
 				}

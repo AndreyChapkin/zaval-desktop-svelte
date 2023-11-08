@@ -53,7 +53,7 @@
 			margin-bottom: $normal-size;
 		}
 
-		$title-color: rgb(217, 200, 73);
+		$title-color: rgb(208, 170, 87);
 		$title-font-size: 28px;
 
 		:global(.rich-title-1) {
@@ -62,7 +62,7 @@
 			font-weight: bold;
 			font-family: Nunito;
 			margin: $large-size 0;
-			@include bordered(left, $title-color);
+			@include bordered(left, $title-color, $normal-size);
 			padding-left: $wide-size;
 		}
 		:global(.rich-title-2) {
@@ -73,18 +73,18 @@
 			margin: $wide-size 0;
 		}
 		:global(.rich-title-3) {
-			color: $title-color;
+			color: darken($title-color, 12%);
 			font-size: $title-font-size - 8px;
 			font-weight: bold;
 			font-family: Nunito;
 			margin: $wide-size 0;
 		}
 		:global(.rich-title-4) {
-			color: adjust-hue($title-color, -25%);
+			color: darken($title-color, 12%);
 			font-size: $title-font-size - 12px;
 			font-weight: bold;
 			font-family: Nunito;
-			margin-bottom: $normal-size 0;
+			margin: $wide-size 0;
 		}
 		:global(.rich-paragraph) {
 			color: $base-contrast-color;

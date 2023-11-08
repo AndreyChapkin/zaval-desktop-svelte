@@ -67,6 +67,15 @@ const KEY_TO_EDITION_COMMAND_MAP: Record<string, EditorCommand> = {
 	'Alt+KeyH': {
 		name: 'help',
 	},
+	'Alt+Equal': {
+		name: 'upgradeSelection',
+	},
+	'Alt+Delete': {
+		name: 'delete',
+	},
+	'Alt+Shift+Delete': {
+		name: 'undoDelete',
+	},
 	'Esc': {
 		name: 'cancel'
 	},
@@ -82,11 +91,14 @@ export function tryToProcessActionEvent(event: KeyboardEvent, contentContainer: 
 }
 
 export function translateEventToEditorCommand(event: KeyboardEvent): EditorCommand | null {
-	if (event.altKey) {
-		let combination = `Alt+${event.code}`;
-		return KEY_TO_EDITION_COMMAND_MAP[combination] ?? null;
+	let combination = event.code;
+	if (event.shiftKey) {
+		combination = `Shift+${combination}`;
 	}
-	return KEY_TO_EDITION_COMMAND_MAP[event.code] ?? null;
+	if (event.altKey) {
+		combination = `Alt+${combination}`;
+	}
+	return KEY_TO_EDITION_COMMAND_MAP[combination] ?? null;
 }
 
 export function rewriteDefaultBehaviourForSomeInputs(event: KeyboardEvent): 'done' | null {

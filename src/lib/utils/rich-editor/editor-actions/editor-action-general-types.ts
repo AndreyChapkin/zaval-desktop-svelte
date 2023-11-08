@@ -15,5 +15,5 @@ export interface EditionResult {
 }
 
 export interface EditorCommand {
-    name: 'save' | 'help' | 'cancel';
+    name: 'save' | 'delete' | 'undoDelete' | 'upgradeSelection' | 'help' | 'cancel';
 }

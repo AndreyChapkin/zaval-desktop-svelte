@@ -12,6 +12,8 @@
 	} from '$lib/utils/rich-editor/event-helpers';
 	import {
 		createNewSimpleRichElement,
+		findNearestRichParentElement,
+		findSelectedRichElement,
 		fixSuspiciousElements,
 		isEditorEmpty,
 		serializeRichContent
@@ -29,6 +31,7 @@
 	export let richContent: string;
 	let effectiveRichContent: string = richContent;
 	let isPromptShown = false;
+	let selectedElement: HTMLElement | null = null;
 
 	let hasUnpersistedData = !!localStorage.getItem(TEMP_RICH_EDITOR_CONTENT_KEY);
 
@@ -47,6 +50,14 @@
 		isAlreadyTryingToSave: false,
 		timerId: 0
 	};
+
+	type RemovedStackElementType = {
+		element: HTMLElement;
+		relativeToAnchor: 'before' | 'after' | 'inside';
+		anchorElement: HTMLElement;
+	};
+
+	let richRemovedStack: RemovedStackElementType[] = [];
 
 	// TODO
 	// Browser can create inappropriate elements during content edition. Mark such elements.
@@ -204,11 +215,26 @@
 		event.stopPropagation();
 	};
 
+	const mouseupHandler = (event: MouseEvent) => {
+		const selectedElementInfo = findSelectedRichElement(richContentContainer);
+		indicateAndSetSelectedElement(selectedElementInfo?.element ?? null);
+	};
+
 	const keyupHandler = (event: KeyboardEvent) => {
 		adjustStrongElementClass(event);
 		const nativeAction = detectNativeActions(event);
 		if (nativeAction === 'paste') {
 			nonTypedModifications++;
+		}
+		// Process selected element indication
+		if (
+			event.code === 'ArrowDown' ||
+			event.code === 'ArrowUp' ||
+			event.code === 'ArrowRight' ||
+			event.code === 'ArrowLeft'
+		) {
+			const selectedElementInfo = findSelectedRichElement(richContentContainer);
+			indicateAndSetSelectedElement(selectedElementInfo?.element ?? null);
 		}
 	};
 
@@ -234,7 +260,10 @@
 			}
 			return;
 		}
-		rewriteDefaultBehaviourForSomeInputs(event);
+		const rewriteResult = rewriteDefaultBehaviourForSomeInputs(event);
+		if (rewriteResult === 'done') {
+			return;
+		}
 	};
 
 	// functions
@@ -250,12 +279,85 @@
 			case 'save':
 				saveHandler();
 				break;
+			case 'delete':
+				manageRichRemoval();
+				break;
+			case 'undoDelete':
+				manageRichUndoRemoval();
+				break;
+			case 'upgradeSelection':
+				if (selectedElement) {
+					const parentInfo = findNearestRichParentElement(selectedElement, richContentContainer);
+					if (parentInfo && parentInfo.element !== richContentContainer) {
+						indicateAndSetSelectedElement(parentInfo.element);
+					}
+				}
+				break;
 			case 'help':
 				isPromptShown = true;
 				break;
 			case 'cancel':
 				dispatch('cancel');
 				break;
+		}
+	}
+
+	function manageRichRemoval() {
+		if (selectedElement) {
+			const stackElement: RemovedStackElementType | null = selectedElement.previousElementSibling
+				? {
+						element: selectedElement,
+						relativeToAnchor: 'after',
+						anchorElement: selectedElement.previousElementSibling as HTMLElement
+				  }
+				: selectedElement.nextElementSibling
+				? {
+						element: selectedElement,
+						relativeToAnchor: 'before',
+						anchorElement: selectedElement.nextElementSibling as HTMLElement
+				  }
+				: selectedElement.parentElement
+				? {
+						element: selectedElement,
+						relativeToAnchor: 'inside',
+						anchorElement: selectedElement.parentElement as HTMLElement
+				  }
+				: null;
+
+			if (stackElement) {
+				richRemovedStack.push(stackElement);
+				selectedElement.remove();
+			}
+		}
+	}
+
+	function manageRichUndoRemoval() {
+		let removalStackElement = richRemovedStack.pop();
+		if (removalStackElement) {
+			const { element, relativeToAnchor, anchorElement } = removalStackElement;
+			if (removalStackElement.anchorElement.parentElement) {
+				switch (relativeToAnchor) {
+					case 'after':
+						anchorElement.after(element);
+						break;
+					case 'before':
+						anchorElement.before(element);
+						break;
+					case 'inside':
+						anchorElement.append(element);
+						break;
+				}
+			}
+		}
+	}
+
+	function indicateAndSetSelectedElement(newSelectedElement: HTMLElement | null) {
+		if (newSelectedElement) {
+			if (selectedElement !== newSelectedElement) {
+				selectedElement?.classList.remove('selected-rich-element');
+				newSelectedElement.classList.add('selected-rich-element');
+				selectedElement = newSelectedElement;
+			}
 		}
 	}
 </script>
@@ -294,6 +396,7 @@
 			class="rich-content-body"
 			contenteditable={true}
 			tabindex="-1"
+			on:mouseup={mouseupHandler}
 			on:keyup={assistanceValueName ? null : keyupHandler}
 			on:keydown={assistanceValueName ? null : keydownHandler}
 		>
@@ -394,6 +497,12 @@
 			.assistance-input {
 				@include standard-input;
 			}
+		}
+
+		:global(.selected-rich-element) {
+			border-color: aqua;
+			border-width: 2px;
+			border-radius: 4px;
 		}
 	}
 </style>

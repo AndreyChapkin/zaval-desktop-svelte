@@ -8,7 +8,6 @@ import {
 	TAGS_TO_SIMPLE_RICH_TYPES_MAP,
 	isComplexRichType,
 	type DescriptionFragment,
-	type NewPositionType,
 	type NewTransformationType,
 	type RichClasses,
 	type RichComplexTypes,
@@ -17,7 +16,7 @@ import {
 	type RichTypes
 } from '$lib/types/rich-text';
 import { appendToListItem, createList, createListItem, createUnitedBlock, insertListChildren, insertListItemChildren, insertUnitedBlockChildren } from './complex-rich-element-creators';
-import { findNearestParentElement, findSelectedElement, selectTextInElement } from './dom-helpers';
+import { findNearestParentElement, findSelectedElement } from './dom-helpers';
 import type { TransformTitleAction } from './editor-actions/transform-actions';
 
 export function getRichTagClass(richType: RichTypes): string | undefined {
@@ -422,9 +421,10 @@ export function fixSuspiciousElements(element: HTMLElement) {
 		if (element.tagName === 'SPAN') {
 			const textNode = document.createTextNode(element.textContent ?? 'placeholder');
 			element.replaceWith(textNode);
-		} else {
-			const unknownElement = createNewSimpleRichElement('unknown', element.textContent ?? 'placeholder');
-			element.replaceWith(unknownElement);
+		} else if (element.tagName.toLocaleLowerCase() === SIMPLE_RICH_TYPES_TO_TAGS_MAP['strong']) {
+			// If strong element tag but without rich class
+			const STRONG_RICH_CLASS = RICH_TYPES_TO_RICH_CLASSES_MAP['strong']!!;
+			element.classList.add(STRONG_RICH_CLASS);
 		}
 	} else {
 		const children = extractRichElementChildren(element, richType);

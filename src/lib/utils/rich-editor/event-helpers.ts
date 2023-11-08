@@ -339,28 +339,6 @@ export function modifyRichElementAndResult(action: ModifyAction): EditionResult 
 	return null;
 }
 
-export function adjustStrongElementClass(event: KeyboardEvent,) {
-	if (event.ctrlKey) {
-		if (event.code === "KeyB") {
-			// make bold element rich
-			const element = findSelectedElement();
-			if (element) {
-				const selectedElementName = element.tagName.toLocaleLowerCase();
-				const selectedElementRichType = TAGS_TO_SIMPLE_RICH_TYPES_MAP[selectedElementName];
-				if (selectedElementRichType === 'strong') {
-					const strongClass = RICH_TYPES_TO_RICH_CLASSES_MAP[selectedElementRichType];
-					element.classList.add(strongClass);
-				} else {
-					const selectedText = getSelectedText();
-					if (selectedText) {
-						element.replaceWith(selectedText);
-					}
-				}
-			}
-		}
-	}
-}
-
 export function detectNativeActions(event: KeyboardEvent): 'paste' | null {
 	if (event.ctrlKey) {
 		if (event.code === "KeyV") {

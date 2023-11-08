@@ -3,7 +3,6 @@
 	import { selectTextInElement } from '$lib/utils/rich-editor/dom-helpers';
 	import type { EditorCommand } from '$lib/utils/rich-editor/editor-actions/editor-action-general-types';
 	import {
-		adjustStrongElementClass,
 		detectNativeActions,
 		processEditionAction,
 		rewriteDefaultBehaviourForSomeInputs,
@@ -72,6 +71,7 @@
 					mutation.addedNodes.forEach((n) => {
 						if (n instanceof HTMLElement) {
 							fixSuspiciousElements(n);
+							nonTypedModifications++;
 						}
 					});
 				}
@@ -221,7 +221,6 @@
 	};
 
 	const keyupHandler = (event: KeyboardEvent) => {
-		adjustStrongElementClass(event);
 		const nativeAction = detectNativeActions(event);
 		if (nativeAction === 'paste') {
 			nonTypedModifications++;

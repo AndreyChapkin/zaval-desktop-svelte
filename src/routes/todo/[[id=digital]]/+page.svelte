@@ -2,7 +2,7 @@
 	import { updateTodo, updateTodoHistory } from '$lib/api/todo-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
-	import type { DetailedTodoDto, SaveHistoryDto } from '$lib/types/todo';
+	import type { SaveHistoryDto } from '$lib/types/todo';
 	import { ARROW_URL, EDIT_ICON_URL } from '$lib/utils/assets-references';
 	import { onMount } from 'svelte';
 	import RichEditor from '../../components/RichEditor.svelte';
@@ -20,15 +20,27 @@
 	let createInRootMenuIsOpen = false;
 	let shouldSeeElement: HTMLElement;
 	let isDescriptionEditable: boolean = false;
+	let showDoneChildrenTodos = false;
+
+	let effectiveChildrenTodos = mainDetailedTodoDto?.children ?? [];
 
 	$: shownItems = 'all' as ('1' | '2' | '3')[] | 'all';
 	$: {
 		if (shouldSeeElement && data) {
 			setTimeout(() => {
-				if (shouldSeeElement.parentElement?.parentElement) {
-					shouldSeeElement.parentElement.scrollTo(0, 2000);
+				if (shouldSeeElement?.parentElement?.parentElement) {
+					shouldSeeElement?.parentElement.scrollTo(0, 2000);
 				}
 			}, 500);
+		}
+	}
+	$: {
+		if (showDoneChildrenTodos) {
+			effectiveChildrenTodos = mainDetailedTodoDto?.children ?? [];
+		} else {
+			effectiveChildrenTodos = (mainDetailedTodoDto?.children ?? []).filter(
+				(child) => child.status !== 'DONE'
+			);
 		}
 	}
 
@@ -59,8 +71,8 @@
 
 	onMount(() => {
 		setTimeout(() => {
-			if (shouldSeeElement.parentElement?.parentElement) {
-				shouldSeeElement.parentElement.scrollTo(0, 2000);
+			if (shouldSeeElement?.parentElement?.parentElement) {
+				shouldSeeElement?.parentElement.scrollTo(0, 2000);
 			}
 		}, 500);
 	});
@@ -133,11 +145,18 @@
 					class="children-todos"
 					slot="third"
 				>
-					{#if mainDetailedTodoDto.children}
-						{#each mainDetailedTodoDto.children as child (child.id)}
-							<PrimitiveCard todo={child} />
-						{/each}
-					{/if}
+					<div class="children-todos-menu">
+						<button on:click={() => (showDoneChildrenTodos = !showDoneChildrenTodos)}>
+							{showDoneChildrenTodos ? 'Hide done' : 'Show done'}
+						</button>
+					</div>
+					<div class="children-todos-body">
+						{#if effectiveChildrenTodos}
+							{#each effectiveChildrenTodos as child (child.id)}
+								<PrimitiveCard todo={child} />
+							{/each}
+						{/if}
+					</div>
 				</div>
 			</SplitPane>
 			<SplitPane
@@ -190,6 +209,10 @@
 		flex: 1;
 		height: 100vh;
 
+		button {
+			@include standard-button;
+		}
+
 		.root-control-panel {
 			padding: $wide-size;
 		}
@@ -202,8 +225,12 @@
 			padding: $wide-size;
 		}
 
+		.children-todos-menu {
+			padding: $normal-size;
+		}
+
 		.parent-todos,
-		.children-todos {
+		.children-todos-body {
 			padding: $wide-size;
 			@include column-stretched;
 
@@ -230,7 +257,7 @@
 			background: $second-gradient;
 		}
 
-		:global(.children-todos .primitive-card) {
+		:global(.children-todos-body .primitive-card) {
 			margin-bottom: $wide-size;
 		}
 

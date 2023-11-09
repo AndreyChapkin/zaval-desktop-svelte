@@ -1,5 +1,5 @@
 import { RICH_TYPES_TO_RICH_CLASSES_MAP, TAGS_TO_SIMPLE_RICH_TYPES_MAP, isComplexRichType } from "$lib/types/rich-text";
-import { findSelectedElement, getSelectedText, pasteElementsInSelection, pasteEnterInSelection, pasteSpacesInSelection, selectTextInElement } from "./dom-helpers";
+import { findSelectedElement, getSelectedText, pasteElementsInSelection, pasteEnterInSelection, pasteSpacesInSelection, selectTextInElement, setCaretWithinNode } from "./dom-helpers";
 import type { CreateAction, CreateComplexAction, CreateSimpleAction } from "./editor-actions/create-actions";
 import type { EditionAction, EditionResult, EditorCommand } from "./editor-actions/editor-action-general-types";
 import type { ModifyAction } from "./editor-actions/modify-action";
@@ -28,11 +28,11 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 		name: 'draft',
 		richType: 'list-item',
 	},
-	'Alt+Digit5': {
+	'Alt+Shift+KeyE': {
 		type: 'modify',
 		name: 'draftExtendList',
 	},
-	'Alt+Digit6': {
+	'Alt+Digit5': {
 		type: 'create',
 		name: 'draft',
 		richType: 'united-block',
@@ -47,12 +47,12 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 		name: 'draftWithin',
 		direction: 'down'
 	},
-	'Alt+Shift+ArrowLeft': {
+	'Alt+Equal': {
 		type: 'transform',
 		name: 'title',
 		description: 'upgrade'
 	},
-	'Alt+Shift+ArrowRight': {
+	'Alt+Minus': {
 		type: 'transform',
 		name: 'title',
 		description: 'downgrade'
@@ -64,10 +64,16 @@ const KEY_TO_EDITION_COMMAND_MAP: Record<string, EditorCommand> = {
 	'Alt+KeyS': {
 		name: 'save',
 	},
+	'Alt+KeyC': {
+		name: 'copy',
+	},
+	'Alt+Shift+KeyC': {
+		name: 'replace',
+	},
 	'Alt+KeyH': {
 		name: 'help',
 	},
-	'Alt+Equal': {
+	'Alt+Shift+ArrowLeft': {
 		name: 'upgradeSelection',
 	},
 	'Alt+Delete': {
@@ -81,10 +87,10 @@ const KEY_TO_EDITION_COMMAND_MAP: Record<string, EditorCommand> = {
 	},
 };
 
-export function tryToProcessActionEvent(event: KeyboardEvent, contentContainer: HTMLElement) {
+export function tryToProcessActionEvent(event: KeyboardEvent, selectedElement: HTMLElement | null, contentContainer: HTMLElement) {
 	let action = translateEventToEditionAction(event);
 	if (action) {
-		action = fillDraftActionWithDataOrReturnSame(action, contentContainer);
+		action = fillDraftActionWithDataOrReturnSame(action, selectedElement, contentContainer);
 		return processEditionAction(action);
 	}
 	return null;
@@ -117,7 +123,7 @@ export function rewriteDefaultBehaviourForSomeInputs(event: KeyboardEvent): 'don
 	return null;
 }
 
-function fillDraftActionWithDataOrReturnSame(action: EditionAction, containerElement: HTMLElement): EditionAction {
+function fillDraftActionWithDataOrReturnSame(action: EditionAction, selectedElement: HTMLElement | null, containerElement: HTMLElement): EditionAction {
 	if (action.type === 'create' && action.name === 'draft') {
 		return {
 			type: 'create',
@@ -131,11 +137,12 @@ function fillDraftActionWithDataOrReturnSame(action: EditionAction, containerEle
 			name: 'extendList',
 			container: containerElement,
 		};
-	} else if (action.type === 'move' && action.name === 'draftWithin') {
+	} else if (action.type === 'move' && action.name === 'draftWithin' && selectedElement) {
 		return {
 			type: 'move',
 			name: 'within',
 			direction: action.direction,
+			selectedElement,
 			container: containerElement,
 		};
 	}
@@ -259,25 +266,25 @@ function createListItemAccordingToSelection(text: string, containerElement: HTML
 function moveRichElementAndResult(action: MoveAction): EditionResult | null {
 	let result: EditionResult | null = null;
 	if (action.name === 'within') {
-		const richElementInfo = findSelectedRichElement(action.container);
-		if (richElementInfo) {
+		const selectedRichElement = action.selectedElement || findSelectedRichElement(action.container);
+		if (selectedRichElement) {
 			switch (action.direction) {
 				case 'up':
-					let previousElement = richElementInfo.element.previousElementSibling;
-					previousElement?.before(richElementInfo.element);
+					let previousElement = selectedRichElement.previousElementSibling;
+					previousElement?.before(selectedRichElement);
 					break;
 				case 'down':
-					let nextElement = richElementInfo.element.nextElementSibling;
-					nextElement?.after(richElementInfo.element);
+					let nextElement = selectedRichElement.nextElementSibling;
+					nextElement?.after(selectedRichElement);
 					break;
 			}
-			richElementInfo.element.scrollIntoView();
-			selectTextInElement(richElementInfo.element);
+			selectedRichElement.scrollIntoView();
+			setCaretWithinNode(selectedRichElement);
 			result = {
 				name: 'moved',
 				elementInfo: {
-					richType: richElementInfo.richType,
-					element: richElementInfo.element,
+					richType: defineElementRichType(selectedRichElement)!!,
+					element: selectedRichElement,
 				},
 			};
 		}

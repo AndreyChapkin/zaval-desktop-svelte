@@ -1,9 +1,9 @@
 export function selectTextInElement(
-	element: HTMLElement,
+	element: Node,
 	startOffset: number | null = null,
 	endOffset: number | null = null
 ) {
-	const elementText = element.firstChild;
+	const elementText = element instanceof Text ? element : element.firstChild;
 	if (elementText) {
 		const range = new Range();
 		range.setStart(elementText, startOffset == null ? 0 : startOffset);
@@ -96,6 +96,21 @@ export function pasteTextInSelection(pastedText: string) {
 		window.getSelection()?.removeAllRanges();
 		window.getSelection()?.addRange(newRange);
 	}
+}
+
+export function setCaretWithinNode(node: Node): 'set' | null {
+	if (node instanceof Text) {
+		selectTextInElement(node, 0, 0);
+		return 'set';
+	} else {
+		for (let childNode of node.childNodes) {
+			const result = setCaretWithinNode(childNode);
+			if (result) {
+				return result;
+			}
+		}
+	}
+	return null;
 }
 
 // deprecated

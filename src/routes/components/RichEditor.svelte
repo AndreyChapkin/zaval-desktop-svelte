@@ -225,12 +225,15 @@
 		if (nativeAction === 'paste') {
 			nonTypedModifications++;
 		}
+		// Not interfer with existing command shortkey
+		const editorCommand = translateEventToEditorCommand(event);
 		// Process selected element indication
 		if (
-			event.code === 'ArrowDown' ||
-			event.code === 'ArrowUp' ||
-			event.code === 'ArrowRight' ||
-			event.code === 'ArrowLeft'
+			!editorCommand &&
+			(event.code === 'ArrowDown' ||
+				event.code === 'ArrowUp' ||
+				event.code === 'ArrowRight' ||
+				event.code === 'ArrowLeft')
 		) {
 			const selectedElementInfo = findSelectedRichElement(richContentContainer);
 			indicateAndSetSelectedElement(selectedElementInfo?.element ?? null);
@@ -245,7 +248,7 @@
 			return;
 		}
 		// Process content manipulation actions and get new/changed element
-		const actionResult = tryToProcessActionEvent(event, richContentContainer);
+		const actionResult = tryToProcessActionEvent(event, selectedElement, richContentContainer);
 		if (actionResult) {
 			if (actionResult.elementInfo) {
 				nonTypedModifications++;
@@ -278,6 +281,12 @@
 			case 'save':
 				saveHandler();
 				break;
+			case 'copy':
+				manageRichCopy();
+				break;
+			case 'replace':
+				manageRichReplace();
+				break;
 			case 'delete':
 				manageRichRemoval();
 				break;
@@ -298,6 +307,27 @@
 			case 'cancel':
 				dispatch('cancel');
 				break;
+		}
+	}
+
+	function manageRichCopy() {
+		if (selectedElement) {
+			const content = selectedElement.outerHTML;
+			const blobInput = new Blob([content], { type: 'text/html' });
+			const clipboardItemInput = new ClipboardItem({ 'text/html': blobInput });
+			navigator.clipboard.write([clipboardItemInput]);
+		}
+	}
+
+	async function manageRichReplace() {
+		if (selectedElement) {
+			const clipboardContents = await navigator.clipboard.read();
+			const blob = await clipboardContents[0].getType('text/html');
+			const text = await blob.text();
+			// TODO: Bad
+			const tempDom = new DOMParser().parseFromString(text, 'text/html');
+			selectedElement.replaceWith(...tempDom.body.childNodes);
+			selectedElement = null;
 		}
 	}
 

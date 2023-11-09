@@ -8,6 +8,7 @@ export interface MoveWithinAction {
     type: 'move',
     name: 'within',
     direction: 'up' | 'down',
+    selectedElement: HTMLElement,
     container: HTMLElement,
 }
 

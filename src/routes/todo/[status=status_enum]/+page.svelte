@@ -4,7 +4,7 @@
 	import type { TodosWithStatusPageData } from '$lib/types/pages-data';
 	import type { DetailedTodoDto, LightTodoDto, TodoHeavyDetailsDto } from '$lib/types/todo';
 	import RichText from '../../components/RichText.svelte';
-	import TodoHistory from '../[[id=digital]]/components/TodoHistory.svelte';
+	import TodoHistory from '../[id=digital]/components/TodoHistory.svelte';
 	import TodoCard from '../components/TodoCard.svelte';
 	import SplitPane from './../../components/SplitPane.svelte';
 	import PrimitiveCard from './components/PrimitiveCard.svelte';

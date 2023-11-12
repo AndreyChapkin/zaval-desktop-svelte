@@ -9,17 +9,15 @@ export async function load({
 }: {
 	params: any;
 }): Promise<TodoDetailedPageData | null> {
-	const todoId: number | undefined = params.id;
+	const todoId: number = params.id;
 	const [detailedTodoDto, todoHistoryDto] = await Promise.all([
-		getDetailedTodo(todoId ?? null),
-		getTodoHistory(todoId ?? -1000),
+		getDetailedTodo(todoId),
+		getTodoHistory(todoId),
 	]);
 	if (detailedTodoDto) {
 		return {
 			detailedTodoDto: detailedTodoDto,
 			todoHistoryRecords: todoHistoryDto.records,
-			// TODO move that logic to backend somehow
-			isRoot: detailedTodoDto.id < 0,
 		};
 	} else {
 		return null;

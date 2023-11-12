@@ -13,7 +13,7 @@
 	export let records: string[];
 	export let viewMode = false;
 	let editRecords = records.join('\n');
-	let isEditMode = false;
+	export let isEditMode = false;
 	let textAreaElement: HTMLTextAreaElement;
 
 	// events and issuers

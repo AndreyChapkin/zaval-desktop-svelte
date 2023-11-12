@@ -35,7 +35,7 @@
 	</div>
 	<SideStatusMenu />
 	<div class="todo-side-menu-item">
-		<a href={`/todo`}>
+		<a href={`/todo/root`}>
 			<img
 				src={ROOT_MENU_ICON_URL}
 				alt="status"

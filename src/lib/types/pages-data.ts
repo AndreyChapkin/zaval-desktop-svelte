@@ -2,8 +2,13 @@ import type { DetailedTodoDto, LightTodoDto, TodoStatus } from './todo';
 
 export interface TodoDetailedPageData {
 	detailedTodoDto: DetailedTodoDto;
-	todoHistoryRecords: string[] | null;
-	isRoot: boolean;
+	todoHistoryRecords: string[];
+}
+
+export interface TodoRootPageData {
+	rootLightTodos: LightTodoDto[];
+	recentLightTodos: LightTodoDto[];
+	oldLightTodos: LightTodoDto[];
 }
 
 export interface TodoAndParentBranchIdDto {

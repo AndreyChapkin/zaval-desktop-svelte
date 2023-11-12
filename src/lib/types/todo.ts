@@ -3,6 +3,7 @@ export interface DetailedTodoDto {
     name: string;
     description: string;
     priority: number;
+    interactedOn: string;
     status: TodoStatus;
     parents: LightTodoDto[] | null;
     children: LightTodoDto[] | null;
@@ -20,6 +21,7 @@ export interface LightTodoDto {
     priority: number;
     status: TodoStatus;
     parentId: number | null;
+    interactedOn: string;
 }
 
 export interface TodoHistoryDto {

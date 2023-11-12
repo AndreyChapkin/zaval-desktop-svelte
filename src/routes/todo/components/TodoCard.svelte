@@ -3,8 +3,9 @@
 	import { EDIT_ICON_URL, TODO_COMPLEX_ICON_URL } from '$lib/utils/assets-references';
 	import { chooseStatusClass } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
-	import TodoMenu from '../[[id=digital]]/components/TodoMenu.svelte';
-	import MovingTodoPanel from '../[[id=digital]]/components/MovingTodoPanel.svelte';
+	import TodoMenu from '../[id=digital]/components/TodoMenu.svelte';
+	import MovingTodoPanel from '../[id=digital]/components/MovingTodoPanel.svelte';
+	import { presentDate } from '$lib/utils/presentation-helpers';
 
 	// state
 	export let todo: DetailedTodoDto | LightTodoDto;
@@ -47,7 +48,10 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`todo-card ${externalClass}`} on:click={selectCardHandler}>
+<div
+	class={`todo-card ${externalClass}`}
+	on:click={selectCardHandler}
+>
 	<div class={`todo-status-indicator ${statusClass}`} />
 	<div class={`todo-status-indicator-secondary ${secondaryStatusClass}`} />
 	<div class="todo-interaction-panel">
@@ -78,8 +82,13 @@
 		<div class="todo-name">
 			{todo.name}
 		</div>
-		<div class="todo-priority">
-			{todo.priority}
+		<div class="additional-info">
+			<div class="todo-priority">
+				{todo.priority}
+			</div>
+			<div class="todo-interacted-on">
+				{presentDate(todo.interactedOn)}
+			</div>
 		</div>
 	</div>
 	{#if isMenuOpen}
@@ -110,6 +119,7 @@
 		padding: $normal-size $normal-size;
 		position: relative;
 		overflow: hidden;
+		min-height: 70px;
 
 		@include row-start;
 		border-radius: $normal-size;
@@ -141,7 +151,6 @@
 		.todo-status-indicator-secondary {
 			width: 5 * $normal-size;
 			height: 15 * $normal-size;
-			// border-radius: $normal-size;
 			top: -9 * $normal-size;
 			left: 1.6 * $normal-size;
 			transform: rotate(45deg);
@@ -151,12 +160,12 @@
 
 		.todo-info {
 			padding-left: $wide-size;
-			z-index: 3;
 
 			@apply flex-1;
 			@include column-justifyied;
 
-			.todo-priority {
+			.additional-info {
+				@include row($normal-size);
 				font-size: smaller;
 				color: $base-weak-contrast-color;
 			}

@@ -159,7 +159,7 @@
 		@include column;
 
 		.selected-option {
-			background-color: $second-lighter-color;
+			background-color: $second-light-color;
 		}
 
 		.main-todo {

@@ -8,14 +8,14 @@ export const RICH_COMPLEX_TYPES = [
 	'list', 'list-item',
 	'expandable-block', 'united-block',
 	'info-block', 'bad-block',
-];
+] as const;
 export type RichComplexTypes = (typeof RICH_COMPLEX_TYPES)[number];
 export function isComplexRichType(value: RichTypes): value is RichComplexTypes {
 	return RICH_COMPLEX_TYPES.indexOf(value as any) > -1;
 }
 
-export type RichTypes = RichSimpleTypes | RichComplexTypes;
-export const RICH_TYPES = [...RICH_SIMPLE_TYPES, ...RICH_COMPLEX_TYPES];
+export const RICH_TYPES = [...RICH_SIMPLE_TYPES, ...RICH_COMPLEX_TYPES] as const;
+export type RichTypes = (typeof RICH_TYPES)[number];
 export function isRichType(value: string): value is RichTypes {
 	return RICH_TYPES.indexOf(value as any) > -1;
 }
@@ -73,14 +73,14 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'title-2': ['root'],
 	'title-3': ['root'],
 	'title-4': ['root'],
-	'paragraph': ['root', 'list-item', 'united-block'],
+	'paragraph': ['root', 'list-item', 'united-block', 'expandable-block'],
 	'unknown': ['any-parent'],
 	'strong': ['paragraph'],
 	'obscure': ['paragraph'],
 	'link': ['paragraph'],
-	'list': ['root', 'list-item', 'united-block'],
-	'list-item': ['list', 'list-item', 'united-block'],
-	'expandable-block': ['root', 'list-item'],
+	'list': ['root', 'list-item', 'united-block', 'expandable-block'],
+	'list-item': ['list', 'list-item', 'united-block', 'expandable-block'],
+	'expandable-block': ['root', 'list-item', 'united-block'],
 	'united-block': ['root', 'list-item'],
 	'info-block': ['root', 'list-item'],
 	'bad-block': ['root', 'list-item']
@@ -107,6 +107,9 @@ export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 
 export const RICH_LIST_ITEM_SIGN_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['list-item']}-sign`;
 export const RICH_LIST_ITEM_CONTENT_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['list-item']}-content`;
+
+export const RICH_EXPANDABLE_BLOCK_TITLE_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block']}-title`;
+export const RICH_EXPANDABLE_BLOCK_CONTENT_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block']}-content`;
 
 export const RICH_CLASSES_TO_RICH_TYPES_MAP: Record<RichClasses, RichTypes> = Object.entries(
 	RICH_TYPES_TO_RICH_CLASSES_MAP

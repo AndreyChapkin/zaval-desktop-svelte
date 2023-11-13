@@ -1,4 +1,4 @@
-import { RICH_LIST_ITEM_CONTENT_CLASS, RICH_LIST_ITEM_SIGN_CLASS, RICH_TYPES_TO_RICH_CLASSES_MAP } from "$lib/types/rich-text";
+import { RICH_EXPANDABLE_BLOCK_CONTENT_CLASS, RICH_EXPANDABLE_BLOCK_TITLE_CLASS, RICH_LIST_ITEM_CONTENT_CLASS, RICH_LIST_ITEM_SIGN_CLASS, RICH_TYPES_TO_RICH_CLASSES_MAP } from "$lib/types/rich-text";
 import { createNewSimpleRichElement } from "./rich-editor-helpers";
 
 export function createList(content: (HTMLElement | string)[] | string | null): HTMLElement {
@@ -49,28 +49,6 @@ export function createListItem(content: (HTMLElement | string)[] | string | null
     return listItemWrapper;
 }
 
-export function appendToListItem(listItemElement: HTMLElement, childElement: HTMLElement) {
-    const contentElement = listItemElement.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
-    if (contentElement) {
-        contentElement.append(childElement);
-    }
-}
-
-export function insertListChildren(element: HTMLElement, childrenArray: ChildNode[]) {
-    for (let childNode of element.childNodes) {
-        childrenArray.push(childNode);
-    }
-}
-
-export function insertListItemChildren(element: HTMLElement, childrenArray: ChildNode[]) {
-    const contentElement = element.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
-    if (contentElement) {
-        for (let childNode of contentElement.childNodes) {
-            childrenArray.push(childNode);
-        }
-    }
-}
-
 export function createUnitedBlock(content: (string | HTMLElement)[] | string | null): HTMLElement {
     const unitedBlockWrapper = document.createElement('div');
     const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['united-block'];
@@ -91,8 +69,82 @@ export function createUnitedBlock(content: (string | HTMLElement)[] | string | n
     return unitedBlockWrapper;
 }
 
+export function createExpandableBlock(content: (HTMLElement | string)[] | string | null): HTMLElement {
+    const expandableBlockWrapper = document.createElement('div');
+    const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block'];
+    expandableBlockWrapper.classList.add(richClass);
+
+    const titleElement = document.createElement('div');
+    titleElement.classList.add(RICH_EXPANDABLE_BLOCK_TITLE_CLASS);
+
+    const contentElement = document.createElement('div');
+    contentElement.classList.add(RICH_EXPANDABLE_BLOCK_CONTENT_CLASS);
+
+    if (typeof content === 'string') {
+        titleElement.append(content);
+        const paragraphElement = createNewSimpleRichElement('paragraph', 'placeholder');
+        contentElement.append(paragraphElement);
+    } else if (content) {
+        // array
+        const [title, ...bodyContent] = content;
+        titleElement.append(title);
+        contentElement.append(...bodyContent);
+    } else {
+        // null content
+        titleElement.append('placeholder');
+        const paragraphElement = createNewSimpleRichElement('paragraph', 'placeholder');
+        contentElement.append(paragraphElement);
+    }
+
+    expandableBlockWrapper.append(titleElement, contentElement);
+    return expandableBlockWrapper;
+}
+
+export function appendToListItem(listItemElement: HTMLElement, childElement: HTMLElement) {
+    const contentElement = listItemElement.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
+    if (contentElement) {
+        contentElement.append(childElement);
+    }
+}
+
+export function appendToExpandableBlock(expandableBlockElement: HTMLElement, childElement: HTMLElement) {
+    const contentElement = expandableBlockElement.querySelector(`.${RICH_EXPANDABLE_BLOCK_CONTENT_CLASS}`);
+    if (contentElement) {
+        contentElement.append(childElement);
+    }
+}
+
+export function insertListChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+    for (let childNode of element.childNodes) {
+        childrenArray.push(childNode);
+    }
+}
+
+export function insertListItemChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+    const contentElement = element.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
+    if (contentElement) {
+        for (let childNode of contentElement.childNodes) {
+            childrenArray.push(childNode);
+        }
+    }
+}
+
 export function insertUnitedBlockChildren(element: HTMLElement, childrenArray: ChildNode[]) {
     for (let childNode of element.childNodes) {
         childrenArray.push(childNode);
     }
+}
+
+export function insertExpandableBlockChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+    const titleElement = element.querySelector(`.${RICH_EXPANDABLE_BLOCK_TITLE_CLASS}`);
+    const contentElement = element.querySelector(`.${RICH_EXPANDABLE_BLOCK_CONTENT_CLASS}`);
+    if (titleElement && contentElement) {
+        // append title as first child
+        childrenArray.push(titleElement.childNodes[0]);
+        // append content children as the rest
+        for (let childNode of contentElement.childNodes) {
+            childrenArray.push(childNode);
+        }
+    }
+
 }

@@ -28,14 +28,19 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 		name: 'draft',
 		richType: 'list-item',
 	},
-	'Alt+Shift+KeyE': {
-		type: 'modify',
-		name: 'draftExtendList',
-	},
 	'Alt+Digit5': {
 		type: 'create',
 		name: 'draft',
 		richType: 'united-block',
+	},
+	'Alt+Digit6': {
+		type: 'create',
+		name: 'draft',
+		richType: 'expandable-block',
+	},
+	'Alt+Shift+KeyE': {
+		type: 'modify',
+		name: 'draftExtendList',
 	},
 	'Alt+ArrowUp': {
 		type: 'move',
@@ -214,10 +219,8 @@ export function createNewComplexRichElementAccordingToSelection(action: CreateCo
 	switch (action.richType) {
 		case 'list-item':
 			return createListItemAccordingToSelection('placeholder', action.container);
-		case 'united-block':
-			return createNewRichElementAccordingToSelection(action.container, 'united-block', 'placeholder');
 	}
-	return null;
+	return createNewRichElementAccordingToSelection(action.container, action.richType, action.data ?? 'placeholder');
 }
 
 function createLinkElementAccordingToSelection(containerElement: HTMLElement): HTMLElement | null {

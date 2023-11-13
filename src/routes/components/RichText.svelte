@@ -4,6 +4,7 @@
 
 	// data
 	export let richText: string;
+	export let isEdition = false;
 	export let contentContainer: HTMLDivElement | null = null;
 
 	$: descriptionFragments = parseDescription(richText);
@@ -15,7 +16,7 @@
 	bind:this={contentContainer}
 >
 	{#each descriptionFragments as fragment}
-		<RenderedFragment {fragment} />
+		<RenderedFragment {fragment} {isEdition} />
 	{/each}
 </div>
 
@@ -123,6 +124,22 @@
 			border-radius: 5px;
 			padding: $normal-size;
 			margin: $wide-size 0;
+		}
+		:global(.rich-expandable-block) {
+			@include column-start;
+			border-width: $border-small-size;
+			border-color: $second-lighter-color;
+			border-radius: 5px;
+			margin: $wide-size 0;
+			overflow: hidden;
+		}
+		:global(.rich-expandable-block-title) {
+			background-color: $second-light-color;
+			padding: $normal-size;
+			cursor: pointer;
+		}
+		:global(.rich-expandable-block-content) {
+			padding: $normal-size;
 		}
 	}
 </style>

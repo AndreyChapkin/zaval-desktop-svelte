@@ -42,6 +42,12 @@
 	gap: $gap;
 }
 
+@mixin column-start($gap: 0px) {
+	@apply flex flex-col;
+	justify-content: start;
+	gap: $gap;
+}
+
 @mixin column-wrapping($gap: 0px) {
 	display: flex;
 	flex-direction: column;

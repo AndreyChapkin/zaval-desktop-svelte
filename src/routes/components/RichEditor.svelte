@@ -433,6 +433,7 @@
 				<RichText
 					richText={effectiveRichContent}
 					bind:contentContainer={richContentContainer}
+					isEdition
 				/>
 			{/key}
 		</div>

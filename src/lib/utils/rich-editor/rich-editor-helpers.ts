@@ -15,7 +15,7 @@ import {
 	type RichTitleTypes,
 	type RichTypes
 } from '$lib/types/rich-text';
-import { appendToListItem, createList, createListItem, createUnitedBlock, insertListChildren, insertListItemChildren, insertUnitedBlockChildren } from './complex-rich-element-creators';
+import { appendToExpandableBlock, appendToListItem, createExpandableBlock, createList, createListItem, createUnitedBlock, insertExpandableBlockChildren, insertListChildren, insertListItemChildren, insertUnitedBlockChildren } from './complex-rich-element-creators';
 import { findNearestParentElement, findSelectedElement } from './dom-helpers';
 import type { TransformTitleAction } from './editor-actions/transform-actions';
 
@@ -235,6 +235,8 @@ export function createNewComplexRichElement(
 			return createList(content);
 		case 'list-item':
 			return createListItem(content);
+		case 'expandable-block':
+			return createExpandableBlock(content);
 		default:
 			return createUnitedBlock(content);
 	}
@@ -253,6 +255,9 @@ export function extractRichElementChildren(element: HTMLElement, richType: RichT
 				break;
 			case 'united-block':
 				insertUnitedBlockChildren(element, resultChildren);
+				break;
+			case 'expandable-block':
+				insertExpandableBlockChildren(element, resultChildren);
 				break;
 		}
 	} else {
@@ -445,7 +450,11 @@ export function appendToRichOrNotRichElement(parentElement: HTMLElement, childEl
 				case 'list-item':
 					appendToListItem(parentElement, childElement);
 					break;
+				case 'expandable-block':
+					appendToExpandableBlock(parentElement, childElement);
+					break;
 			}
+			return;
 		}
 	}
 	parentElement.append(childElement);

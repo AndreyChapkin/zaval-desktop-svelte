@@ -6,12 +6,14 @@
 		type RichSimpleTypes
 	} from '$lib/types/rich-text';
 	import { getRichTagClass, getSimpleRichTag } from '$lib/utils/rich-editor/rich-editor-helpers';
+	import RenderedExpandableBlockFragment from './RenderedExpandableBlockFragment.svelte';
 	import RenderedListFragment from './RenderedListFragment.svelte';
 	import RenderedListItemFragment from './RenderedListItemFragment.svelte';
 	import RenderedUnitedBlockFragment from './RenderedUnitedBlockFragment.svelte';
 
 	// data
 	export let fragment: DescriptionFragment;
+	export let isEdition = false;
 	const isComplex = isComplexRichType(fragment.richType);
 	const simpleRichType = isComplex ? null : (fragment.richType as RichSimpleTypes);
 </script>
@@ -23,6 +25,8 @@
 		<RenderedListItemFragment {fragment} />
 	{:else if fragment.richType === 'united-block'}
 		<RenderedUnitedBlockFragment {fragment} />
+	{:else if fragment.richType === 'expandable-block'}
+		<RenderedExpandableBlockFragment {fragment} {isEdition} />
 	{/if}
 {:else if simpleRichType}
 	<svelte:element

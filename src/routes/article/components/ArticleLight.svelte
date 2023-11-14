@@ -53,12 +53,14 @@
 	.article-light {
 		@include standard-container;
 		@include min-max-width(250px, 600px);
-		@include row-start($normal-size);
-		background-color: $base-color;
+		@include row-start($large-size);
+		background-color: adjust-color($strong-second-color, $alpha: -0.7);
 		color: $base-contrast-color;
+		border-width: 2px;
+		border-color: $strong-second-color;
 
 		.interaction-panel {
-			background-color: lighten($base-light-color, 10%);
+			background-color: $strong-second-dark-color;
 			border-radius: 1.5 * $normal-size;
 			padding: 0.8 * $normal-size;
 			@include column-centered($normal-size);
@@ -67,6 +69,11 @@
 			.edit-menu {
 				@include like-normal-button;
 			}
+		}
+
+		.article-date {
+			font-size: smaller;
+			color: $base-weaker-contrast-color;
 		}
 	}
 </style>

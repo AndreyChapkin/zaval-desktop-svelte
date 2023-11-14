@@ -13,6 +13,7 @@
 	import SplitPane from '../../components/SplitPane.svelte';
 	import ArticleLabel from '../components/ArticleLabel.svelte';
 	import ArticleLabelSearch from '../components/ArticleLabelSearch.svelte';
+	import ArticleLabelSearchModal from '../components/ArticleLabelSearchModal.svelte';
 
 	// const
 	const REMOVE_TIMEOUT_MS = 3000;
@@ -169,24 +170,6 @@
 			slot="first"
 			class="observe-panel"
 		>
-			<div class="interaction-panel">
-				{#if isContentEditable}
-					<button on:click={saveComplexArticleHandler}>Save changes</button>
-				{:else if isChangingLabels}
-					<ArticleLabelSearch
-						chosenArticleLabels={articleLabels}
-						on:accept={acceptChosenArticleLabelsHandler}
-					/>
-					<button on:click={cancelLabelAddingHandler}>Stop labels change</button>
-				{:else}
-					<button on:click={switchToLabelAddingHandler}>Change labels</button>
-				{/if}
-			</div>
-			<div class="article-labels">
-				{#each articleLabels as articleLabel}
-					<ArticleLabel {articleLabel} />
-				{/each}
-			</div>
 			<div class="content-titles">
 				{#each data.articleLight.contentTitles as contentTitle}
 					<a
@@ -195,6 +178,24 @@
 					>
 						{contentTitle.title}
 					</a>
+				{/each}
+			</div>
+			<div class="interaction-panel">
+				{#if isContentEditable}
+					<button on:click={saveComplexArticleHandler}>Save changes</button>
+				{:else if isChangingLabels}
+					<ArticleLabelSearchModal
+						chosenArticleLabels={articleLabels}
+						on:accept={acceptChosenArticleLabelsHandler}
+						on:cancel={cancelLabelAddingHandler}
+					/>
+				{:else}
+					<button on:click={switchToLabelAddingHandler}>Change labels</button>
+				{/if}
+			</div>
+			<div class="article-labels">
+				{#each articleLabels as articleLabel}
+					<ArticleLabel {articleLabel} />
 				{/each}
 			</div>
 		</div>
@@ -262,31 +263,13 @@
 
 			.article-labels {
 				@include row-align-start($normal-size);
-				max-height: 150px;
+				max-height: 200px;
 				@include scrollable-in-column;
-				@include bordered(top, $second-light-color, 2px);
-				@include bordered(bottom, $second-light-color, 2px);
 				flex-wrap: wrap;
 				padding: $wide-size 0;
 
 				:global(.article-label) {
 					min-width: 50px;
-				}
-			}
-
-			.current-article-label {
-				@include row($small-size);
-
-				button {
-					background-color: transparent;
-
-					&:hover {
-						background-color: $base-color;
-					}
-				}
-
-				img {
-					@include icon-small-sized;
 				}
 			}
 
@@ -301,7 +284,7 @@
 					cursor: pointer;
 
 					&:hover {
-						background-color: $second-light-color;
+						background-color: $base-color;
 					}
 				}
 
@@ -320,7 +303,7 @@
 		}
 
 		.article-pane {
-			background: $second-gradient;
+			// background: $second-gradient;
 			padding: $wide-size;
 			@include column($wide-size);
 

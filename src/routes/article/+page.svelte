@@ -156,17 +156,20 @@
 				slot="first"
 				class="article-labels-panel"
 			>
-				{#if isChoosingLabels}
-					<ArticleLabelSearch
-						isOpen={true}
-						autofocus={true}
-						on:cancel={cancelChoosingLabelsHandler}
-						on:accept={acceptChosenArticleLabelsHandler}
-					/>
-				{:else}
-					<button on:click={startChoosingLabelsHandler}>Choose labels</button>
-					<button on:click={clearLabelsHandler}>Clear labels</button>
-				{/if}
+				<div class="article-labels-interaction-panel">
+					{#if isChoosingLabels}
+						<ArticleLabelSearch
+							isOpen={true}
+							autofocus={true}
+							{chosenArticleLabels}
+							on:cancel={cancelChoosingLabelsHandler}
+							on:accept={acceptChosenArticleLabelsHandler}
+						/>
+					{:else}
+						<button on:click={startChoosingLabelsHandler}>Choose labels</button>
+						<button on:click={clearLabelsHandler}>Clear labels</button>
+					{/if}
+				</div>
 				<div class="article-label-search-collection">
 					{#each chosenArticleLabels as articleLabel}
 						<ArticleLabel
@@ -196,13 +199,13 @@
 			class="article-panel"
 		>
 			<div class="article-interactive-panel">
+				<CreateArticle />
 				<input
 					class="title-search"
 					type="text"
 					bind:value={articleSearchFragment}
 				/>
 			</div>
-			<CreateArticle />
 			<div class="article-lights">
 				{#if isLoading}
 					<LoadingIndicator />
@@ -225,7 +228,6 @@
 	.multiple-articles-page {
 		flex: 1;
 		height: 100vh;
-		padding: $wide-size;
 		@include column;
 
 		button {
@@ -234,11 +236,20 @@
 
 		.article-labels-panel {
 			@include column($normal-size);
-			padding-right: $normal-size;
+			padding: $normal-size;
+
+			.article-labels-interaction-panel {
+				@include row-start($normal-size);
+				margin-bottom: $large-size;
+			}
+		}
+
+		:global(.article-label-search) {
+			flex: 1;
 		}
 
 		.article-panel {
-			padding-left: $normal-size;
+			padding: $normal-size;
 			@include column($normal-size);
 		}
 
@@ -246,14 +257,15 @@
 			padding: $normal-size;
 
 			.delimiter {
-				height: 3px;
+				height: 2px;
 				background-color: $second-light-color;
 				margin: $wide-size 0;
 			}
 		}
 
 		.article-interactive-panel {
-			@include row-start($normal-size);
+			@include row-centered($normal-size);
+			margin-bottom: $large-size;
 
 			input {
 				flex: 1;

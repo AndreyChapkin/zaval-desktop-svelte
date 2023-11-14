@@ -127,11 +127,11 @@
 			.main-todo-and-parents {
 				@include column;
 				min-width: 0px;
+				margin-bottom: $large-size;
 
 				.parents {
 					@include row($small-size);
 					margin-top: $small-size;
-					margin-bottom: $large-size;
 
 					overflow-x: auto;
 
@@ -142,6 +142,7 @@
 
 		.todo-info {
 			@include column;
+			padding-left: $normal-size;
 
 			.chosen-todo-name {
 				color: $base-contrast-color;

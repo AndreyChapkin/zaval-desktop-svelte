@@ -56,9 +56,10 @@
 	}
 
 	.create-article-form {
-		@include column($normal-size);
+		@include column($large-size);
 		@include standard-container;
 		background-color: $second-color;
+		padding: $large-size;
 		width: 50vw;
 
 		button {

@@ -90,7 +90,7 @@
 	.article-label {
 		@include row($normal-size);
 		@include standard-container;
-		background-color: $base-color;
+		background-color: $strong-second-darker-color;
 		color: $base-contrast-color;
 		
 

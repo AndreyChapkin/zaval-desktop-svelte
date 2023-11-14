@@ -70,7 +70,7 @@
 	@import '/static/style/todo-variables.scss';
 
 	.todo-side-menu {
-		background-color: $second-color;
+		background-color: $base-darker-color;
 		@include column-centered($normal-size);
 		padding: $normal-size $small-size;
 
@@ -85,7 +85,7 @@
 		}
 
 		.todo-side-menu-item:hover {
-			background-color: $second-lighter-color;
+			background-color: $base-light-color;
 		}
 
 		.separator {

@@ -9,6 +9,7 @@
 
 	// data
 	export let fragment: DescriptionFragment;
+	export let isEdition = false;
 </script>
 
 <div class={getRichTagClass('list-item')}>
@@ -18,7 +19,7 @@
 			{#if typeof child === 'string'}
 				{child}
 			{:else}
-				<RenderedFragment fragment={child} />
+				<RenderedFragment fragment={child} {isEdition} />
 			{/if}
 		{/each}
 	</div>

@@ -123,7 +123,7 @@
 
 <div
 	bind:this={splitContainer}
-	class={`split-pane ${type === 'horizontal' ? 'horizontal' : 'vertical'} ${clazz ? clazz : 'colored'}`}
+	class={`split-pane ${type === 'horizontal' ? 'horizontal' : 'vertical'} ${clazz ? clazz : ''}`}
 >
 	{#if firstIsShown}
 		<div
@@ -198,7 +198,7 @@
 		.split-separator {
 			flex-grow: 0;
 			flex-shrink: 0;
-			background-color: $second-light-color;
+			background-color: $base-darker-color;
 		}
 
 		.not-selectable {
@@ -230,7 +230,6 @@
 	}
 
 	.colored {
-		/* background-color: $base-color; */
 
 		& > .split-separator {
 			background-color: $base-color;

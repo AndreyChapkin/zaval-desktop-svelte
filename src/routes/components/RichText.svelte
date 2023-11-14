@@ -45,6 +45,7 @@
 		outline: none;
 		white-space: pre-wrap;
 		@include styled-scrollbar;
+		color: $base-contrast-color;
 
 		:global(.rich-title) {
 			color: rgb(236, 178, 70);

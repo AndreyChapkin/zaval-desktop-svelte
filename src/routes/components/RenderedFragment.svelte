@@ -20,11 +20,11 @@
 
 {#if isComplex}
 	{#if fragment.richType === 'list'}
-		<RenderedListFragment {fragment} />
+		<RenderedListFragment {fragment} {isEdition} />
 	{:else if fragment.richType === 'list-item'}
-		<RenderedListItemFragment {fragment} />
+		<RenderedListItemFragment {fragment} {isEdition} />
 	{:else if fragment.richType === 'united-block'}
-		<RenderedUnitedBlockFragment {fragment} />
+		<RenderedUnitedBlockFragment {fragment} {isEdition} />
 	{:else if fragment.richType === 'expandable-block'}
 		<RenderedExpandableBlockFragment {fragment} {isEdition} />
 	{/if}

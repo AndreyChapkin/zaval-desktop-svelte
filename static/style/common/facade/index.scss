@@ -51,13 +51,13 @@
 
 @mixin standard-button {
 	cursor: pointer;
-	background-color: $base-color;
+	background-color: $second-light-color;
 	color: $base-contrast-color;
 	padding: $normal-size $wide-size $normal-size $wide-size;
 	border-radius: $normal-size;
 
 	&:hover {
-		background-color: $second-light-color;
+		background-color: $second-lighter-color;
 	}
 }
 

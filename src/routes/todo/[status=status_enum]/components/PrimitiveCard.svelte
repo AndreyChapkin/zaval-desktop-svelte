@@ -63,7 +63,7 @@
 
 	.primitive-card {
 		padding: $normal-size;
-		background-color: $base-color;
+		background-color: $second-color;
 		color: $base-contrast-color;
 		font-size: small;
 		border-radius: $normal-size;

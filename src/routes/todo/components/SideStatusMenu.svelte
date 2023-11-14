@@ -127,7 +127,7 @@
 		}
 
 		.todo-status-side-menu-face:hover {
-			background-color: $second-light-color;
+			background-color: $base-light-color;
 		}
 
 		.options-pane {

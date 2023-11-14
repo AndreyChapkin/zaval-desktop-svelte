@@ -114,19 +114,20 @@
 	@import '/static/style/common/color/';
 
 	.todo-card {
-		background-color: $base-light-color;
+		background-color: $second-color;
 		color: $base-contrast-color;
 		padding: $normal-size $normal-size;
 		position: relative;
 		overflow: hidden;
 		min-height: 70px;
+		@include bordered(all, $second-light-color, 1px);
 
-		@include row-start;
+		@include row-start($large-size);
 		border-radius: $normal-size;
 
 		.todo-interaction-panel {
 			z-index: 3;
-			background-color: lighten($base-light-color, 10%);
+			background-color: $base-light-color;
 			border-radius: 1.5 * $normal-size;
 			padding: 0.8 * $normal-size;
 			@include column-centered($normal-size);
@@ -138,28 +139,28 @@
 		}
 
 		.todo-status-indicator {
-			width: 4 * $normal-size;
-			height: 4 * $normal-size;
+			width: 3 * $normal-size;
+			height: 5 * $normal-size;
 			top: -1 * $normal-size;
-			left: -1.5 * $normal-size;
-			transform: rotate(-10deg) skewX(30deg);
+			left: -1 * $normal-size;
+			// transform: rotate(-10deg) skewX(30deg);
 
 			position: absolute;
 			z-index: 2;
 		}
 
 		.todo-status-indicator-secondary {
-			width: 5 * $normal-size;
-			height: 15 * $normal-size;
-			top: -9 * $normal-size;
-			left: 1.6 * $normal-size;
-			transform: rotate(45deg);
+			width: 8 * $normal-size;
+			height: 19 * $normal-size;
+			top: -11 * $normal-size;
+			left: -4.5 * $normal-size;
+			border-radius: 4px;
+			// transform: rotate(45deg);
 			position: absolute;
 			z-index: 1;
 		}
 
 		.todo-info {
-			padding-left: $wide-size;
 
 			@apply flex-1;
 			@include column-justifyied;

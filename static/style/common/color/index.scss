@@ -11,6 +11,12 @@ $second-light-color: lighten($second-color, 10%);
 $second-lighter-color: lighten($second-light-color, 10%);
 $second-more-lighter-color: lighten($second-light-color, 30%);
 
+// action-colors
+$action-color: rgb(50, 140, 116);
+$action-lighter-color: lighten($action-color, 5%);
+$action-light-color: lighten($action-color, 10%);
+$action-dark-color: darken($action-color, 10%);
+
 // strong color
 $strong-color: #c43c45;
 $strong-light-color: lighten($strong-color, 15%);

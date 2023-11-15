@@ -42,10 +42,7 @@
 		}
 
 		.chosen {
-			@include bordered(bottom, $second-more-lighter-color, $border-normal-size);
 			background-color: $second-light-color;
-			// border-width: $border-normal-size;
-			// border-color: lighten($second-light-color, 30%);
 		}
 	}
 </style>

@@ -33,7 +33,7 @@
 			/>
 		</a>
 	</div>
-	<SideStatusMenu />
+	<!-- <SideStatusMenu /> -->
 	<div class="todo-side-menu-item">
 		<a href={`/todo/root`}>
 			<img

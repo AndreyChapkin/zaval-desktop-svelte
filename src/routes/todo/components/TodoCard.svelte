@@ -120,7 +120,7 @@
 		position: relative;
 		overflow: hidden;
 		min-height: 70px;
-		@include bordered(all, $second-light-color, 1px);
+		@include bordered(all, $second-light-color, 2px);
 
 		@include row-start($large-size);
 		border-radius: $normal-size;
@@ -143,7 +143,6 @@
 			height: 5 * $normal-size;
 			top: -1 * $normal-size;
 			left: -1 * $normal-size;
-			// transform: rotate(-10deg) skewX(30deg);
 
 			position: absolute;
 			z-index: 2;
@@ -155,7 +154,6 @@
 			top: -11 * $normal-size;
 			left: -4.5 * $normal-size;
 			border-radius: 4px;
-			// transform: rotate(45deg);
 			position: absolute;
 			z-index: 1;
 		}

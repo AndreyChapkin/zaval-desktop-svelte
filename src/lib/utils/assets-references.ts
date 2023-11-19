@@ -11,6 +11,7 @@ export const PING_ME_MENU_ICON_URL = '/assets/todo/menu/ping-me-menu-icon.svg';
 export const NEXT_TO_TAKE_MENU_ICON_URL = '/assets/todo/menu/next-to-take-menu-icon.svg';
 export const IN_PROGRESS_MENU_ICON_URL = '/assets/todo/menu/in-progress-menu-icon.svg';
 export const ROOT_MENU_ICON_URL = '/assets/todo/menu/root-menu-icon.svg';
+export const PARENT_ICON_URL = '/assets/todo/parent-icon.svg';
 export const CHOOSE_ICON_URL = '/assets/todo/choose-icon.svg';
 export const HISTORY_RECORD_SIGN_URL = '/assets/todo/history/record-sign.svg';
 export const EDIT_ICON_URL = '/assets/common/edit-icon.svg';

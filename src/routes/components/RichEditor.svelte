@@ -22,7 +22,7 @@
 	import RichText from './RichText.svelte';
 
 	// const
-	const TEMP_RICH_EDITOR_CONTENT_KEY = 'tempRichEditorContent';
+	const TEMP_RICH_EDITOR_CONTENT_KEY = `tempRichEditorContent-${window.location.pathname}`;
 	const WAIT_TO_CHECK_INPUT_RATE_MILLIS = 500;
 	const MAX_UNSAVED_INPUTS_COUNT = 15;
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { findTodosWithNameFragment } from '$lib/api/todo-calls';
+	import type { LightTodoDto } from '$lib/types/todo';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
 	import ModalWindow from '../../components/ModalWindow.svelte';
-	import TodoCard from './TodoCard.svelte';
-	import type { LightTodoDto } from '$lib/types/todo';
+	import FoundTodoCard from './FoundTodoCard.svelte';
 
 	// data
 	let searchValue: string;
@@ -49,12 +49,12 @@
 		{#if isLoading}
 			<LoadingIndicator />
 		{:else}
-			<div class="found-todo">
+			<div class="found-todos">
 				{#if todos && todos.length > 0}
 					{#each todos as todo}
-						<TodoCard
-							{todo}
+						<FoundTodoCard
 							on:select={closeHandler}
+							{todo}
 						/>
 					{/each}
 				{/if}
@@ -85,8 +85,14 @@
 		@include standard-input;
 	}
 
-	.found-todo {
-		@include scrollable;
-		@include responsive-grid(350px);
+	.found-todos {
+		@include scrollable-in-column;
+		// overflow-y: auto;
+		@include styled-scrollbar;
+		// @include column($large-size);
+	}
+
+	:global(.found-todo-card) {
+		margin-bottom: $large-size;
 	}
 </style>

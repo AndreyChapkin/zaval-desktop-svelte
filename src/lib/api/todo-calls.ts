@@ -61,11 +61,15 @@ export async function getAllTodos(): Promise<LightTodoDto[]> {
     return result.data;
 }
 
-export async function getPrioritizedListOfTodosWithStatus(status: TodoStatus): Promise<TodosListDto> {
+export async function getPrioritizedListOfTodos(todoIds: number[]): Promise<TodosListDto> {
     const url = `${baseTodoURL}/prioritized-list`;
-    const result = await callGet<TodosListDto>(url, {
-        status
-    });
+    const result = await callPost<TodosListDto>(url, { todoIds });
+    return result.data;
+}
+
+export async function getPrioritizedListOfTodosWithStatus(status: TodoStatus): Promise<TodosListDto> {
+    const url = `${baseTodoURL}/prioritized-list/${status}`;
+    const result = await callGet<TodosListDto>(url);
     return result.data;
 }
 

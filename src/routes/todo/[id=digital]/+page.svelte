@@ -3,7 +3,7 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { TodoDetailedPageData } from '$lib/types/pages-data';
 	import type { SaveHistoryDto } from '$lib/types/todo';
-	import { EDIT_ICON_URL } from '$lib/utils/assets-references';
+	import { EDIT_ICON_URL, PARENT_ICON_URL } from '$lib/utils/assets-references';
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
@@ -75,6 +75,16 @@
 				class="main-todo"
 				slot="first"
 			>
+				<div class="main-interaction-panel">
+					<a href={`/todo/${parentTodos[parentTodos.length - 1]?.id ?? 'root'}`}>
+						<div class="link-area">
+							<img
+								src={PARENT_ICON_URL}
+								alt="composition"
+							/>
+						</div>
+					</a>
+				</div>
 				<TodoCard
 					todo={mainDetailedTodoDto}
 					isNavigable={false}
@@ -159,11 +169,26 @@
 		@include column;
 
 		.selected-option {
-			background-color: $second-light-color;
+			background-color: $second-color;
 		}
 
 		.main-todo {
 			padding: $wide-size;
+
+			.main-interaction-panel {
+				margin-bottom: $normal-size;
+				@include row;
+
+				.link-area {
+					background-color: $base-light-color;
+					border-radius: $normal-size;
+					padding: $small-size $normal-size;
+				}
+
+				img {
+					@include icon-normal-sized;
+				}
+			}
 		}
 
 		.children-todos-menu {
@@ -187,7 +212,7 @@
 			}
 
 			.description-interaction-panel {
-				background-color: $second-light-color;
+				background-color: $second-color;
 				@include row-centered;
 				padding: $small-size;
 

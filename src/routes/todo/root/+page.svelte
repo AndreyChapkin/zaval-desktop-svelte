@@ -85,7 +85,10 @@
 
 			.block-body {
 				@include scrollable-in-column;
-				@include column($normal-size);
+			}
+
+			:global(.block-body > div) {
+				margin-bottom: $large-size;
 			}
 		}
 

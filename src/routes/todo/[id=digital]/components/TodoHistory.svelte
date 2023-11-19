@@ -122,7 +122,7 @@
 		}
 
 		.todo-history-menu {
-			background-color: $second-light-color;
+			background-color: $second-color;
 			padding: $small-size;
 
 			@include row-centered($normal-size);

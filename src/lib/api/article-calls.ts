@@ -152,3 +152,31 @@ export async function deleteLabelsCombination(combinationId: number): Promise<vo
     const url = `${baseArticleURL}/label/combination/${combinationId}`;
     await callDelete<void>(url);
 }
+
+export async function createArticleSeries(articleSeriesDto: ArticleSeriesDto): Promise<ArticleSeriesDto> {
+    const url = `${baseArticleURL}/series`;
+    const result = await callPost<ArticleSeriesDto>(url, articleSeriesDto);
+    return result.data;
+}
+
+export async function getArticleSeries(articleSeriesId: number): Promise<ArticleSeriesDto> {
+    const url = `${baseArticleURL}/series/${articleSeriesId}`;
+    const result = await callGet<ArticleSeriesDto>(url);
+    return result.data;
+}
+
+export async function getTheMostRecentArticleSeries(number?: number): Promise<ArticleSeriesDto[]> {
+    const url = `${baseArticleURL}/series/recent`;
+    const result = await callGet<ArticleSeriesDto[]>(url, { number });
+    return result.data;
+}
+
+export async function updateArticleSeries(articleSeriesId: number, updateArticleSeriesDto: UpdateArticleSeriesDto): Promise<void> {
+    const url = `${baseArticleURL}/series/${articleSeriesId}`;
+    await callPatch<UpdateArticleDto>(url, updateArticleSeriesDto);
+}
+
+export async function deleteArticleSeries(articleSeriesId: number): Promise<void> {
+    const url = `${baseArticleURL}/series/${articleSeriesId}`;
+    await callDelete<void>(url);
+}

@@ -43,6 +43,19 @@ interface LabelsCombinationDto {
     popularity: number,
 }
 
+interface ArticleSeriesDto {
+    id: number,
+    name: string,
+    articleIds: number[],
+    interactedOn: string,
+}
+
+interface UpdateArticleSeriesDto {
+    name?: string,
+    articleIds?: number[],
+    interactedOn?: string,
+}
+
 interface FilledLabelsCombinationDto {
     id: number,
     labels: ArticleLabelDto[],

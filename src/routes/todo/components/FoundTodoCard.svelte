@@ -8,6 +8,7 @@
 
 	// state
 	export let todo: DetailedTodoDto | LightTodoDto;
+	let linkElement: HTMLElement;
 	let parents: {
 		isInitialized: boolean;
 		data: LightTodoDto[];
@@ -35,23 +36,35 @@
 	const dispatch = createEventDispatcher<EventType>();
 
 	// handlers
-	const todoIsRevealedHandler = () => {
-		isRevealed = true;
+	let todoIsRevealedHandler = (event: MouseEvent) => {
+		if (linkElement !== event.target) {
+			isRevealed = true;
+		}
 	};
+	$: if (linkElement) {
+		todoIsRevealedHandler = (event: MouseEvent) => {
+			if (linkElement !== event.target) {
+				isRevealed = true;
+			}
+		};
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	class={`found-todo-card ${externalClass}`}
-	on:mouseenter={() => (isRevealed = true)}
+	on:click={todoIsRevealedHandler}
 >
 	<div class="child-block">
 		<div class="interaction-panel">
 			<div
 				class="go-to-todo"
-				on:click={() => (dispatch('select', todo))}
+				on:click={() => dispatch('select', todo)}
 			>
-				<a href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}>
+				<a
+					href={`/todo/${todo.id === ROOT_TODO_HIERARCHY.id ? '' : todo.id}`}
+					bind:this={linkElement}
+				>
 					<div class="link-area">
 						<img
 							src={TODO_COMPLEX_ICON_URL}

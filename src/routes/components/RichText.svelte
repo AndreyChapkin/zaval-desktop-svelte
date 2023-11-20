@@ -98,7 +98,7 @@
 			background-color: rgb(173, 30, 30);
 		}
 		:global(.rich-strong) {
-			color: rgb(38, 187, 75);
+			color: rgb(226, 136, 196);
 		}
 		:global(.rich-link) {
 			color: rgb(125, 180, 212);
@@ -112,12 +112,13 @@
 			margin-bottom: $normal-size;
 		}
 		:global(.rich-list-item-sign) {
-			width: 8px;
-			height: 8px;
+			width: 6px;
+			height: 6px;
 			border-color: $strong-second-color;
+			background-color: $strong-second-color;
 			border-width: 2px;
-			border-radius: 5px;
-			margin: 6px 8px 0 0;
+			// border-radius: 5px;
+			margin: 10px 10px 0 0;
 		}
 		:global(.rich-united-block) {
 			border-width: $border-small-size;

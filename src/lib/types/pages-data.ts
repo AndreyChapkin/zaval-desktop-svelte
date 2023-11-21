@@ -28,6 +28,7 @@ export interface TodosWithStatusPageData {
 
 export interface MultipleArticlesPageData {
 	articleLights: ArticleLightDto[];
+	articleSeries: ArticleSeriesDto[];
 	topLabelsCombinations: FilledLabelsCombinationDto[];
 }
 
@@ -35,4 +36,9 @@ export interface ArticlePageData {
 	articleLight: ArticleLightDto;
 	articleContent: ArticleContentDto;
 	articleLabels: ArticleLabelDto[];
+}
+
+export interface ArticleSeriesPageData {
+	articleSeries: ArticleSeriesDto;
+	articleLights: ArticleLightDto[];
 }

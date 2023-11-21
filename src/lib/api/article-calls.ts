@@ -15,6 +15,12 @@ export async function getAllArticleLights(): Promise<ArticleLightDto[]> {
     return result.data;
 }
 
+export async function getArticleLightsById(articleIds: number[]): Promise<ArticleLightDto[]> {
+    const url = `${baseArticleURL}/by-id`;
+    const result = await callPost<ArticleLightDto[]>(url, { articleIds });
+    return result.data;
+}
+
 export async function getArticleLight(id: number): Promise<ArticleLightDto> {
     const url = `${baseArticleURL}/${id}`;
     const result = await callGet<ArticleLightDto>(url);

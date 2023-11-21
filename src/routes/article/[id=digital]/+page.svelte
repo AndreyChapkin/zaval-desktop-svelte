@@ -12,7 +12,6 @@
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
 	import ArticleLabel from '../components/ArticleLabel.svelte';
-	import ArticleLabelSearch from '../components/ArticleLabelSearch.svelte';
 	import ArticleLabelSearchModal from '../components/ArticleLabelSearchModal.svelte';
 
 	// const
@@ -308,6 +307,7 @@
 			@include column($wide-size);
 
 			.article-title {
+				font-size: x-large;
 				@include bordered(bottom, $base-contrast-color, 2px);
 			}
 
@@ -318,7 +318,7 @@
 
 			h1 {
 				font-size: x-large;
-				font-weight: bold;
+				// font-weight: bold;
 				font-family: Nunito;
 				padding-left: $normal-size;
 			}

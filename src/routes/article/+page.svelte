@@ -16,13 +16,16 @@
 	import ArticleLabelCombination from './components/ArticleLabelCombination.svelte';
 	import ArticleLabelSearch from './components/ArticleLabelSearch.svelte';
 	import ArticleLight from './components/ArticleLight.svelte';
+	import ArticleSeries from './components/ArticleSeries.svelte';
 	import CreateArticle from './components/CreateArticle.svelte';
+	import CreateArticleSeries from './components/CreateArticleSeries.svelte';
 
 	// state
 	export let data: MultipleArticlesPageData;
 	let articleSearchFragment = '';
 	const dropSearchFragment = () => (articleSearchFragment = '');
 	let articleLights: ArticleLightDto[] = data.articleLights;
+	let articleSeries: ArticleSeriesDto[] = data.articleSeries;
 	let topLabelsCombinations = data.topLabelsCombinations;
 	let isLoading = false;
 	let isChoosingLabels = false;
@@ -200,6 +203,7 @@
 		>
 			<div class="article-interactive-panel">
 				<CreateArticle />
+				<CreateArticleSeries />
 				<input
 					class="title-search"
 					type="text"
@@ -212,6 +216,16 @@
 				{:else}
 					{#each articleLights as article}
 						<ArticleLight articleLight={article} />
+					{/each}
+				{/if}
+			</div>
+			<div class="delimiter" />
+			<div class="article-series-collection">
+				{#if isLoading}
+					<LoadingIndicator />
+				{:else}
+					{#each articleSeries as series}
+						<ArticleSeries articleSeries={series} />
 					{/each}
 				{/if}
 			</div>
@@ -232,6 +246,12 @@
 
 		button {
 			@include standard-button;
+		}
+
+		.delimiter {
+			height: 2px;
+			background-color: $second-light-color;
+			margin: $wide-size 0;
 		}
 
 		.article-labels-panel {
@@ -255,12 +275,6 @@
 
 		.top-labels-combinations {
 			padding: $normal-size;
-
-			.delimiter {
-				height: 2px;
-				background-color: $second-light-color;
-				margin: $wide-size 0;
-			}
 		}
 
 		.article-interactive-panel {
@@ -279,13 +293,20 @@
 		}
 
 		.article-lights {
-			@include row($wide-size);
+			@include row-start($wide-size);
+			flex: 1;
 			flex-wrap: wrap;
+			@include scrollable-in-column;
 
 			:global(.article-light) {
 				flex: 1;
 				min-width: 300px;
 			}
+		}
+
+		.article-series-collection {
+			flex: 1;
+			@include scrollable-in-column;
 		}
 
 		.article-label {

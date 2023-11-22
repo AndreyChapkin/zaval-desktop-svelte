@@ -6,8 +6,8 @@ export type RichSimpleTypes = (typeof RICH_SIMPLE_TYPES)[number];
 
 export const RICH_COMPLEX_TYPES = [
 	'list', 'list-item',
-	'expandable-block', 'united-block',
-	'info-block', 'bad-block',
+	'expandable-block', 'united-block', 'code-block',
+	'info-block', 'warning-block',
 ] as const;
 export type RichComplexTypes = (typeof RICH_COMPLEX_TYPES)[number];
 export function isComplexRichType(value: RichTypes): value is RichComplexTypes {
@@ -26,8 +26,8 @@ export const RICH_CLASSES = [
 	'rich-title', 'rich-title-1', 'rich-title-2', 'rich-title-3', 'rich-title-4',
 	'rich-paragraph', 'rich-unknown', 'rich-strong', 'rich-obscure', 'rich-link',
 	'rich-list', 'rich-list-item',
-	'rich-expandable-block', 'rich-united-block',
-	'rich-info-block', 'rich-bad-block',
+	'rich-expandable-block', 'rich-united-block', 'rich-code-block',
+	'rich-info-block', 'rich-warning-block',
 ] as const;
 export type RichClasses = (typeof RICH_CLASSES)[number];
 
@@ -82,8 +82,9 @@ export const RICH_TYPES_TO_POSSIBLE_PARENT_TYPES: Record<RichTypes, PossibleRich
 	'list-item': ['list', 'list-item', 'united-block', 'expandable-block'],
 	'expandable-block': ['root', 'list-item', 'united-block'],
 	'united-block': ['root', 'list-item'],
+	'code-block': ['root', 'list-item', 'united-block', 'expandable-block'],
 	'info-block': ['root', 'list-item'],
-	'bad-block': ['root', 'list-item']
+	'warning-block': ['root', 'list-item']
 };
 
 export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
@@ -101,12 +102,16 @@ export const RICH_TYPES_TO_RICH_CLASSES_MAP: Record<RichTypes, RichClasses> = {
 	'list-item': 'rich-list-item',
 	'expandable-block': 'rich-expandable-block',
 	'united-block': 'rich-united-block',
+	'code-block': 'rich-code-block',
 	'info-block': 'rich-info-block',
-	'bad-block': 'rich-bad-block',
+	'warning-block': 'rich-warning-block',
 };
 
 export const RICH_LIST_ITEM_SIGN_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['list-item']}-sign`;
 export const RICH_LIST_ITEM_CONTENT_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['list-item']}-content`;
+
+export const RICH_CODE_BLOCK_ICON_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['code-block']}-icon`;
+export const RICH_CODE_BLOCK_CONTENT_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['code-block']}-content`;
 
 export const RICH_EXPANDABLE_BLOCK_TITLE_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block']}-title`;
 export const RICH_EXPANDABLE_BLOCK_CONTENT_CLASS = `${RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block']}-content`;

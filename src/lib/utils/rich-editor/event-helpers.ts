@@ -38,6 +38,11 @@ const KEY_TO_EDITION_ACTION_MAP: Record<string, EditionAction> = {
 		name: 'draft',
 		richType: 'expandable-block',
 	},
+	'Alt+Digit7': {
+		type: 'create',
+		name: 'draft',
+		richType: 'code-block',
+	},
 	'Alt+Shift+KeyE': {
 		type: 'modify',
 		name: 'draftExtendList',

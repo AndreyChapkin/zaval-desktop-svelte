@@ -6,6 +6,7 @@
 		type RichSimpleTypes
 	} from '$lib/types/rich-text';
 	import { getRichTagClass, getSimpleRichTag } from '$lib/utils/rich-editor/rich-editor-helpers';
+	import RenderedCodeBlockFragment from './RenderedCodeBlockFragment.svelte';
 	import RenderedExpandableBlockFragment from './RenderedExpandableBlockFragment.svelte';
 	import RenderedListFragment from './RenderedListFragment.svelte';
 	import RenderedListItemFragment from './RenderedListItemFragment.svelte';
@@ -23,6 +24,8 @@
 		<RenderedListFragment {fragment} {isEdition} />
 	{:else if fragment.richType === 'list-item'}
 		<RenderedListItemFragment {fragment} {isEdition} />
+	{:else if fragment.richType === 'code-block'}
+		<RenderedCodeBlockFragment {fragment} />
 	{:else if fragment.richType === 'united-block'}
 		<RenderedUnitedBlockFragment {fragment} {isEdition} />
 	{:else if fragment.richType === 'expandable-block'}

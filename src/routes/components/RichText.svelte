@@ -16,7 +16,10 @@
 	bind:this={contentContainer}
 >
 	{#each descriptionFragments as fragment}
-		<RenderedFragment {fragment} {isEdition} />
+		<RenderedFragment
+			{fragment}
+			{isEdition}
+		/>
 	{/each}
 </div>
 
@@ -142,6 +145,34 @@
 		}
 		:global(.rich-expandable-block-content) {
 			padding: $normal-size;
+		}
+		:global(.rich-code-block) {
+			@include row-start;
+			border-radius: 5px;
+			margin: $large-size 0;
+			background-color: $base-darker-color;
+			position: relative;
+		}
+		:global(.rich-code-block-icon) {
+			@include row;
+			background-color: $second-light-color;
+			padding: $normal-size;
+			cursor: pointer;
+			position: absolute;
+			top: -10px;
+			left: 10px;
+			width: 25px;
+			height: 20px;
+		}
+		:global(.rich-code-block-icon img) {
+			@include icon-normal-sized;
+			position: absolute;
+			left: 2px;
+			top: 0px;
+		}
+		:global(.rich-code-block-content) {
+			font-family: 'Courier New', Courier, monospace;
+			padding: 1.5 * $wide-size $wide-size;
 		}
 	}
 </style>

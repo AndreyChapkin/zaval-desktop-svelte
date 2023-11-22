@@ -1,4 +1,4 @@
-import { RICH_EXPANDABLE_BLOCK_CONTENT_CLASS, RICH_EXPANDABLE_BLOCK_TITLE_CLASS, RICH_LIST_ITEM_CONTENT_CLASS, RICH_LIST_ITEM_SIGN_CLASS, RICH_TYPES_TO_RICH_CLASSES_MAP } from "$lib/types/rich-text";
+import { RICH_CODE_BLOCK_CONTENT_CLASS, RICH_CODE_BLOCK_ICON_CLASS, RICH_EXPANDABLE_BLOCK_CONTENT_CLASS, RICH_EXPANDABLE_BLOCK_TITLE_CLASS, RICH_LIST_ITEM_CONTENT_CLASS, RICH_LIST_ITEM_SIGN_CLASS, RICH_TYPES_TO_RICH_CLASSES_MAP } from "$lib/types/rich-text";
 import { createNewSimpleRichElement } from "./rich-editor-helpers";
 
 export function createList(content: (HTMLElement | string)[] | string | null): HTMLElement {
@@ -69,6 +69,28 @@ export function createUnitedBlock(content: (string | HTMLElement)[] | string | n
     return unitedBlockWrapper;
 }
 
+export function createCodeBlock(content: string | null): HTMLElement {
+    const codeBlockWrapper = document.createElement('div');
+    const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['code-block'];
+    codeBlockWrapper.classList.add(richClass);
+
+    const iconElement = document.createElement('div');
+    iconElement.classList.add(RICH_CODE_BLOCK_ICON_CLASS);
+
+    const contentElement = document.createElement('div');
+    contentElement.classList.add(RICH_CODE_BLOCK_CONTENT_CLASS);
+
+    if (typeof content === 'string') {
+        contentElement.append(content);
+    } else {
+        // null content
+        contentElement.append('placeholder');
+    }
+
+    codeBlockWrapper.append(iconElement, contentElement);
+    return codeBlockWrapper;
+}
+
 export function createExpandableBlock(content: (HTMLElement | string)[] | string | null): HTMLElement {
     const expandableBlockWrapper = document.createElement('div');
     const richClass = RICH_TYPES_TO_RICH_CLASSES_MAP['expandable-block'];
@@ -107,6 +129,13 @@ export function appendToListItem(listItemElement: HTMLElement, childElement: HTM
     }
 }
 
+export function appendToCodeBlock(codeBlockElement: HTMLElement, content: string) {
+    const contentElement = codeBlockElement.querySelector(`.${RICH_CODE_BLOCK_CONTENT_CLASS}`);
+    if (contentElement) {
+        contentElement.append(content);
+    }
+}
+
 export function appendToExpandableBlock(expandableBlockElement: HTMLElement, childElement: HTMLElement) {
     const contentElement = expandableBlockElement.querySelector(`.${RICH_EXPANDABLE_BLOCK_CONTENT_CLASS}`);
     if (contentElement) {
@@ -122,6 +151,15 @@ export function insertListChildren(element: HTMLElement, childrenArray: ChildNod
 
 export function insertListItemChildren(element: HTMLElement, childrenArray: ChildNode[]) {
     const contentElement = element.querySelector(`.${RICH_LIST_ITEM_CONTENT_CLASS}`);
+    if (contentElement) {
+        for (let childNode of contentElement.childNodes) {
+            childrenArray.push(childNode);
+        }
+    }
+}
+
+export function insertCodeBlockChildren(element: HTMLElement, childrenArray: ChildNode[]) {
+    const contentElement = element.querySelector(`.${RICH_CODE_BLOCK_CONTENT_CLASS}`);
     if (contentElement) {
         for (let childNode of contentElement.childNodes) {
             childrenArray.push(childNode);

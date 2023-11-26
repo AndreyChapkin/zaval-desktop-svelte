@@ -17,6 +17,7 @@
 	$: parentTodos = mainDetailedTodoDto.parents ?? [];
 	let isDescriptionEditable: boolean = false;
 	let showDoneChildrenTodos = false;
+	$: hasDoneChildrenTodos = !!mainDetailedTodoDto.children?.find((i) => i.status === 'DONE');
 	let shownInfo: 'description' | 'history' = 'description';
 
 	let effectiveChildrenTodos = mainDetailedTodoDto?.children ?? [];
@@ -95,9 +96,11 @@
 				slot="second"
 			>
 				<div class="children-todos-menu">
-					<button on:click={() => (showDoneChildrenTodos = !showDoneChildrenTodos)}>
-						{showDoneChildrenTodos ? 'Hide done' : 'Show done'}
-					</button>
+					{#if hasDoneChildrenTodos}
+						<button on:click={() => (showDoneChildrenTodos = !showDoneChildrenTodos)}>
+							{showDoneChildrenTodos ? 'Hide done' : 'Show done'}
+						</button>
+					{/if}
 				</div>
 				<div class="children-todos-body">
 					{#if effectiveChildrenTodos}

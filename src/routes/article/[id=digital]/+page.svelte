@@ -171,12 +171,15 @@
 		>
 			<div class="content-titles">
 				{#each data.articleLight.contentTitles as contentTitle}
-					<a
-						class={`content-title ${chooseContentTitleClass(contentTitle)}`}
-						href={`#${contentTitle.id}`}
-					>
-						{contentTitle.title}
-					</a>
+					<div class={`content-title ${chooseContentTitleClass(contentTitle)}`}>
+						<div class="content-title-sign">o</div>
+						<a
+							class="content-title-name"
+							href={`#${contentTitle.id}`}
+						>
+							{contentTitle.title}
+						</a>
+					</div>
 				{/each}
 			</div>
 			<div class="interaction-panel">
@@ -277,9 +280,9 @@
 
 				.content-title {
 					@include standard-container;
+					@include row-start($wide-size);
 					padding-top: $small-size;
 					padding-bottom: $small-size;
-					display: block;
 					cursor: pointer;
 
 					&:hover {

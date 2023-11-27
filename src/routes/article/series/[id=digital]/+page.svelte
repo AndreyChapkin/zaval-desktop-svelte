@@ -96,7 +96,7 @@
 	};
 
 	const createPositionRemoveHandler = (i: number) => () => {
-		if (0 <= i && i < editableArticleLights.length - 1) {
+		if (0 <= i && i < editableArticleLights.length) {
 			editableArticleLights = editableArticleLights.filter((article, index) => index !== i);
 		}
 	};

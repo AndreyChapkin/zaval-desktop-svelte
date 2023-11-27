@@ -171,15 +171,14 @@
 		>
 			<div class="content-titles">
 				{#each data.articleLight.contentTitles as contentTitle}
-					<div class={`content-title ${chooseContentTitleClass(contentTitle)}`}>
-						<div class="content-title-sign">o</div>
-						<a
-							class="content-title-name"
-							href={`#${contentTitle.id}`}
-						>
-							{contentTitle.title}
-						</a>
-					</div>
+					<a href={`#${contentTitle.id}`}>
+						<div class={`content-title ${chooseContentTitleClass(contentTitle)}`}>
+							<div class="content-title-sign">o</div>
+							<div class="content-title-name">
+								{contentTitle.title}
+							</div>
+						</div>
+					</a>
 				{/each}
 			</div>
 			<div class="interaction-panel">

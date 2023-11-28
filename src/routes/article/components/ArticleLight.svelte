@@ -71,6 +71,10 @@
 			}
 		}
 
+		.article-name {
+			margin-bottom: $normal-size;
+		}
+
 		.article-date {
 			font-size: smaller;
 			color: $base-weaker-contrast-color;

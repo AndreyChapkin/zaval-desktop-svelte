@@ -1,14 +1,18 @@
 <script lang="ts">
 	import {
 		createLabelsCombination,
+		findAllArticleSeriesWithAllLabels,
+		findAllArticleSeriesWithFragment,
 		findAllArticlesWithAllLabels,
 		findAllArticlesWithTitleFragment,
 		getTheMostPopularLabelsCombinations,
 		getTheMostRecentArticleLights,
+		getTheMostRecentArticleSeries,
 		updateLabelsCombinationPopularity
 	} from '$lib/api/article-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { MultipleArticlesPageData } from '$lib/types/pages-data';
+	import { compareWithDates, describeArticleSeriesContent } from '$lib/utils/article-helpers';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import LoadingIndicator from '../components/LoadingIndicator.svelte';
 	import SplitPane from '../components/SplitPane.svelte';
@@ -24,8 +28,7 @@
 	export let data: MultipleArticlesPageData;
 	let articleSearchFragment = '';
 	const dropSearchFragment = () => (articleSearchFragment = '');
-	let articleLights: ArticleLightDto[] = data.articleLights;
-	let articleSeries: ArticleSeriesDto[] = data.articleSeries;
+	$: articleContents = [...data.articleLights, ...data.articleSeries].toSorted(compareWithDates);
 	let topLabelsCombinations = data.topLabelsCombinations;
 	let isLoading = false;
 	let isChoosingLabels = false;
@@ -42,9 +45,11 @@
 
 	// reactivity
 	$: if (!articleSearchFragment && chosenArticleLabels.length < 1 && !chosenLabelsCombination) {
-		getTheMostRecentArticleLights().then((articles) => {
-			articleLights = articles;
-		});
+		Promise.all([getTheMostRecentArticleLights(), getTheMostRecentArticleSeries()]).then(
+			([articles, series]) => {
+				articleContents = [...articles, ...series].toSorted(compareWithDates);
+			}
+		);
 	}
 
 	$: if (articleSearchFragment) {
@@ -120,8 +125,9 @@
 			: chosenArticleLabels.map((i) => i.id);
 		if (effectiveLabelIds.length > 0) {
 			isLoading = true;
-			articleLights = await findAllArticlesWithAllLabels(effectiveLabelIds);
-			if (articleLights.length > 0) {
+			const articleLights = await findAllArticlesWithAllLabels(effectiveLabelIds);
+			const articleSeries = await findAllArticleSeriesWithAllLabels(effectiveLabelIds);
+			if (articleLights.length > 0 && articleSeries.length > 0) {
 				if (chosenLabelsCombination === null) {
 					// If it was new labels combination and some articles are fetched then remember that combination
 					await createLabelsCombination(effectiveLabelIds);
@@ -134,6 +140,7 @@
 				}
 				refreshCombinations();
 			}
+			articleContents = [...articleLights, ...articleSeries];
 			isLoading = false;
 		}
 	}
@@ -141,7 +148,9 @@
 	const searchArticlesWithSearchFragmentInhibitly = decreaseNumberOfCalls(async (value: string) => {
 		if (value) {
 			isLoading = true;
-			articleLights = await findAllArticlesWithTitleFragment(value);
+			const articleLights = await findAllArticlesWithTitleFragment(value);
+			const articleSeries = await findAllArticleSeriesWithFragment(value);
+			articleContents = [...articleLights, ...articleSeries];
 			isLoading = false;
 		}
 	}, 800);
@@ -210,22 +219,16 @@
 					bind:value={articleSearchFragment}
 				/>
 			</div>
-			<div class="article-lights">
+			<div class="article-contents">
 				{#if isLoading}
 					<LoadingIndicator />
 				{:else}
-					{#each articleLights as article}
-						<ArticleLight articleLight={article} />
-					{/each}
-				{/if}
-			</div>
-			<div class="delimiter" />
-			<div class="article-series-collection">
-				{#if isLoading}
-					<LoadingIndicator />
-				{:else}
-					{#each articleSeries as series}
-						<ArticleSeries articleSeries={series} />
+					{#each describeArticleSeriesContent(articleContents) as desc (desc.content.id + desc.type)}
+						{#if desc.type === 'series'}
+							<ArticleSeries articleSeries={desc.content} />
+						{:else}
+							<ArticleLight articleLight={desc.content} />
+						{/if}
 					{/each}
 				{/if}
 			</div>
@@ -292,8 +295,8 @@
 			flex-wrap: wrap;
 		}
 
-		.article-lights {
-			@include row-start($wide-size);
+		.article-contents {
+			@include row-start-and-align-start($wide-size);
 			flex: 1;
 			flex-wrap: wrap;
 			@include scrollable-in-column;
@@ -302,11 +305,6 @@
 				flex: 1;
 				min-width: 300px;
 			}
-		}
-
-		.article-series-collection {
-			flex: 1;
-			@include scrollable-in-column;
 		}
 
 		.article-label {

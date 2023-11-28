@@ -39,8 +39,8 @@
 		</div>
 	</div>
 	<div class="article-series-info">
-		<div class="series-name">{articleSeries.name}</div>
-		<div class="series-date">{presentDate(articleSeries.interactedOn)}</div>
+		<div class="article-series-name">{articleSeries.name}</div>
+		<div class="article-series-date">{presentDate(articleSeries.interactedOn)}</div>
 	</div>
 </div>
 
@@ -50,14 +50,16 @@
 	@import '/static/style/common/composition/';
 	@import '/static/style/common/facade/';
 
+	$article-series-color: adjust-hue($strong-second-color, -25deg);
+
 	.article-series {
 		@include standard-container;
 		@include min-max-width(250px, 600px);
 		@include row-start($large-size);
-		background-color: adjust-color($strong-second-color, $alpha: -0.7);
+		background-color: adjust-color($article-series-color, $alpha: -0.7);
 		color: $base-contrast-color;
 		border-width: 2px;
-		border-color: $strong-second-color;
+		border-color: $article-series-color;
 
 		.interaction-panel {
 			background-color: $strong-second-dark-color;
@@ -70,7 +72,11 @@
 			}
 		}
 
-		.article-date {
+		.article-series-name {
+			margin-bottom: $normal-size;
+		}
+
+		.article-series-date {
 			font-size: smaller;
 			color: $base-weaker-contrast-color;
 		}

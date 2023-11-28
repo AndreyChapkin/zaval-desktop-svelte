@@ -40,5 +40,5 @@ export interface ArticlePageData {
 
 export interface ArticleSeriesPageData {
 	articleSeries: ArticleSeriesDto;
-	articleLights: ArticleLightDto[];
+	articleSeriesContent: (ArticleLightDto | ArticleSeriesDto)[];
 }

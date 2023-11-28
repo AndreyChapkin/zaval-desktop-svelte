@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { updateArticleSeries } from '$lib/api/article-calls';
+	import { deleteArticleSeries, updateArticleSeries } from '$lib/api/article-calls';
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { ArticleSeriesPageData } from '$lib/types/pages-data';
+	import { describeArticleSeriesContent } from '$lib/utils/article-helpers';
 	import ArticleLight from '../../components/ArticleLight.svelte';
+	import ArticleSeries from '../../components/ArticleSeries.svelte';
 	import ArticleSearch from './components/ArticleSearch.svelte';
 
 	// const
@@ -10,11 +12,11 @@
 
 	// state
 	export let data: ArticleSeriesPageData;
-	let articleSeries = data.articleSeries;
-	let articleLights = data.articleLights;
-	let name: string = articleSeries.name;
-	let editableName: string = name;
-	let editableArticleLights = articleLights;
+	$: articleSeries = data.articleSeries;
+	$: articleSeriesContent = data.articleSeriesContent ?? [];
+	$: name = articleSeries.name ?? "";
+	$: editableName = name;
+	$: editableSeriesContent = [...articleSeriesContent];
 	let isEditable = false;
 	let isGoingRemove = false;
 	let removeCounter = 0;
@@ -28,7 +30,7 @@
 	const saveEditionHandler = async () => {
 		await updateArticleSeries(articleSeries.id, {
 			name: editableName,
-			articleIds: editableArticleLights.map((i) => i.id)
+			articleIds: editableSeriesContent.map((i) => i.id)
 		});
 		isEditable = !isEditable;
 		window.location.reload();
@@ -36,15 +38,18 @@
 
 	const cancelEditionHandler = () => {
 		editableName = name;
-		editableArticleLights = articleLights;
+		editableSeriesContent = [...articleSeriesContent];
 		isEditable = false;
 	};
 
-	const addArticleToSeriesHandler = (event: CustomSvelteEvent<ArticleLightDto>) => {
-		const articleLight = event.detail;
-		let isArticlePresented = editableArticleLights.findIndex((i) => i.id === articleLight.id) > -1;
+	const addArticleToSeriesHandler = (
+		event: CustomSvelteEvent<ArticleLightDto | ArticleSeriesDto>
+	) => {
+		const articleContent = event.detail;
+		let isArticlePresented =
+			editableSeriesContent.findIndex((i) => i.id === articleContent.id) > -1;
 		if (!isArticlePresented) {
-			editableArticleLights = [...editableArticleLights, articleLight];
+			editableSeriesContent = [...editableSeriesContent, articleContent];
 		}
 	};
 
@@ -53,7 +58,7 @@
 		removeCounter = 0;
 		setTimeout(async () => {
 			if (isGoingRemove) {
-				// await deleteArticleSeries(articleSeries.id);
+				await deleteArticleSeries(articleSeries.id);
 				isGoingRemove = false;
 				clearCounterIncrease();
 				window.location.href = '/article';
@@ -78,26 +83,26 @@
 	};
 
 	const createPositionUpHandler = (i: number) => () => {
-		if (0 < i && i <= editableArticleLights.length - 1) {
-			const temp = editableArticleLights[i];
-			editableArticleLights[i] = editableArticleLights[i - 1];
-			editableArticleLights[i - 1] = temp;
-			editableArticleLights = [...editableArticleLights];
+		if (0 < i && i <= editableSeriesContent.length - 1) {
+			const temp = editableSeriesContent[i];
+			editableSeriesContent[i] = editableSeriesContent[i - 1];
+			editableSeriesContent[i - 1] = temp;
+			editableSeriesContent = [...editableSeriesContent];
 		}
 	};
 
 	const createPositionDownHandler = (i: number) => () => {
-		if (0 <= i && i < editableArticleLights.length - 1) {
-			const temp = editableArticleLights[i];
-			editableArticleLights[i] = editableArticleLights[i + 1];
-			editableArticleLights[i + 1] = temp;
-			editableArticleLights = [...editableArticleLights];
+		if (0 <= i && i < editableSeriesContent.length - 1) {
+			const temp = editableSeriesContent[i];
+			editableSeriesContent[i] = editableSeriesContent[i + 1];
+			editableSeriesContent[i + 1] = temp;
+			editableSeriesContent = [...editableSeriesContent];
 		}
 	};
 
 	const createPositionRemoveHandler = (i: number) => () => {
-		if (0 <= i && i < editableArticleLights.length) {
-			editableArticleLights = editableArticleLights.filter((article, index) => index !== i);
+		if (0 <= i && i < editableSeriesContent.length) {
+			editableSeriesContent = editableSeriesContent.filter((article, index) => index !== i);
 		}
 	};
 
@@ -124,12 +129,16 @@
 		/>
 		<ArticleSearch on:accept={addArticleToSeriesHandler} />
 		<div class="article-collection">
-			{#each editableArticleLights as article, i (article.id)}
+			{#each describeArticleSeriesContent(editableSeriesContent) as desc, i (desc.content.id + desc.type)}
 				<div class="editable-article-position">
 					<button on:click={createPositionUpHandler(i)}>Up</button>
 					<button on:click={createPositionDownHandler(i)}>Down</button>
 					<button on:click={createPositionRemoveHandler(i)}>Remove</button>
-					<ArticleLight articleLight={article} />
+					{#if desc.type === 'article'}
+						<ArticleLight articleLight={desc.content} />
+					{:else if desc.type === 'series'}
+						<ArticleSeries articleSeries={desc.content} />
+					{/if}
 				</div>
 				<div class="delimiter" />
 			{/each}
@@ -151,8 +160,12 @@
 			{articleSeries.name}
 		</div>
 		<div class="article-collection">
-			{#each articleLights as article}
-				<ArticleLight articleLight={article} />
+			{#each describeArticleSeriesContent(articleSeriesContent) as desc (desc.content.id + desc.type)}
+				{#if desc.type === 'series'}
+					<ArticleSeries articleSeries={desc.content} />
+				{:else}
+					<ArticleLight articleLight={desc.content} />
+				{/if}
 				<div class="delimiter" />
 			{/each}
 		</div>

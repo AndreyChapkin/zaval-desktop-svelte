@@ -171,6 +171,28 @@ export async function getArticleSeries(articleSeriesId: number): Promise<Article
     return result.data;
 }
 
+export async function getArticleSeriesContent(articleSeriesId: number): Promise<(ArticleLightDto | ArticleSeriesDto)[]> {
+    const url = `${baseArticleURL}/series/${articleSeriesId}/content`;
+    const result = await callGet<(ArticleLightDto | ArticleSeriesDto)[]>(url);
+    return result.data;
+}
+
+export async function findAllArticleSeriesWithAllLabels(labelIds: number[]): Promise<ArticleSeriesDto[]> {
+    const url = `${baseArticleURL}/series/with-labels`;
+    const result = await callPost<ArticleSeriesDto[]>(url, {
+        labelIds,
+    });
+    return result.data;
+}
+
+export async function findAllArticleSeriesWithFragment(fragment: string): Promise<ArticleSeriesDto[]> {
+    const url = `${baseArticleURL}/series/with-fragment`;
+    const result = await callGet<ArticleSeriesDto[]>(url, {
+        "fragment": fragment,
+    });
+    return result.data;
+}
+
 export async function getTheMostRecentArticleSeries(number?: number): Promise<ArticleSeriesDto[]> {
     const url = `${baseArticleURL}/series/recent`;
     const result = await callGet<ArticleSeriesDto[]>(url, { number });

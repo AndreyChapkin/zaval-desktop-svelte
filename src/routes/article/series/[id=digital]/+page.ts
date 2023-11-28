@@ -1,4 +1,4 @@
-import { getArticleLightsById, getArticleSeries } from '$lib/api/article-calls';
+import { getArticleSeries, getArticleSeriesContent } from '$lib/api/article-calls';
 import type { ArticleSeriesPageData } from '$lib/types/pages-data';
 
 export const ssr = false;
@@ -11,9 +11,9 @@ export async function load({
 }): Promise<ArticleSeriesPageData> {
 	const articleSeriesId: number = params.id;
 	const articleSeries = await getArticleSeries(articleSeriesId);
-	const articleLights = await getArticleLightsById(articleSeries.articleIds);
+	const articleSeriesContent = await getArticleSeriesContent(articleSeriesId);
 	return {
 		articleSeries,
-		articleLights
+		articleSeriesContent
 	};
 }

@@ -1,19 +1,18 @@
 <script lang="ts">
 	import {
-		createArticleLabel,
-		findAllArticleLabelsWithNameFragment,
+		findAllArticleSeriesWithFragment,
 		findAllArticlesWithTitleFragment,
-		getAllArticleLabels,
-		getTheMostRecentArticleLights
+		getTheMostRecentArticleLights,
+		getTheMostRecentArticleSeries
 	} from '$lib/api/article-calls';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { createEventDispatcher } from 'svelte';
-	import { CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import LoadingIndicator from '../../../../components/LoadingIndicator.svelte';
+	import { compareWithDates, describeArticleSeriesContent } from '$lib/utils/article-helpers';
 
 	// state
 	let isLoading = false;
-	let suggestedArticleLights: ArticleLightDto[] = [];
+	let suggestedArticleContents: (ArticleSeriesDto | ArticleLightDto)[] = [];
 	let searchValue = '';
 	const notTriggeringValue = () => searchValue;
 	const dropSearchValue = () => (searchValue = '');
@@ -40,18 +39,18 @@
 				width: rect.width
 			};
 		}
-		fetchSuggestedArticleLights(notTriggeringValue());
+		fetchSuggestedArticleContents(notTriggeringValue());
 	} else {
 		dropSearchValue();
 	}
 
-	$: if (isLoading || suggestedArticleLights.length < 1) {
+	$: if (isLoading || suggestedArticleContents.length < 1) {
 		selectedItemIndex = null;
 	}
 
 	// events and issuers
 	type EventType = {
-		accept: ArticleLightDto;
+		accept: ArticleLightDto | ArticleSeriesDto;
 		cancel: void;
 	};
 	const dispatch = createEventDispatcher<EventType>();
@@ -84,30 +83,34 @@
 		isOpen = false;
 	};
 
-	const createChooseOptionHandler = (dto: ArticleLightDto) => () => {
+	const createChooseOptionHandler = (dto: ArticleLightDto | ArticleSeriesDto) => () => {
 		dispatch('accept', dto);
 		isOpen = false;
 	};
 
 	// functions
-	const fetchSuggestedArticleLights = async (value: string) => {
+	const fetchSuggestedArticleContents = async (value: string) => {
 		isLoading = true;
 		if (value) {
-			suggestedArticleLights = await findAllArticlesWithTitleFragment(value);
+			const articles = await findAllArticlesWithTitleFragment(value);
+			const series = await findAllArticleSeriesWithFragment(value);
+			suggestedArticleContents = [...articles, ...series].toSorted(compareWithDates);
 		} else {
-			suggestedArticleLights = await getTheMostRecentArticleLights();
+			const articles = await getTheMostRecentArticleLights();
+			const series = await getTheMostRecentArticleSeries();
+			suggestedArticleContents = [...articles, ...series].toSorted(compareWithDates);
 		}
 		isLoading = false;
 	};
 
-	const fetchSuggestedArticlesInhibitly = decreaseNumberOfCalls(fetchSuggestedArticleLights, 800);
+	const fetchSuggestedArticlesInhibitly = decreaseNumberOfCalls(fetchSuggestedArticleContents, 800);
 
 	function moveSelectedIndex(action: 'increase' | 'decrease') {
-		if (suggestedArticleLights.length > 0) {
+		if (suggestedArticleContents.length > 0) {
 			if (selectedItemIndex !== null) {
 				const delta = action === 'increase' ? 1 : -1;
 				const result = selectedItemIndex + delta;
-				if (0 <= result && result < suggestedArticleLights.length) {
+				if (0 <= result && result < suggestedArticleContents.length) {
 					selectedItemIndex = result;
 				}
 			} else {
@@ -141,13 +144,17 @@
 			<div class="suggested-options">
 				{#if isLoading}
 					<LoadingIndicator />
-				{:else if suggestedArticleLights.length > 0}
-					{#each suggestedArticleLights as suggestedArticle, i}
+				{:else if suggestedArticleContents.length > 0}
+					{#each describeArticleSeriesContent(suggestedArticleContents) as suggestedContentDesc, i}
 						<div
 							class={`suggested-option ${i === selectedItemIndex ? 'selected-option' : ''}`}
-							on:click={createChooseOptionHandler(suggestedArticle)}
+							on:click={createChooseOptionHandler(suggestedContentDesc.content)}
 						>
-							{suggestedArticle.title}
+							{#if suggestedContentDesc.type === 'series'}
+								{suggestedContentDesc.content.name}
+							{:else}
+								{suggestedContentDesc.content.title}
+							{/if}
 						</div>
 					{/each}
 				{/if}

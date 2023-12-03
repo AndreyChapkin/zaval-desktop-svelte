@@ -12,12 +12,13 @@
 	import ArticleLabel from './ArticleLabel.svelte';
 
 	// state
-	let isLoading = false;
+	let isLoading = true;
 	let suggestedArticleLabels: ArticleLabelDto[] = [];
 	let searchValue = '';
 	export let chosenArticleLabels: ArticleLabelDto[] = [];
 	let selectedItemIndex: number | null = null;
 	export let autofocus = false;
+	$: suggestCreation = suggestedArticleLabels.length < 1 && searchValue;
 
 	// reactivity
 	$: searchValue, fetchSuggestedLabelsInhibitly(searchValue);
@@ -37,19 +38,21 @@
 	const createClickHandler = async () => {
 		if (searchValue) {
 			isLoading = true;
-			await createArticleLabel({
+			const createdOption = await createArticleLabel({
 				id: -1000, // no matter
 				name: searchValue
 			});
-			fetchSuggestedLabels(searchValue);
+			chooseOption(createdOption);
+			searchValue = '';
 		}
 	};
 
 	const inputKeyupHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Escape') {
 			cancelHandler();
-		} else if (e.code === 'Enter') {
+		} else if (e.code === 'Enter' && suggestCreation) {
 			// TODO
+			createClickHandler();
 		}
 	};
 
@@ -75,7 +78,14 @@
 		dispatch('cancel');
 	};
 
-	const createChooseOptionHandler = (dto: ArticleLabelDto) => () => {
+	const createChooseOptionHandler = (dto: ArticleLabelDto) => () => chooseOption(dto);
+
+	const createRemoveOptionFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
+		chosenArticleLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
+	};
+
+	// functions
+	const chooseOption = (dto: ArticleLabelDto) => {
 		// Add new label to the current labels collection
 		const isPresented = chosenArticleLabels.findIndex((i) => i.id === dto!!.id) > -1;
 		if (!isPresented) {
@@ -83,11 +93,6 @@
 		}
 	};
 
-	const createRemoveOptionFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
-		chosenArticleLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
-	};
-
-	// functions
 	const fetchSuggestedLabels = async (value: string) => {
 		isLoading = true;
 		if (value) {
@@ -204,7 +209,8 @@
 			@include icon-normal-sized;
 		}
 
-		.search-panel, .result-panel {
+		.search-panel,
+		.result-panel {
 			flex: 1;
 			@include column-stretched;
 		}
@@ -218,19 +224,15 @@
 		.suggested-options {
 			@include standard-container;
 			@include bordered(all, $second-light-color, 1px);
-			@include styled-scrollbar;
-			width: 100%;
+			@include scrollable-in-column;
 			overflow-y: auto;
-			// height: 30vh;
 
 			background-color: $second-color;
 			color: $base-contrast-color;
 		}
 
 		@mixin selected-option {
-			@include standard-button;
 			background-color: $second-light-color;
-			padding: $normal-size;
 		}
 
 		.suggested-option {

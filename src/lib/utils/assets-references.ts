@@ -22,4 +22,6 @@ export const HELP_ICON_URL = '/assets/common/help-icon.svg';
 export const REMOVE_ICON_URL = '/assets/common/remove-icon.svg';
 export const ARROW_URL = '/assets/common/arrow.svg';
 export const ARTICLE_ICON_URL = '/assets/article/article-icon.svg';
+export const ADD_ARTICLE_ICON_URL = '/assets/article/add-article-icon.svg';
+export const ADD_SERIES_ICON_URL = '/assets/article/add-series-icon.svg';
 export const CODE_ICON_URL = '/assets/article/code-icon.svg';

@@ -173,6 +173,8 @@
 		:global(.rich-code-block-content) {
 			font-family: 'Courier New', Courier, monospace;
 			padding: 1.5 * $wide-size $wide-size;
+			overflow-x: auto;
+			@include styled-scrollbar;
 		}
 	}
 </style>

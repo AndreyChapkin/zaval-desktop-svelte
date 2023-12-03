@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { createArticle, createArticleSeries } from '$lib/api/article-calls';
-	import ModalWindow from '../../components/ModalWindow.svelte';
+	import { createArticleSeries } from '$lib/api/article-calls';
 
 	// state
 	let name = '';
-	let isOpen = false;
 	let isLoading = false;
 
 	// reactivity
@@ -23,30 +21,15 @@
 			window.location.reload();
 		}
 	};
-
-	const openHandler = () => {
-		isOpen = true;
-	};
-
-	const closeHandler = () => {
-		isOpen = false;
-	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="create-article-series">
-	<button on:click={openHandler}>Add series</button>
-	{#if isOpen}
-		<ModalWindow on:close={closeHandler}>
-			<div class="create-article-series-form">
-				<input
-					type="text"
-					bind:value={name}
-				/>
-				<button on:click={clickCreateHandler}>Create article series</button>
-			</div>
-		</ModalWindow>
-	{/if}
+<div class="create-article-series-form">
+	<input
+		type="text"
+		bind:value={name}
+	/>
+	<button on:click={clickCreateHandler}>Create article series</button>
 </div>
 
 <style lang="scss">
@@ -54,12 +37,6 @@
 	@import '/static/style/common/size/';
 	@import '/static/style/common/composition/';
 	@import '/static/style/common/facade/';
-
-	.create-article-series {
-		button {
-			@include standard-button;
-		}
-	}
 
 	.create-article-series-form {
 		@include column($large-size);

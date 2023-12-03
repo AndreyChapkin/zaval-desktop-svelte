@@ -125,31 +125,33 @@
 					on:click={() => (shownInfo = 'history')}>History</button
 				>
 			</div>
-			{#if shownInfo === 'description'}
-				{#if isDescriptionEditable}
-					<RichEditor
-						richContent={mainDetailedTodoDto.description}
-						on:save={saveContentEditionHandler}
-						on:cancel={cancelContentEditionHandler}
-					/>
+			{#key mainDetailedTodoDto}
+				{#if shownInfo === 'description'}
+					{#if isDescriptionEditable}
+						<RichEditor
+							richContent={mainDetailedTodoDto.description}
+							on:save={saveContentEditionHandler}
+							on:cancel={cancelContentEditionHandler}
+						/>
+					{:else}
+						<div class="description-interaction-panel">
+							<button on:click={editHandler}>
+								<img
+									src={EDIT_ICON_URL}
+									alt="status"
+								/>
+							</button>
+						</div>
+						<RichText richText={mainDetailedTodoDto.description} />
+					{/if}
 				{:else}
-					<div class="description-interaction-panel">
-						<button on:click={editHandler}>
-							<img
-								src={EDIT_ICON_URL}
-								alt="status"
-							/>
-						</button>
-					</div>
-					<RichText richText={mainDetailedTodoDto.description} />
+					<TodoHistory
+						todoId={data.detailedTodoDto.id}
+						records={data.todoHistoryRecords ?? []}
+						on:save={historySaveHandler}
+					/>
 				{/if}
-			{:else}
-				<TodoHistory
-					todoId={data.detailedTodoDto.id}
-					records={data.todoHistoryRecords ?? []}
-					on:save={historySaveHandler}
-				/>
-			{/if}
+			{/key}
 		</div>
 	</SplitPane>
 	<div class="parents-block">

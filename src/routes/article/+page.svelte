@@ -13,16 +13,25 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { MultipleArticlesPageData } from '$lib/types/pages-data';
 	import { compareWithDates, describeArticleSeriesContent } from '$lib/utils/article-helpers';
+	import {
+		ADD_ARTICLE_ICON_URL,
+		ADD_SERIES_ICON_URL,
+		CANCEL_ICON_URL,
+		EDIT_ICON_URL
+	} from '$lib/utils/assets-references';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import LoadingIndicator from '../components/LoadingIndicator.svelte';
+	import ModalWindow from '../components/ModalWindow.svelte';
 	import SplitPane from '../components/SplitPane.svelte';
 	import ArticleLabel from './components/ArticleLabel.svelte';
 	import ArticleLabelCombination from './components/ArticleLabelCombination.svelte';
 	import ArticleLabelSearch from './components/ArticleLabelSearch.svelte';
+	import ArticleLabelSearchModal from './components/ArticleLabelSearchModal.svelte';
 	import ArticleLight from './components/ArticleLight.svelte';
 	import ArticleSeries from './components/ArticleSeries.svelte';
-	import CreateArticle from './components/CreateArticle.svelte';
-	import CreateArticleSeries from './components/CreateArticleSeries.svelte';
+	import CreateArticleForm from './components/CreateArticleForm.svelte';
+	import CreateArticleSeriesForm from './components/CreateArticleSeriesForm.svelte';
+	import CreateArticleSeries from './components/CreateArticleSeriesForm.svelte';
 
 	// state
 	export let data: MultipleArticlesPageData;
@@ -34,6 +43,8 @@
 	let isChoosingLabels = false;
 	let chosenArticleLabels: ArticleLabelDto[] = [];
 	let chosenLabelsCombination: FilledLabelsCombinationDto | null = null;
+	let isCreatingArticle = false;
+	let isCreatingSeries = false;
 	const dropLabels = () => {
 		if (chosenArticleLabels.length > 0) {
 			chosenArticleLabels = [];
@@ -127,7 +138,7 @@
 			isLoading = true;
 			const articleLights = await findAllArticlesWithAllLabels(effectiveLabelIds);
 			const articleSeries = await findAllArticleSeriesWithAllLabels(effectiveLabelIds);
-			if (articleLights.length > 0 && articleSeries.length > 0) {
+			if (articleLights.length > 0 || articleSeries.length > 0) {
 				if (chosenLabelsCombination === null) {
 					// If it was new labels combination and some articles are fetched then remember that combination
 					await createLabelsCombination(effectiveLabelIds);
@@ -159,27 +170,63 @@
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
 <div class="multiple-articles-page">
 	<SplitPane contextName="MultipleArticlesPage-0">
-		<SplitPane
+		<div
 			slot="first"
-			type="vertical"
-			contextName="MultipleArticlesPage"
+			class="top-labels-combinations"
 		>
-			<div
-				slot="first"
-				class="article-labels-panel"
-			>
+			{#each topLabelsCombinations as articleLabelCombination}
+				<ArticleLabelCombination
+					{articleLabelCombination}
+					on:pick={pickCombinationHandler}
+					on:remove={removeCombinationHandler}
+				/>
+			{/each}
+		</div>
+		<div
+			slot="second"
+			class="article-panel"
+		>
+			<div class="article-interactive-panel">
+				<button on:click={() => (isCreatingArticle = true)}>
+					<img
+						src={ADD_ARTICLE_ICON_URL}
+						alt="status"
+					/>
+				</button>
+				<button on:click={() => (isCreatingSeries = true)}>
+					<img
+						src={ADD_SERIES_ICON_URL}
+						alt="status"
+					/>
+				</button>
+				<input
+					class="title-search"
+					type="text"
+					bind:value={articleSearchFragment}
+				/>
+			</div>
+			<div class="article-labels-panel">
 				<div class="article-labels-interaction-panel">
 					{#if isChoosingLabels}
-						<ArticleLabelSearch
-							isOpen={true}
+						<ArticleLabelSearchModal
 							autofocus={true}
 							{chosenArticleLabels}
 							on:cancel={cancelChoosingLabelsHandler}
 							on:accept={acceptChosenArticleLabelsHandler}
 						/>
 					{:else}
-						<button on:click={startChoosingLabelsHandler}>Choose labels</button>
-						<button on:click={clearLabelsHandler}>Clear labels</button>
+						<button on:click={startChoosingLabelsHandler}>
+							<img
+								src={EDIT_ICON_URL}
+								alt="status"
+							/>
+						</button>
+						<button on:click={clearLabelsHandler}>
+							<img
+								src={CANCEL_ICON_URL}
+								alt="status"
+							/>
+						</button>
 					{/if}
 				</div>
 				<div class="article-label-search-collection">
@@ -191,33 +238,6 @@
 						/>
 					{/each}
 				</div>
-			</div>
-			<div
-				slot="second"
-				class="top-labels-combinations"
-			>
-				{#each topLabelsCombinations as articleLabelCombination}
-					<ArticleLabelCombination
-						{articleLabelCombination}
-						on:pick={pickCombinationHandler}
-						on:remove={removeCombinationHandler}
-					/>
-					<div class="delimiter" />
-				{/each}
-			</div>
-		</SplitPane>
-		<div
-			slot="second"
-			class="article-panel"
-		>
-			<div class="article-interactive-panel">
-				<CreateArticle />
-				<CreateArticleSeries />
-				<input
-					class="title-search"
-					type="text"
-					bind:value={articleSearchFragment}
-				/>
 			</div>
 			<div class="article-contents">
 				{#if isLoading}
@@ -234,6 +254,16 @@
 			</div>
 		</div>
 	</SplitPane>
+	{#if isCreatingArticle}
+		<ModalWindow on:close={() => (isCreatingArticle = false)}>
+			<CreateArticleForm />
+		</ModalWindow>
+	{/if}
+	{#if isCreatingSeries}
+		<ModalWindow on:close={() => (isCreatingSeries = false)}>
+			<CreateArticleSeriesForm />
+		</ModalWindow>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -248,23 +278,11 @@
 		@include column;
 
 		button {
-			@include standard-button;
+			@include menu-button;
 		}
 
-		.delimiter {
-			height: 2px;
-			background-color: $second-light-color;
-			margin: $wide-size 0;
-		}
-
-		.article-labels-panel {
-			@include column($normal-size);
-			padding: $normal-size;
-
-			.article-labels-interaction-panel {
-				@include row-start($normal-size);
-				margin-bottom: $large-size;
-			}
+		img {
+			@include icon-normal-sized;
 		}
 
 		:global(.article-label-search) {
@@ -278,11 +296,14 @@
 
 		.top-labels-combinations {
 			padding: $normal-size;
+
+			:global(.article-label-combination) {
+				margin-bottom: $large-size;
+			}
 		}
 
 		.article-interactive-panel {
-			@include row-centered($normal-size);
-			margin-bottom: $large-size;
+			@include row-centered-and-align-center($normal-size);
 
 			input {
 				flex: 1;
@@ -290,9 +311,19 @@
 			}
 		}
 
-		.article-label-search-collection {
+		.article-labels-panel {
 			@include row($normal-size);
-			flex-wrap: wrap;
+			align-items: center;
+			padding: $normal-size;
+
+			.article-labels-interaction-panel {
+				@include row-start($normal-size);
+			}
+
+			.article-label-search-collection {
+				@include row($normal-size);
+				flex-wrap: wrap;
+			}
 		}
 
 		.article-contents {

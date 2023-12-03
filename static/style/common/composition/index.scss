@@ -5,7 +5,15 @@
 }
 
 @mixin row-centered($gap: 0px) {
-	@apply flex flex-row items-center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: $gap;
+}
+
+@mixin row-align-center($gap: 0px) {
+	display: flex;
+	align-items: center;
 	gap: $gap;
 }
 
@@ -79,6 +87,11 @@
 	flex: 1;
 	min-height: 0px;
 	overflow-y: auto;
+	@include styled-scrollbar;
+}
+
+@mixin scrollable-in-column-horizontally() {
+	overflow-x: auto;
 	@include styled-scrollbar;
 }
 

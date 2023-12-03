@@ -92,15 +92,14 @@
 		@include standard-container;
 		background-color: $strong-second-darker-color;
 		color: $base-contrast-color;
-		
-
-		.label-name {
-			min-width: 150px;
-		}
 
 		img {
 			@include icon-normal-sized;
 		}
+	}
+
+	.label-name {
+		flex: 1;
 	}
 
 	.article-label-menu {

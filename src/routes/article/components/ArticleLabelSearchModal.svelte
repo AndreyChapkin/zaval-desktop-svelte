@@ -1,15 +1,17 @@
 <script lang="ts">
 	import {
 		createArticleLabel,
+		deleteArticleLabel,
 		findAllArticleLabelsWithNameFragment,
 		getAllArticleLabels
 	} from '$lib/api/article-calls';
-	import { CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import { CANCEL_ICON_URL, REMOVE_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
 	import ModalWindow from '../../components/ModalWindow.svelte';
 	import ArticleLabel from './ArticleLabel.svelte';
+	import RemoveAcceptance from '../../components/RemoveAcceptance.svelte';
 
 	// state
 	let isLoading = true;
@@ -20,6 +22,8 @@
 	export let chosenArticleLabels: ArticleLabelDto[] = [];
 	let selectedItemIndex: number | null = null;
 	$: suggestCreation = suggestedArticleLabels.length < 1 && searchValue;
+	let labelToRemove: ArticleLabelDto | null = null;
+	$: isRemovingLabel = !!labelToRemove;
 
 	// reactivity
 	$: searchValue, fetchSuggestedLabelsInhibitly(searchValue);
@@ -31,7 +35,9 @@
 	$: {
 		// scroll selected item into view
 		if (selectedItemIndex !== null) {
-			let selectedOptionElement = suggestedOptionsElement.children[selectedItemIndex] as HTMLElement;
+			let selectedOptionElement = suggestedOptionsElement.children[
+				selectedItemIndex
+			] as HTMLElement;
 			selectedOptionElement.scrollIntoView();
 		}
 	}
@@ -42,14 +48,14 @@
 		// add listener to accept result on Alt + S combination
 		const globalAcceptListener = (event: KeyboardEvent) => {
 			if (event.altKey) {
-				if (event.code === "KeyS") {
+				if (event.code === 'KeyS') {
 					acceptHandler();
 				}
 			}
 		};
-		window.addEventListener("keyup", globalAcceptListener);
+		window.addEventListener('keyup', globalAcceptListener);
 		return () => {
-			window.removeEventListener("keyup", globalAcceptListener);
+			window.removeEventListener('keyup', globalAcceptListener);
 		};
 	});
 
@@ -108,7 +114,15 @@
 		dispatch('cancel');
 	};
 
-	const createChooseOptionHandler = (dto: ArticleLabelDto) => () => chooseOption(dto);
+	const createChooseOptionHandler = (dto: ArticleLabelDto) => (event: MouseEvent) => {
+		if (event.target === event.currentTarget) {
+			chooseOption(dto);
+		}		
+	}
+
+	const createSubmitLabelToDeletionHandler = (dto: ArticleLabelDto) => () => {
+		labelToRemove = dto;
+	};
 
 	const createRemoveOptionFromCollectionHandler = (articleLabel: ArticleLabelDto) => () => {
 		chosenArticleLabels = chosenArticleLabels.filter((label) => label.id !== articleLabel.id);
@@ -148,6 +162,14 @@
 			}
 		}
 	}
+
+	const removeLabel = async () => {
+		isLoading = true;
+		const removingLabel = labelToRemove!!;
+		labelToRemove = null;
+		await deleteArticleLabel(removingLabel?.id);
+		fetchSuggestedLabels(searchValue);
+	};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -171,7 +193,18 @@
 							class={`suggested-option ${i === selectedItemIndex ? 'selected-option' : ''}`}
 							on:click={createChooseOptionHandler(suggestedArticleLabel)}
 						>
-							{suggestedArticleLabel.name}
+							<div class="suggested-option-name">
+								{suggestedArticleLabel.name}
+							</div>
+							<button
+								class="suggested-option-remove"
+								on:click={createSubmitLabelToDeletionHandler(suggestedArticleLabel)}
+							>
+								<img
+									src={REMOVE_ICON_URL}
+									alt="status"
+								/>
+							</button>
 						</div>
 					{/each}
 				{:else if searchValue}
@@ -212,6 +245,12 @@
 			</div>
 		</div>
 	</div>
+	{#if isRemovingLabel}
+		<RemoveAcceptance
+			on:accept={removeLabel}
+			on:cancel={() => (labelToRemove = null)}
+		/>
+	{/if}
 </ModalWindow>
 
 <style lang="scss">
@@ -266,11 +305,13 @@
 		}
 
 		.suggested-option {
+			@include row-justify-and-align-center($normal-size);
+			padding: $normal-size;
+			cursor: pointer;
+
 			&:hover {
 				background-color: $second-light-color;
 			}
-
-			padding: $normal-size;
 		}
 
 		.selected-option {

@@ -69,6 +69,13 @@
 	gap: $gap;
 }
 
+@mixin row-justify-and-align-center($gap: 0px) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: $gap;
+}
+
 @mixin column($gap: 0px) {
 	display: flex;
 	flex-direction: column;

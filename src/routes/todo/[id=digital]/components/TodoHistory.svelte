@@ -125,7 +125,7 @@
 			background-color: $second-color;
 			padding: $small-size;
 
-			@include row-center($normal-size);
+			@include row-start-and-align-center($normal-size);
 
 			img {
 				@include icon-normal-sized;
@@ -147,7 +147,7 @@
 			margin-bottom: $wide-size;
 			color: $base-contrast-color;
 			padding-bottom: $small-size;
-			@include row-center($normal-size);
+			@include row-start-and-align-center($normal-size);
 			@include bordered(bottom, $base-light-color, $border-small-size);
 
 			img {

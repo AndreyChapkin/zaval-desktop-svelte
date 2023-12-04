@@ -9,6 +9,7 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { ArticlePageData } from '$lib/types/pages-data';
 	import { EDIT_ICON_URL, REMOVE_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
+	import RemoveAcceptance from '../../components/RemoveAcceptance.svelte';
 	import RichEditor from '../../components/RichEditor.svelte';
 	import RichText from '../../components/RichText.svelte';
 	import SplitPane from '../../components/SplitPane.svelte';
@@ -16,19 +17,16 @@
 	import ArticleLabelSearchModal from '../components/ArticleLabelSearchModal.svelte';
 
 	// const
-	const REMOVE_TIMEOUT_MS = 3000;
 
 	// state
 	export let data: ArticlePageData;
 	let isContentEditable: boolean = false;
 	let isChangingLabels: boolean = false;
-	let articleLight = data.articleLight;
-	let title: string = articleLight.title;
-	let content: string = data.articleContent.content;
-	let articleLabels: ArticleLabelDto[] = data.articleLabels;
-	let isGoingRemove = false;
-	let removeCounter = 0;
-	let counterIncreaserId: number | null = null;
+	$: articleLight = data.articleLight;
+	$: title = articleLight.title;
+	$: content = data.articleContent.content;
+	$: articleLabels = data.articleLabels;
+	let isSuggestingRemovement = false;
 
 	// handlers
 	const editHandler = () => {
@@ -50,12 +48,9 @@
 		}).then(() => window.location.reload());
 	};
 
-	const saveComplexArticleHandler = () => {
-		const editedContent = flushRichEditor();
-		updateArticle(data.articleLight.id, {
-			title,
-			content: editedContent
-		}).then(() => window.location.reload());
+	const removeArticleHandler = async () => {
+		await deleteArticle(articleLight.id);
+		window.location.href = '/article';
 	};
 
 	const cancelArticleEditionHandler = (cancelEvent: CustomSvelteEvent<void>) => {
@@ -97,35 +92,6 @@
 		await refreshLabels();
 	};
 
-	const removeMouseDownHandler = () => {
-		isGoingRemove = true;
-		removeCounter = 0;
-		setTimeout(async () => {
-			if (isGoingRemove) {
-				await deleteArticle(articleLight.id);
-				isGoingRemove = false;
-				clearCounterIncrease();
-				window.location.href = '/article';
-			}
-		}, REMOVE_TIMEOUT_MS);
-		// counter
-		const COUNTER_TIMEOUT_MS = 1000;
-		const increaseCounter = () => {
-			if (isGoingRemove) {
-				removeCounter = removeCounter + 1;
-				counterIncreaserId = setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
-			} else {
-				clearCounterIncrease();
-			}
-		};
-		setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
-	};
-
-	const removeMouseUpHandler = async () => {
-		isGoingRemove = false;
-		clearCounterIncrease();
-	};
-
 	// function
 	let flushRichEditor: () => string;
 
@@ -148,14 +114,6 @@
 	async function refreshLabels() {
 		const freshLabels = await getArticleLabels(articleLight.id);
 		articleLabels = freshLabels;
-	}
-
-	function clearCounterIncrease() {
-		removeCounter = 0;
-		if (counterIncreaserId != null) {
-			clearTimeout(counterIncreaserId);
-			counterIncreaserId = null;
-		}
 	}
 </script>
 
@@ -180,17 +138,13 @@
 					</button>
 					<button
 						class="remove-button"
-						on:mousedown={removeMouseDownHandler}
-						on:mouseup={removeMouseUpHandler}
+						on:mouseup={() => (isSuggestingRemovement = true)}
 					>
 						<img
 							src={REMOVE_ICON_URL}
 							alt="status"
 						/>
 					</button>
-					{#if isGoingRemove}
-						<div class="remove-counter">{removeCounter}</div>
-					{/if}
 				{/if}
 			</div>
 			<div class="content-titles">
@@ -249,6 +203,12 @@
 			<ArticleLabel {articleLabel} />
 		{/each}
 	</div>
+	{#if isSuggestingRemovement}
+		<RemoveAcceptance
+			on:accept={removeArticleHandler}
+			on:cancel={() => (isSuggestingRemovement = false)}
+		/>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -274,7 +234,7 @@
 		}
 
 		.observe-panel {
-			@include column-stretched($wide-size);
+			@include column-stretch($wide-size);
 			padding: $wide-size;
 
 			.interaction-panel {
@@ -350,12 +310,6 @@
 
 		.article-interaction-panel {
 			@include row;
-		}
-
-		.remove-counter {
-			@include standard-container;
-			padding: $small-size $normal-size;
-			background-color: $strong-color;
 		}
 
 		.remove-button {

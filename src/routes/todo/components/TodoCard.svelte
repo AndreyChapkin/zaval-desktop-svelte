@@ -122,7 +122,7 @@
 		min-height: 70px;
 		@include bordered(all, $second-light-color, 2px);
 
-		@include row-start($large-size);
+		@include row-start-and-align-start($large-size);
 		border-radius: $normal-size;
 
 		.todo-interaction-panel {
@@ -130,7 +130,7 @@
 			background-color: $base-light-color;
 			border-radius: 1.5 * $normal-size;
 			padding: 0.8 * $normal-size;
-			@include column-centered($normal-size);
+			@include column-center($normal-size);
 
 			.go-to-todo,
 			.edit-menu {
@@ -159,12 +159,12 @@
 		}
 
 		.todo-info {
-
-			@apply flex-1;
-			@include column-justifyied;
+			flex: 1;
+			align-self: stretch;
+			@include column-start-and-stretch($large-size);
 
 			.additional-info {
-				@include row($normal-size);
+				@include row-start-and-stretch($large-size);
 				font-size: smaller;
 				color: $base-weak-contrast-color;
 			}

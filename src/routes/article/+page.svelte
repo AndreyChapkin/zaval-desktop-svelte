@@ -25,13 +25,11 @@
 	import SplitPane from '../components/SplitPane.svelte';
 	import ArticleLabel from './components/ArticleLabel.svelte';
 	import ArticleLabelCombination from './components/ArticleLabelCombination.svelte';
-	import ArticleLabelSearch from './components/ArticleLabelSearch.svelte';
 	import ArticleLabelSearchModal from './components/ArticleLabelSearchModal.svelte';
 	import ArticleLight from './components/ArticleLight.svelte';
 	import ArticleSeries from './components/ArticleSeries.svelte';
 	import CreateArticleForm from './components/CreateArticleForm.svelte';
 	import CreateArticleSeriesForm from './components/CreateArticleSeriesForm.svelte';
-	import CreateArticleSeries from './components/CreateArticleSeriesForm.svelte';
 
 	// state
 	export let data: MultipleArticlesPageData;
@@ -207,20 +205,13 @@
 			</div>
 			<div class="article-labels-panel">
 				<div class="article-labels-interaction-panel">
-					{#if isChoosingLabels}
-						<ArticleLabelSearchModal
-							autofocus={true}
-							{chosenArticleLabels}
-							on:cancel={cancelChoosingLabelsHandler}
-							on:accept={acceptChosenArticleLabelsHandler}
+					<button on:click={startChoosingLabelsHandler}>
+						<img
+							src={EDIT_ICON_URL}
+							alt="status"
 						/>
-					{:else}
-						<button on:click={startChoosingLabelsHandler}>
-							<img
-								src={EDIT_ICON_URL}
-								alt="status"
-							/>
-						</button>
+					</button>
+					{#if chosenArticleLabels.length > 0}
 						<button on:click={clearLabelsHandler}>
 							<img
 								src={CANCEL_ICON_URL}
@@ -264,6 +255,13 @@
 			<CreateArticleSeriesForm />
 		</ModalWindow>
 	{/if}
+	{#if isChoosingLabels}
+		<ArticleLabelSearchModal
+			{chosenArticleLabels}
+			on:cancel={cancelChoosingLabelsHandler}
+			on:accept={acceptChosenArticleLabelsHandler}
+		/>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -303,7 +301,7 @@
 		}
 
 		.article-interactive-panel {
-			@include row-centered-and-align-center($normal-size);
+			@include row-center-and-align-center($normal-size);
 
 			input {
 				flex: 1;
@@ -312,9 +310,9 @@
 		}
 
 		.article-labels-panel {
-			@include row($normal-size);
-			align-items: center;
-			padding: $normal-size;
+			@include row-start-and-align-center($normal-size);
+			// padding: $normal-size;
+			margin: $wide-size 0;
 
 			.article-labels-interaction-panel {
 				@include row-start($normal-size);
@@ -326,15 +324,16 @@
 			}
 		}
 
+		$article-light-min-width: 300px;
+
 		.article-contents {
-			@include row-start-and-align-start($wide-size);
 			flex: 1;
-			flex-wrap: wrap;
+			@include responsive-grid($article-light-min-width, $large-size, $wide-size);
 			@include scrollable-in-column;
 
 			:global(.article-light) {
 				flex: 1;
-				min-width: 300px;
+				min-width: $article-light-min-width;
 			}
 		}
 

@@ -53,7 +53,7 @@
 	.article-light {
 		@include standard-container;
 		@include min-max-width(250px, 600px);
-		@include row-start($large-size);
+		@include row-start-and-align-start($large-size);
 		background-color: adjust-color($strong-second-color, $alpha: -0.7);
 		color: $base-contrast-color;
 		border-width: 2px;
@@ -63,7 +63,7 @@
 			background-color: $strong-second-dark-color;
 			border-radius: 1.5 * $normal-size;
 			padding: 0.8 * $normal-size;
-			@include column-centered($normal-size);
+			@include column-center($normal-size);
 
 			.go-to-article,
 			.edit-menu {

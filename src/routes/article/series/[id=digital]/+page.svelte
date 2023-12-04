@@ -3,24 +3,22 @@
 	import type { CustomSvelteEvent } from '$lib/types/general';
 	import type { ArticleSeriesPageData } from '$lib/types/pages-data';
 	import { describeArticleSeriesContent } from '$lib/utils/article-helpers';
+	import RemoveAcceptance from '../../../components/RemoveAcceptance.svelte';
 	import ArticleLight from '../../components/ArticleLight.svelte';
 	import ArticleSeries from '../../components/ArticleSeries.svelte';
 	import ArticleSearch from './components/ArticleSearch.svelte';
 
 	// const
-	const REMOVE_TIMEOUT_MS = 3000;
 
 	// state
 	export let data: ArticleSeriesPageData;
 	$: articleSeries = data.articleSeries;
 	$: articleSeriesContent = data.articleSeriesContent ?? [];
-	$: name = articleSeries.name ?? "";
+	$: name = articleSeries.name ?? '';
 	$: editableName = name;
 	$: editableSeriesContent = [...articleSeriesContent];
 	let isEditable = false;
-	let isGoingRemove = false;
-	let removeCounter = 0;
-	let counterIncreaserId: number | null = null;
+	let isRemoving = false;
 
 	// handlers
 	const editHandler = () => {
@@ -53,33 +51,10 @@
 		}
 	};
 
-	const removeMouseDownHandler = () => {
-		isGoingRemove = true;
-		removeCounter = 0;
-		setTimeout(async () => {
-			if (isGoingRemove) {
-				await deleteArticleSeries(articleSeries.id);
-				isGoingRemove = false;
-				clearCounterIncrease();
-				window.location.href = '/article';
-			}
-		}, REMOVE_TIMEOUT_MS);
-		// counter
-		const COUNTER_TIMEOUT_MS = 1000;
-		const increaseCounter = () => {
-			if (isGoingRemove) {
-				removeCounter = removeCounter + 1;
-				counterIncreaserId = setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
-			} else {
-				clearCounterIncrease();
-			}
-		};
-		setTimeout(increaseCounter, COUNTER_TIMEOUT_MS);
-	};
-
-	const removeMouseUpHandler = async () => {
-		isGoingRemove = false;
-		clearCounterIncrease();
+	const removeHandler = async () => {
+		await deleteArticleSeries(articleSeries.id);
+		isRemoving = false;
+		window.location.href = '/article';
 	};
 
 	const createPositionUpHandler = (i: number) => () => {
@@ -107,13 +82,6 @@
 	};
 
 	// function
-	function clearCounterIncrease() {
-		removeCounter = 0;
-		if (counterIncreaserId != null) {
-			clearTimeout(counterIncreaserId);
-			counterIncreaserId = null;
-		}
-	}
 </script>
 
 <!-- TODO: use https://svelte.dev/tutorial/svelte-component -->
@@ -146,15 +114,7 @@
 	{:else}
 		<div class="interaction-panel">
 			<button on:click={editHandler}>Edit</button>
-			<button
-				on:mousedown={removeMouseDownHandler}
-				on:mouseup={removeMouseUpHandler}
-			>
-				Remove
-			</button>
-			{#if isGoingRemove}
-				<div class="remove-counter">{removeCounter}</div>
-			{/if}
+			<button on:mouseup={() => (isRemoving = true)}> Remove </button>
 		</div>
 		<div class="article-series-name">
 			{articleSeries.name}
@@ -169,6 +129,12 @@
 				<div class="delimiter" />
 			{/each}
 		</div>
+	{/if}
+	{#if isRemoving}
+		<RemoveAcceptance
+			on:accept={removeHandler}
+			on:cancel={() => (isRemoving = false)}
+		/>
 	{/if}
 </div>
 
@@ -212,11 +178,11 @@
 		}
 
 		.editable-article-position {
-			@include row-centered($normal-size);
+			@include row-center($normal-size);
 		}
 
 		.observe-panel {
-			@include column-stretched($wide-size);
+			@include column-stretch($wide-size);
 			padding: $wide-size;
 
 			.article-labels {
@@ -255,14 +221,9 @@
 		}
 
 		.article-interaction-panel {
-			@include row-justifyied;
+			@include row-justify;
 		}
-
-		.remove-counter {
-			@include standard-container;
-			background-color: $strong-color;
-		}
-
+		
 		:global(.rich-editor) {
 			@include scrollable-in-column;
 		}

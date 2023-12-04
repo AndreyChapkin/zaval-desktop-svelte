@@ -75,7 +75,7 @@
 
 		@include bordered($color: $base-color, $size: $border-small-size);
 		@include screen-sized(80, 80);
-		@include column-stretched($wide-size);
+		@include column-stretch($wide-size);
 	}
 
 	.search-input {

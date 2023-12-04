@@ -208,7 +208,7 @@
 			@include column;
 
 			.info-switch-panel {
-				@include row-centered($normal-size);
+				@include row-start-and-align-center($normal-size);
 
 				button {
 					color: $base-contrast-color;
@@ -218,7 +218,7 @@
 
 			.description-interaction-panel {
 				background-color: $second-color;
-				@include row-centered;
+				@include row-start-and-align-center;
 				padding: $small-size;
 
 				img {
@@ -240,7 +240,7 @@
 		.parent-todos,
 		.children-todos-body {
 			padding: $wide-size;
-			@include column-stretched;
+			@include column-stretch;
 		}
 
 		.parents-block {

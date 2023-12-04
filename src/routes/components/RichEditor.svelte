@@ -481,7 +481,7 @@
 			padding: $small-size;
 			color: $base-contrast-color;
 
-			@include row-centered($normal-size);
+			@include row-start-and-align-center($normal-size);
 
 			img {
 				@include icon-normal-sized;

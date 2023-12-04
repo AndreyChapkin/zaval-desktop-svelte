@@ -4,6 +4,7 @@
 	import { returnParentId } from '$lib/utils/todo-helpers';
 	import { createEventDispatcher } from 'svelte';
 	import ModalWindow from '../../../components/ModalWindow.svelte';
+	import RemoveAcceptance from '../../../components/RemoveAcceptance.svelte';
 	import TodoStatusMenu from './TodoStatusMenu.svelte';
 
 	// data
@@ -11,6 +12,7 @@
 	let editName: string = todoDto?.name ?? '';
 	let editStatus: TodoStatus = todoDto?.status ?? 'BACKLOG';
 	let editPriority: number = todoDto?.priority ?? 0;
+	let isRemoving = false;
 	let isCreateMode = todoDto === null;
 
 	// components
@@ -59,12 +61,11 @@
 	const createHandler = () => {
 		requestTodoCreate();
 	};
+	
 	const updateHandler = () => {
 		requestTodoUpdate();
 	};
-	const deleteEventIssuer = () => {
-		requestTodoDelete();
-	};
+
 	const enterKeyHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Enter') {
 			if (isCreateMode) {
@@ -141,7 +142,7 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					class="todo-menu-action"
-					on:click={deleteEventIssuer}
+					on:click={() => (isRemoving = true)}
 				>
 					Delete
 				</div>
@@ -156,6 +157,12 @@
 			{/if}
 		</div>
 	</div>
+	{#if isRemoving}
+		<RemoveAcceptance
+			on:accept={requestTodoDelete}
+			on:cancel={() => (isRemoving = false)}
+		/>
+	{/if}
 </ModalWindow>
 
 <style lang="scss">
@@ -172,10 +179,10 @@
 
 		@include bordered($color: $base-color, $size: $border-small-size);
 		@include screen-sized(80, 80);
-		@include column-stretched($wide-size);
+		@include column-stretch($wide-size);
 
 		.edit-pane {
-			@include column-stretched($normal-size);
+			@include column-stretch($normal-size);
 
 			input {
 				@include standard-input;
@@ -186,7 +193,7 @@
 			}
 		}
 		.action-pane {
-			@include row-centered($normal-size);
+			@include row-start($normal-size);
 
 			.todo-menu-action {
 				@include standard-button;

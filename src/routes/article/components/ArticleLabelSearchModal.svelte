@@ -6,7 +6,7 @@
 	} from '$lib/api/article-calls';
 	import { CANCEL_ICON_URL, SAVE_ICON_URL } from '$lib/utils/assets-references';
 	import { decreaseNumberOfCalls } from '$lib/utils/function-helpers';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import LoadingIndicator from '../../components/LoadingIndicator.svelte';
 	import ModalWindow from '../../components/ModalWindow.svelte';
 	import ArticleLabel from './ArticleLabel.svelte';
@@ -15,9 +15,10 @@
 	let isLoading = true;
 	let suggestedArticleLabels: ArticleLabelDto[] = [];
 	let searchValue = '';
+	let inputElement: HTMLInputElement;
+	let suggestedOptionsElement: HTMLInputElement;
 	export let chosenArticleLabels: ArticleLabelDto[] = [];
 	let selectedItemIndex: number | null = null;
-	export let autofocus = false;
 	$: suggestCreation = suggestedArticleLabels.length < 1 && searchValue;
 
 	// reactivity
@@ -26,6 +27,31 @@
 	$: if (isLoading || suggestedArticleLabels.length < 1) {
 		selectedItemIndex = null;
 	}
+
+	$: {
+		// scroll selected item into view
+		if (selectedItemIndex !== null) {
+			let selectedOptionElement = suggestedOptionsElement.children[selectedItemIndex] as HTMLElement;
+			selectedOptionElement.scrollIntoView();
+		}
+	}
+
+	// lifecycle
+	onMount(() => {
+		inputElement.focus();
+		// add listener to accept result on Alt + S combination
+		const globalAcceptListener = (event: KeyboardEvent) => {
+			if (event.altKey) {
+				if (event.code === "KeyS") {
+					acceptHandler();
+				}
+			}
+		};
+		window.addEventListener("keyup", globalAcceptListener);
+		return () => {
+			window.removeEventListener("keyup", globalAcceptListener);
+		};
+	});
 
 	// events and issuers
 	type EventType = {
@@ -50,9 +76,13 @@
 	const inputKeyupHandler = (e: KeyboardEvent) => {
 		if (e.code === 'Escape') {
 			cancelHandler();
-		} else if (e.code === 'Enter' && suggestCreation) {
-			// TODO
-			createClickHandler();
+		} else if (e.code === 'Enter') {
+			if (selectedItemIndex !== null) {
+				const selectedLabelDto = suggestedArticleLabels[selectedItemIndex];
+				chooseOption(selectedLabelDto);
+			} else if (suggestCreation) {
+				createClickHandler();
+			}
 		}
 	};
 
@@ -127,7 +157,7 @@
 			<input
 				class="search-name-fragment"
 				type="text"
-				{autofocus}
+				bind:this={inputElement}
 				bind:value={searchValue}
 				on:keyup={inputKeyupHandler}
 				on:keydown={inputKeydownHandler}
@@ -212,7 +242,7 @@
 		.search-panel,
 		.result-panel {
 			flex: 1;
-			@include column-stretched;
+			@include column-stretch;
 		}
 
 		.result-panel {
@@ -232,12 +262,12 @@
 		}
 
 		@mixin selected-option {
-			background-color: $second-light-color;
+			background-color: $second-lighter-color;
 		}
 
 		.suggested-option {
 			&:hover {
-				@include selected-option();
+				background-color: $second-light-color;
 			}
 
 			padding: $normal-size;

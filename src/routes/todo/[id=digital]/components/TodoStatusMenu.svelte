@@ -85,7 +85,7 @@
 	@import '/static/style/todo-variables.scss';
 
 	.todo-status-menu {
-		@include row-stretched;
+		@include row-stretch;
 
 		img {
 			@include icon-normal-sized;
@@ -96,7 +96,7 @@
 			cursor: pointer;
 			background-color: $second-light-color;
 			padding: $normal-size $wide-size $normal-size $wide-size;
-			@include row-centered($small-size);
+			@include row-start-and-align-center($small-size);
 		}
 
 		.current-status {

@@ -99,17 +99,17 @@ $space-normal-size: 30px;
 	gap: $gap;
 }
 
-@mixin row-centered($gap: 0px) {
+@mixin row-center($gap: 0px) {
 	@apply flex flex-row items-center;
 	gap: $gap;
 }
 
-@mixin row-justifyied($gap: 0px) {
+@mixin row-justify($gap: 0px) {
 	@apply flex flex-row justify-between;
 	gap: $gap;
 }
 
-@mixin row-stretched($gap: 0px) {
+@mixin row-stretch($gap: 0px) {
 	@apply flex flex-row items-stretch;
 	gap: $gap;
 }
@@ -124,17 +124,17 @@ $space-normal-size: 30px;
 	gap: $gap;
 }
 
-@mixin column-justifyied($gap: 0px) {
+@mixin column-justify($gap: 0px) {
 	@apply flex flex-col justify-between;
 	gap: $gap;
 }
 
-@mixin column-stretched($gap: 0px) {
+@mixin column-stretch($gap: 0px) {
 	@apply flex flex-col items-stretch;
 	gap: $gap;
 }
 
-@mixin column-centered($gap: 0px) {
+@mixin column-center($gap: 0px) {
 	@apply flex flex-col items-center;
 	gap: $gap;
 }

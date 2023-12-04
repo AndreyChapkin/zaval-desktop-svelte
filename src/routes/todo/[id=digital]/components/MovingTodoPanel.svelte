@@ -93,7 +93,7 @@
 
 		@include bordered($color: $base-color, $size: $border-small-size);
 		@include screen-sized(70, 80);
-		@include column-stretched($wide-size);
+		@include column-stretch($wide-size);
 	}
 
 	.to-root {
@@ -106,7 +106,7 @@
 	}
 
 	.search-panel {
-		@include column-stretched($wide-size);
+		@include column-stretch($wide-size);
 	}
 
 	.search-input {

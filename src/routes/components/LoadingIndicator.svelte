@@ -19,7 +19,7 @@
 	@import '/static/style/common/composition/';
 
 	.loading-indicator-container {
-		@include column-centered;
+		@include column-center;
 	}
 
 	.loading-indicator {

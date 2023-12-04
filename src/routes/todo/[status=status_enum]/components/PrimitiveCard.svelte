@@ -68,7 +68,7 @@
 		font-size: small;
 		border-radius: $normal-size;
 
-		@include row-centered($normal-size);
+		@include row-start-and-align-center($normal-size);
 
 		img {
 			@include icon-normal-sized;

@@ -112,7 +112,7 @@
 	@import '/static/style/common/facade/';
 
 	.todo-status-side-menu {
-		@include row-stretched;
+		@include row-stretch;
 
 		.background {
 			@include modal-window-background;
@@ -150,7 +150,7 @@
 				}
 
 				a {
-					@include row-centered($small-size);
+					@include row-center($small-size);
 				}
 			}
 

@@ -124,7 +124,7 @@
 		background-color: $base-light-color;
 		border-radius: 1.5 * $normal-size;
 		padding: 0.8 * $normal-size;
-		@include column-centered($normal-size);
+		@include column-center($normal-size);
 
 		.go-to-todo {
 			@include like-normal-button;
@@ -133,7 +133,7 @@
 
 	.todo-info {
 		@apply flex-1;
-		@include column-justifyied;
+		@include column-justify;
 
 		.additional-info {
 			@include row($normal-size);

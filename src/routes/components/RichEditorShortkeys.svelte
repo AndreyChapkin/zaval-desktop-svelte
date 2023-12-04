@@ -53,7 +53,7 @@
 		}
 
 		.control-prompt {
-			@include row-justifyied($wide-size);
+			@include row-justify($wide-size);
 			min-width: 300px;
 			max-width: 450px;
 			margin: 0 10px;

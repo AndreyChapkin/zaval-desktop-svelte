@@ -71,7 +71,7 @@
 
 	.todo-side-menu {
 		background-color: $base-darker-color;
-		@include column-centered($normal-size);
+		@include column-center($normal-size);
 		padding: $normal-size $small-size;
 
 		img {
